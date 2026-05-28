@@ -484,8 +484,67 @@
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color:#07100b; font-weight: 900;
     }
+    .owner-profile { min-width: 0; }
+    .owner-profile > span { min-width: 0; }
     .owner-profile b { display:block; font-size: 13px; }
     .owner-profile span { display:block; color: var(--muted); font-size: 11px; }
+    .portfolio-btn {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(139,255,189,.22);
+      background: rgba(139,255,189,.09);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .crew-list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+    }
+    .crew-list-head .section-head { margin-bottom: 0; }
+    .about-head { max-width: 960px; }
+    .about-head h2 { font-size: clamp(30px, 4.4vw, 50px); }
+    .about-head .no-break { white-space: nowrap; }
+    .about-head p { max-width: 900px; white-space: nowrap; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+    }
+    .modal-backdrop.active { display: grid; }
+    .modal-card {
+      width: min(560px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: 28px;
+      background: #101720;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .modal-card h3 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.04em; }
+    .modal-card p { margin: 0 0 16px; color: var(--muted); }
+    .modal-fields { display: grid; gap: 12px; }
+    .modal-fields label { display: grid; gap: 6px; font-size: 12px; color: #cbd4df; font-weight: 800; }
+    .modal-fields input, .modal-fields textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.055);
+      color: var(--ink);
+      padding: 11px 12px;
+      outline: none;
+    }
+    .modal-fields small { color: var(--muted); font-weight: 600; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
     .container-story {
       display: grid;
@@ -627,6 +686,8 @@
       .nav-cta { display:none; }
       .hero-actions .btn { width: 100%; }
       .hero p.lead, .section-head p, .cta-box p { font-size: 16px; }
+      .crew-list-head { align-items: stretch; flex-direction: column; }
+      .about-head .no-break, .about-head p { white-space: normal; }
       .phone { min-height: 610px; }
       .progress-strip { grid-template-columns: 1fr; }
       .asset-grid { grid-template-columns: 1fr 1fr; }
@@ -759,7 +820,7 @@
             <p class="lead">마음이 맞는 동료들과 시작해 AI 프로젝트를 끝까지 완주하고, 더 큰 크루로 함께 성장할 수 있는 최적의 협업 공간입니다.</p>
             <div class="hero-actions">
               <a class="btn btn-primary" data-tab="crews">크루 목록 보기</a>
-              <a class="btn btn-secondary" data-tab="home" data-scroll="join">크루 만들기</a>
+              <button class="btn btn-secondary" type="button" data-action="create-crew">크루 만들기</button>
             </div>
             <div class="mini-proof" aria-label="서비스 특징">
               <span class="proof-pill"><strong>간편한 시작</strong> · 누구나 부담 없이 무료 개설</span>
@@ -841,13 +902,14 @@
                       <span>AI 교육 강사 · IT 필자</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 온라인 미팅 + 매일 인증</span>
                   <span><strong>최근 7일 신청:</strong> 12건</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -875,13 +937,14 @@
                       <span>현업 크리에이터 · 영상 PD</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 주 1회 피드백 + 공동제작</span>
                   <span><strong>남은 자리:</strong> 1석</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -909,13 +972,14 @@
                       <span>풀스택 개발자 · 1인 기업가</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 주 2회 코드 리뷰 + 세션</span>
                   <span><strong>이전 완주율:</strong> 95%</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -955,10 +1019,13 @@
       <div id="tab-content-crews" class="tab-section">
         <!-- 전체 크루 목록 섹션: 시안용 placeholder 카드입니다. 실제 구현 시 DB/API/CMS/관리자 입력 데이터로 교체합니다. -->
         <section class="section" id="crews">
-          <div class="section-head">
-            <span class="eyebrow">크루 탐색</span>
-            <h2>전체 크루 목록</h2>
-            <p>카테고리별로 원하는 분야의 AI 크루를 찾고 함께 성장의 기회를 만드세요.</p>
+          <div class="crew-list-head">
+            <div class="section-head">
+              <span class="eyebrow">크루 탐색</span>
+              <h2>전체 크루 목록</h2>
+              <p>카테고리별로 원하는 분야의 AI 크루를 찾고 함께 성장의 기회를 만드세요.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-action="create-crew">크루 만들기</button>
           </div>
 
           <div class="crew-filters" aria-label="크루 필터">
@@ -995,13 +1062,14 @@
                       <span>AI 교육 강사 · IT 필자</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 온라인 미팅 + 매일 인증</span>
                   <span><strong>최근 7일 신청:</strong> 12건</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1029,13 +1097,14 @@
                       <span>현업 크리에이터 · 영상 PD</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 주 1회 피드백 + 공동제작</span>
                   <span><strong>남은 자리:</strong> 1석</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1063,13 +1132,14 @@
                       <span>풀스택 개발자 · 1인 기업가</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 주 2회 코드 리뷰 + 세션</span>
                   <span><strong>이전 완주율:</strong> 95%</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1097,13 +1167,14 @@
                       <span>스타트업 COO · 자동화 전문가</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 과제 수행 + 온라인 세션</span>
                   <span><strong>크루장 평점:</strong> 4.9/5.0</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1131,13 +1202,14 @@
                       <span>1인 비즈니스 구축러 · 부업 코치</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 온라인 미팅 + 실전 매일 인증</span>
                   <span><strong>오늘 업로드:</strong> 18건</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1165,13 +1237,14 @@
                       <span>AI 엔지니어 · 테크 리더</span>
                     </span>
                   </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
                 </div>
                 <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
                   <span><strong>진행:</strong> 주 1회 세션 + 디스코드 공유</span>
                   <span><strong>누적 관심/저장:</strong> 120회+</span>
                 </div>
                 <div style="margin-top:14px; text-align:right;">
-                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
                 </div>
               </div>
             </article>
@@ -1182,9 +1255,9 @@
       <!-- ==================== 3. 서비스 소개 탭 영역 ==================== -->
       <div id="tab-content-about" class="tab-section">
         <section class="section" id="why">
-          <div class="section-head">
+          <div class="section-head about-head">
             <span class="eyebrow">왜 Crew Up인가요?</span>
-            <h2>혼자 하는 AI 학습과<br>프로젝트 완주가 어려우셨나요?</h2>
+            <h2><span class="no-break">혼자 하는 AI 학습과</span><br><span class="no-break">프로젝트 완주가 어려우셨나요?</span></h2>
             <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
           </div>
           <div class="problem-grid">
@@ -1283,7 +1356,19 @@
 
     <div class="mobile-sticky" aria-label="모바일 고정 CTA">
       <a class="btn btn-secondary" data-tab="crews">크루 목록 보기</a>
-      <a class="btn btn-primary" data-tab="home" data-scroll="join">크루 만들기</a>
+      <button class="btn btn-primary" type="button" data-action="create-crew">크루 만들기</button>
+    </div>
+
+    <div class="modal-backdrop" id="actionModal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h3 id="modalTitle">크루 신청</h3>
+        <p id="modalDesc">관심 있는 크루에 참여 신청을 남기는 화면 예시입니다.</p>
+        <div class="modal-fields" id="modalFields"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary btn-small" type="button" data-action="close-modal">닫기</button>
+          <button class="btn btn-primary btn-small" type="button">저장하기</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1382,6 +1467,83 @@
     document.querySelector('.brand').addEventListener('click', (e) => {
       e.preventDefault();
       switchTab('home');
+    });
+
+    const modal = document.getElementById('actionModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalFields = document.getElementById('modalFields');
+
+    const modalTemplates = {
+      apply: {
+        title: '크루 참여 신청',
+        desc: '선택한 크루에 참여 의사를 남기는 화면 예시입니다. 실제 구현 시 로그인/신청 API로 연결합니다.',
+        fields: `
+          <label>신청 메시지<textarea rows="3" maxlength="120" placeholder="참여하고 싶은 이유를 간단히 적어주세요"></textarea></label>
+          <label>연락 가능한 이메일<input type="email" placeholder="name@example.com"></label>`
+      },
+      'create-crew': {
+        title: '새 크루 만들기',
+        desc: '크루장이 직접 크루를 개설하는 화면 예시입니다. 실제 구현 시 관리자/DB 저장 흐름으로 연결합니다.',
+        fields: `
+          <label>크루 이름<input type="text" placeholder="예: AI 숏폼 공동제작 크루"></label>
+          <label>크루 소개<textarea rows="3" maxlength="160" placeholder="어떤 목표로 모이는 크루인지 적어주세요"></textarea></label>
+          <label>카테고리<input type="text" placeholder="AI 학습, 콘텐츠, 웹페이지 제작 등"></label>`
+      },
+      portfolio: {
+        title: '크루장 포트폴리오',
+        desc: '크루장이 신뢰도를 보여줄 수 있도록 영상 1개, 사진 3개, 50자 메시지를 등록하는 화면 예시입니다.',
+        fields: `
+          <label>소개 영상 1개<input type="file" accept="video/*"><small>영상은 1개만 등록</small></label>
+          <label>대표 사진 최대 3개<input type="file" accept="image/*" multiple data-max-files="3"><small>3개 초과 선택 시 다시 선택하도록 안내</small></label>
+          <label>한 줄 메시지<textarea rows="2" maxlength="50" placeholder="50자 이내로 크루장을 소개하세요"></textarea><small>최대 50자</small></label>`
+      }
+    };
+
+    function openModal(type) {
+      const template = modalTemplates[type];
+      if (!template || !modal) return;
+      modalTitle.textContent = template.title;
+      modalDesc.textContent = template.desc;
+      modalFields.innerHTML = template.fields;
+      const photoInput = modalFields.querySelector('[data-max-files="3"]');
+      photoInput?.addEventListener('change', () => {
+        if (photoInput.files.length > 3) {
+          alert('대표 사진은 최대 3개까지만 등록할 수 있습니다.');
+          photoInput.value = '';
+        }
+      });
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.querySelectorAll('[data-action]').forEach(element => {
+      element.addEventListener('click', (e) => {
+        const action = element.getAttribute('data-action');
+        if (action === 'close-modal') {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+        if (modalTemplates[action]) {
+          e.preventDefault();
+          openModal(action);
+        }
+      });
+    });
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
     });
 
     // 크루 목록 카테고리 필터링 기능: 전체 크루 목록 탭 안의 카드만 필터링합니다.
