@@ -773,33 +773,33 @@
               <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
               <div class="app-header">
                 <div class="app-title">
-                  <strong>AI 활용 숏폼 제작 크루</strong>
-                  <span>활동중 · 7/10명 · 최근 활동 12분 전</span>
+                  <strong>AI 프로젝트 성장 크루</strong>
+                  <span>활동중 · 멤버 모집중 · 최근 활동 12분 전</span>
                 </div>
                 <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
               </div>
               <div class="crew-home-card">
                 <span class="tag">크루 홈</span>
-                <h2>4주 안에 광고 숏폼 3개와 블로그 랜딩 1개 만들기</h2>
-                <p>이번 주는 제품 후보 조사, 후킹 문구, 이미지 프롬프트 테스트를 진행합니다.</p>
+                <h2>이번 주 목표와 역할을 함께 정리해요</h2>
+                <p>새 멤버 온보딩, 자료 공유, 주간 체크리스트를 한곳에서 확인합니다.</p>
                 <div class="progress-strip">
-                  <div class="progress-item"><b>3개</b><span>공유 자료</span></div>
-                  <div class="progress-item"><b>5개</b><span>이번 주 할 일</span></div>
-                  <div class="progress-item"><b>2개</b><span>외부 링크</span></div>
+                  <div class="progress-item"><b>4개</b><span>공유 자료</span></div>
+                  <div class="progress-item"><b>6개</b><span>이번 주 할 일</span></div>
+                  <div class="progress-item"><b>12명</b><span>참여 멤버</span></div>
                 </div>
               </div>
               <div class="tabs" role="tablist" aria-label="크루 내부 탭">
-                <button class="tab active" type="button" data-tab="assets">공유함</button>
+                <button class="tab active" type="button" data-tab="assets">자료</button>
                 <button class="tab" type="button" data-tab="note">노트</button>
                 <button class="tab" type="button" data-tab="chat">채팅</button>
                 <button class="tab" type="button" data-tab="links">링크</button>
               </div>
               <div class="panel-preview" id="phonePanel">
                 <div class="asset-grid">
-                  <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
-                  <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
-                  <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
-                  <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
+                  <div class="asset"><small>#가이드</small><b>온보딩 가이드</b></div>
+                  <div class="asset"><small>#체크리스트</small><b>이번 주 할 일</b></div>
+                  <div class="asset"><small>#자료</small><b>참고 자료 모음</b></div>
+                  <div class="asset"><small>#회의록</small><b>주간 회의 기록</b></div>
                 </div>
               </div>
               <div class="bottom-nav" aria-hidden="true">
@@ -1070,7 +1070,7 @@
         <section class="section" id="why">
           <div class="section-head">
             <span class="eyebrow">왜 Crew Up인가요?</span>
-            <h2>혼자 하는 AI 학습과 프로젝트,<br>끝까지 완주하기 어려우셨나요?</h2>
+            <h2>혼자 하는 AI 학습과<br>프로젝트 완주가 어려우셨나요?</h2>
             <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
           </div>
           <div class="problem-grid">
@@ -1174,24 +1174,24 @@
   </div>
 
   <script>
-    // 기존 데모용 폰 내부 탭 데이터 및 이벤트
+    // 스마트폰 목업용 범용 placeholder 데이터입니다. 실제 서비스 구현 시 DB/API/CMS/관리자 입력 데이터로 교체해야 합니다.
     const panelContent = {
       assets: `
         <div class="asset-grid">
-          <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
-          <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
-          <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
-          <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
+          <div class="asset"><small>#가이드</small><b>온보딩 가이드</b></div>
+          <div class="asset"><small>#체크리스트</small><b>이번 주 할 일</b></div>
+          <div class="asset"><small>#자료</small><b>참고 자료 모음</b></div>
+          <div class="asset"><small>#회의록</small><b>주간 회의 기록</b></div>
         </div>`,
       note: `
         <div class="card" style="box-shadow:none; padding:16px; border-radius:20px;">
           <h3 style="margin:0 0 8px; font-size:17px;">크루노트</h3>
-          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 제품 후보 5개, 후킹 문구 5개, 이미지 프롬프트 3개. 크루 공동의 생각과 아이디어를 한곳에 기록하고 보관해 보세요.</p>
+          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 역할 분담 정리, 참고 자료 공유, 다음 미팅 안건 준비. 크루 공동의 생각과 아이디어를 한곳에 기록하고 보관해 보세요.</p>
         </div>`,
       chat: `
         <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
-          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>J</b> 제품 캡처 공유했어요. 비교표에 넣어주세요.</p>
-          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>M</b> 후킹은 “마우스는 가격보다 손에 맞아야 합니다” 괜찮아 보여요.</p>
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>J</b> 온보딩 가이드 초안을 공유했어요. 새 멤버에게 안내하면 좋겠습니다.</p>
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>M</b> 이번 주 체크리스트에 역할 분담 항목을 추가해둘게요.</p>
           <p style="margin:0; font-size:13px; color:var(--muted);">실시간 채팅으로 멤버들과 막힘없이 의견을 조율할 수 있습니다.</p>
         </div>`,
       links: `
