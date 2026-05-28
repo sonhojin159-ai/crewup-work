@@ -387,14 +387,27 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
-    .crew-grid, .process-grid {
+    .process-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
     }
+    .crew-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
     @media (max-width: 1100px) {
-      .crew-grid, .process-grid {
+      .process-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .crew-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .crew-grid {
+        grid-template-columns: 1fr;
       }
     }
     .card {
@@ -627,6 +640,67 @@
       .btn { transition: none; }
       .btn:hover { transform: none; }
     }
+
+    /* 탭 메뉴 전환 스타일 */
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active {
+      display: block;
+      animation: fadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .nav-links a {
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 750;
+    }
+
+    /* 인기 크루 전용 배지 스타일 */
+    .pop-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge-trend {
+      background: rgba(255, 127, 155, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(255, 127, 155, 0.22);
+    }
+    .badge-success {
+      background: rgba(139, 255, 189, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(139, 255, 189, 0.22);
+    }
+    .badge-info {
+      background: rgba(121, 167, 255, 0.12);
+      color: var(--accent-2);
+      border: 1px solid rgba(121, 167, 255, 0.22);
+    }
+    .badge-warn {
+      background: rgba(255, 211, 107, 0.12);
+      color: var(--accent-3);
+      border: 1px solid rgba(255, 211, 107, 0.22);
+    }
   </style>
 </head>
 <body>
@@ -639,311 +713,418 @@
           <span>CrewUp AI<small>small crews for AI builders</small></span>
         </a>
         <div class="nav-links" aria-label="섹션 이동">
-          <a href="#why">서비스 소개</a>
-          <a href="#process">사용 흐름</a>
-          <a href="#crews">모집 크루</a>
-          <a href="#pricing">이용 요금</a>
+          <a class="active" data-tab="home">홈</a>
+          <a data-tab="about">서비스 소개</a>
+          <a data-tab="home" data-scroll="crews">인기 크루</a>
+          <a data-tab="pricing">요금/플랜</a>
         </div>
-        <a class="nav-cta" href="#join">시작하기</a>
+        <a class="nav-cta" data-tab="home" data-scroll="join" style="cursor: pointer;">시작하기</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="section hero">
-        <div>
-          <span class="eyebrow">함께 성장하는 AI 소규모 크루 작업실</span>
-          <h1>AI를 같이 배울 사람과<br><span class="soft">프로젝트 크루를 찾는 곳</span></h1>
-          <p class="lead">CrewUp AI는 혼자서는 지치기 쉬운 AI 학습과 프로젝트를 마음이 맞는 사람들과 함께 완주할 수 있도록 돕는 소규모 크루 전용 공간입니다.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#crews">크루 둘러보기</a>
-            <a class="btn btn-secondary" href="#join">크루 만들기</a>
-          </div>
-          <div class="mini-proof" aria-label="서비스 특징">
-            <span class="proof-pill"><strong>간편한 시작</strong> · 누구나 부담 없이 무료 개설</span>
-            <span class="proof-pill"><strong>협업 도구 연동</strong> · 카톡/디스코드/화상회의 지원</span>
-            <span class="proof-pill"><strong>전용 공유 공간</strong> · 자료와 진행 상황을 한눈에 관리</span>
-          </div>
-        </div>
-
-        <div class="phone-frame" aria-label="CrewUp 모바일 화면 미리보기">
-          <div class="phone">
-            <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
-            <div class="app-header">
-              <div class="app-title">
-                <strong>AI 활용 숏폼 제작 크루</strong>
-                <span>활동중 · 7/10명 · 최근 활동 12분 전</span>
-              </div>
-              <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
+      <!-- ==================== 1. 홈 탭 영역 ==================== -->
+      <div id="tab-content-home" class="tab-section active">
+        <section class="section hero">
+          <div>
+            <span class="eyebrow">CrewUp AI</span>
+            <h1>함께 성장하는<br><span class="soft">AI 소규모 크루 작업실</span></h1>
+            <p class="lead">마음이 맞는 동료들과 소규모 크루를 이루어 AI 학습과 프로젝트를 끝까지 완주하는 최적의 협업 공간입니다.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" data-tab="home" data-scroll="crews">인기 크루 둘러보기</a>
+              <a class="btn btn-secondary" data-tab="home" data-scroll="join">크루 만들기</a>
             </div>
-            <div class="crew-home-card">
-              <span class="tag">크루 홈</span>
-              <h2>4주 안에 광고 숏폼 3개와 블로그 랜딩 1개 만들기</h2>
-              <p>이번 주는 제품 후보 조사, 후킹 문구, 이미지 프롬프트 테스트를 진행합니다.</p>
-              <div class="progress-strip">
-                <div class="progress-item"><b>3개</b><span>공유 자료</span></div>
-                <div class="progress-item"><b>5개</b><span>이번 주 할 일</span></div>
-                <div class="progress-item"><b>2개</b><span>외부 링크</span></div>
-              </div>
-            </div>
-            <div class="tabs" role="tablist" aria-label="크루 내부 탭">
-              <button class="tab active" type="button" data-tab="assets">공유함</button>
-              <button class="tab" type="button" data-tab="note">노트</button>
-              <button class="tab" type="button" data-tab="chat">채팅</button>
-              <button class="tab" type="button" data-tab="links">링크</button>
-            </div>
-            <div class="panel-preview" id="phonePanel">
-              <div class="asset-grid">
-                <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
-                <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
-                <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
-                <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
-              </div>
-            </div>
-            <div class="bottom-nav" aria-hidden="true">
-              <span><i class="dot-icon"></i>홈</span><span class="active"><i class="dot-icon"></i>크루</span><span><i class="dot-icon"></i>만들기</span><span><i class="dot-icon"></i>프로필</span>
+            <div class="mini-proof" aria-label="서비스 특징">
+              <span class="proof-pill"><strong>간편한 시작</strong> · 누구나 부담 없이 무료 개설</span>
+              <span class="proof-pill"><strong>협업 도구 연동</strong> · 카톡/디스코드/화상회의 지원</span>
+              <span class="proof-pill"><strong>전용 공유 공간</strong> · 자료와 진행 상황을 한눈에 관리</span>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section class="section" id="why">
-        <div class="section-head">
-          <span class="eyebrow">왜 CrewUp인가요?</span>
-          <h2>혼자 하는 AI 학습과 프로젝트,<br>끝까지 완주하기 어려우셨나요?</h2>
-          <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
-        </div>
-        <div class="problem-grid">
-          <article class="card"><div class="num">1</div><h3>작심삼일 독학의 한계</h3><p>혼자 인터넷 강의나 책을 보며 공부하면 금방 지루해지고 도중에 흐지부지되기 쉽습니다.</p></article>
-          <article class="card"><div class="num">2</div><h3>신뢰할 동료 찾기의 어려움</h3><p>목표를 가지고 끝까지 성실하게 함께 완주할 수 있는 검증된 동료를 찾기가 어렵습니다.</p></article>
-          <article class="card"><div class="num">3</div><h3>쉽게 흐트러지는 오픈채팅</h3><p>일상 잡담에 대화방 정보가 묻히고 자료가 유실되어 크루 관리가 불가능해집니다.</p></article>
-        </div>
-      </section>
-
-      <section class="section" id="process">
-        <div class="section-head">
-          <span class="eyebrow">사용 흐름</span>
-          <h2>참여부터 완주까지의 핵심 사용 흐름</h2>
-          <p>CrewUp은 복잡한 절차 없이 직관적인 단계를 거쳐 목표를 달성할 수 있도록 지원합니다.</p>
-        </div>
-        <div class="process-grid">
-          <article class="card">
-            <div class="num">1</div>
-            <h3>나에게 맞는 크루 탐색</h3>
-            <p>다양한 주제와 난이도로 개설된 크루 목록에서 자신의 관심사와 목표에 딱 맞는 모임을 찾아봅니다.</p>
-          </article>
-          <article class="card">
-            <div class="num">2</div>
-            <h3>크루장 및 신뢰 확인</h3>
-            <p>크루장의 실무 이력, 모집 인원, 구체적인 진행 방식과 목표 기간을 꼼꼼하게 확인하여 신뢰도를 검증합니다.</p>
-          </article>
-          <article class="card">
-            <div class="num">3</div>
-            <h3>참여 신청 및 가입</h3>
-            <p>간단한 가입 동기나 사전 설문을 통해 크루 참여를 신청하고, 크루장의 확인을 거쳐 크루원으로 가입합니다.</p>
-          </article>
-          <article class="card">
-            <div class="num">4</div>
-            <h3>함께 협업하고 목표 달성</h3>
-            <p>공유 공간에서 파일과 프롬프트를 나누고, 전용 노트와 채팅을 통해 소통하며 계획했던 결과물을 함께 완성합니다.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="crews">
-        <div class="section-head">
-          <span class="eyebrow">진행 중인 크루</span>
-          <h2>전문가 강의가 아니라, 함께 배우고 성장하는 크루.</h2>
-          <p>크루장은 정답을 일방적으로 가르치는 강사가 아니라, 초기 세팅과 시행착오를 공유하며 동료들의 발전을 이끄는 리더입니다.</p>
-        </div>
-        <div class="crew-grid">
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta">
-                <span class="chip">정원 6명</span>
-                <span class="chip">입문</span>
-                <span class="chip">4주 기간</span>
+          <div class="phone-frame" aria-label="CrewUp 모바일 화면 미리보기">
+            <div class="phone">
+              <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
+              <div class="app-header">
+                <div class="app-title">
+                  <strong>AI 활용 숏폼 제작 크루</strong>
+                  <span>활동중 · 7/10명 · 최근 활동 12분 전</span>
+                </div>
+                <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
               </div>
-              <h3>AI 기초 & 프롬프트 입문 스터디</h3>
-              <p>ChatGPT와 Claude를 활용한 업무 자동화 및 프롬프트 기초를 함께 공부하고 매일 실습을 인증합니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner">
-                <div class="owner-profile">
-                  <span class="owner-avatar">K</span>
-                  <span>
-                    <b>크루장: 김러닝</b>
-                    <span>AI 교육 강사 · IT 필자</span>
-                  </span>
+              <div class="crew-home-card">
+                <span class="tag">크루 홈</span>
+                <h2>4주 안에 광고 숏폼 3개와 블로그 랜딩 1개 만들기</h2>
+                <p>이번 주는 제품 후보 조사, 후킹 문구, 이미지 프롬프트 테스트를 진행합니다.</p>
+                <div class="progress-strip">
+                  <div class="progress-item"><b>3개</b><span>공유 자료</span></div>
+                  <div class="progress-item"><b>5개</b><span>이번 주 할 일</span></div>
+                  <div class="progress-item"><b>2개</b><span>외부 링크</span></div>
                 </div>
               </div>
-              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-                <strong>진행 방식:</strong> 주 1회 온라인 미팅 + 일일 실습 인증
+              <div class="tabs" role="tablist" aria-label="크루 내부 탭">
+                <button class="tab active" type="button" data-tab="assets">공유함</button>
+                <button class="tab" type="button" data-tab="note">노트</button>
+                <button class="tab" type="button" data-tab="chat">채팅</button>
+                <button class="tab" type="button" data-tab="links">링크</button>
               </div>
-              <div style="margin-top:14px; text-align:right;">
-                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta">
-                <span class="chip">정원 8명</span>
-                <span class="chip">초급</span>
-                <span class="chip">3주 기간</span>
-              </div>
-              <h3>AI 활용 숏폼 콘텐츠 제작 크루</h3>
-              <p>AI 이미지/영상 생성 도구를 활용하여 유튜브 쇼츠 및 인스타 릴스 3개를 직접 기획하고 제작합니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner">
-                <div class="owner-profile">
-                  <span class="owner-avatar">V</span>
-                  <span>
-                    <b>크루장: 비디오메이커</b>
-                    <span>현업 크리에이터 · 영상 PD</span>
-                  </span>
+              <div class="panel-preview" id="phonePanel">
+                <div class="asset-grid">
+                  <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
+                  <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
+                  <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
+                  <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
                 </div>
               </div>
-              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-                <strong>진행 방식:</strong> 주 1회 피드백 + 자율 공동 제작
-              </div>
-              <div style="margin-top:14px; text-align:right;">
-                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
+              <div class="bottom-nav" aria-hidden="true">
+                <span><i class="dot-icon"></i>홈</span><span class="active"><i class="dot-icon"></i>크루</span><span><i class="dot-icon"></i>만들기</span><span><i class="dot-icon"></i>프로필</span>
               </div>
             </div>
-          </article>
-
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta">
-                <span class="chip">정원 5명</span>
-                <span class="chip">중급</span>
-                <span class="chip">4주 기간</span>
-              </div>
-              <h3>AI 코딩으로 한 달 만에 웹서비스 만들기</h3>
-              <p>Cursor와 v0 등 최신 AI 도구를 사용하여 아이디어를 실제 웹사이트로 빌드하고 배포까지 완료합니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner">
-                <div class="owner-profile">
-                  <span class="owner-avatar">D</span>
-                  <span>
-                    <b>크루장: 데브AI</b>
-                    <span>풀스택 개발자 · 1인 기업가</span>
-                  </span>
-                </div>
-              </div>
-              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-                <strong>진행 방식:</strong> 주 2회 코드 리뷰 + 개발 세션
-              </div>
-              <div style="margin-top:14px; text-align:right;">
-                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta">
-                <span class="chip">정원 8명</span>
-                <span class="chip">중급</span>
-                <span class="chip">4주 기간</span>
-              </div>
-              <h3>AI 자동화를 통한 업무 효율화 프로젝트</h3>
-              <p>Make, Zapier 등을 연동하여 반복되는 업무 프로세스를 자동화하고 비즈니스 수익 모델을 함께 탐색합니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner">
-                <div class="owner-profile">
-                  <span class="owner-avatar">A</span>
-                  <span>
-                    <b>크루장: 오토보스</b>
-                    <span>스타트업 COO · 자동화 전문가</span>
-                  </span>
-                </div>
-              </div>
-              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-                <strong>진행 방식:</strong> 매주 과제 수행 + 주말 오프라인 세션
-              </div>
-              <div style="margin-top:14px; text-align:right;">
-                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="pricing">
-        <div class="section-head">
-          <span class="eyebrow">합리적인 비용</span>
-          <h2>참여자는 언제나 무료로 시작하세요.</h2>
-          <p>기본적인 크루 활동은 무료이며, 더 큰 규모와 추가 공간이 필요할 때만 요금제를 선택해 공간을 확장합니다.</p>
-        </div>
-        <div class="pricing-grid">
-          <article class="card pricing-card">
-            <h3>Free</h3>
-            <div class="price">무료</div>
-            <p>소규모 크루를 부담 없이 시작합니다.</p>
-            <ul class="plan-list">
-              <li>최대 10명 참여</li>
-              <li>공유 공간 1GB 제공</li>
-              <li>기본 채팅 및 크루노트</li>
-              <li>외부 도구 연동</li>
-            </ul>
-            <a class="btn btn-secondary" href="#join">무료로 시작하기</a>
-          </article>
-          <article class="card pricing-card highlight">
-            <h3>Plus</h3>
-            <div class="price">4,900<span>원/월</span></div>
-            <p>활동이 활발해진 크루의 공간을 확장합니다.</p>
-            <ul class="plan-list">
-              <li>최대 30명 참여</li>
-              <li>공유 공간 10GB 제공</li>
-              <li>대표 자료 상단 고정</li>
-              <li>자료 태그/컬렉션 분류</li>
-              <li>크루 홈 커스터마이징</li>
-            </ul>
-            <a class="btn btn-primary" href="#join">시작하기</a>
-          </article>
-          <article class="card pricing-card">
-            <h3>Pro</h3>
-            <div class="price">9,900<span>원/월</span></div>
-            <p>성장한 대규모 크루를 운영합니다.</p>
-            <ul class="plan-list">
-              <li>최대 100명 참여</li>
-              <li>공유 공간 50GB 제공</li>
-              <li>대용량 파일/영상 업로드</li>
-              <li>비공개 크루 개설 지원</li>
-              <li>크루 공개 포트폴리오 생성</li>
-            </ul>
-            <a class="btn btn-secondary" href="#join">문의하기</a>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="policy">
-        <div class="policy-band">
-          <h2>신뢰할 수 있는 크루 문화를 만듭니다.</h2>
-          <div class="policy-copy">
-            <p>CrewUp은 모두가 안심하고 배움과 프로젝트에 집중할 수 있는 환경을 지향합니다.</p>
-            <p class="quote">불법 금전거래, 투자 유도, 리딩방, 허위 포트폴리오 등 타인에게 피해를 주는 활동은 강력히 제재됩니다.</p>
-            <p>서로 존중하고 협력하는 건강한 크루를 만들어 가기 위해 함께 노력해 주세요.</p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="section" id="join">
-        <div class="cta-box">
-          <span class="eyebrow">시작하기</span>
-          <h2>나에게 맞는 크루를 만나보세요</h2>
-          <p>마음이 맞는 동료들과 함께라면 AI 프로젝트도 두렵지 않습니다. 지금 바로 시작해 보세요!</p>
-          <div class="hero-actions" style="justify-content:center; margin-top:0;">
-            <a class="btn btn-primary" href="#crews">나에게 맞는 크루 찾기</a>
-            <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20새%20크루%20만들기%20문의">새 크루 만들기</a>
+        <!-- 현재 인기 크루 섹션 (랜딩페이지 전면에 배치) -->
+        <section class="section" id="crews">
+          <div class="section-head">
+            <span class="eyebrow">현재 인기 크루</span>
+            <h2>검증된 인기 크루에 합류해보세요.</h2>
+            <p>참여 신청률, 완주율, 활동 빈도 등 실시간 신뢰 지표를 기반으로 선정된 인기 크루입니다.</p>
           </div>
-        </div>
-      </section>
+          
+          <div class="crew-grid">
+            <!-- 카드 1: AI 기초 & 프롬프트 입문 스터디 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend">🔥 신청 급상승</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">스터디</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 5/6명</span>
+                  <span class="chip">입문</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>AI 기초 & 프롬프트 입문 스터디</h3>
+                <p>ChatGPT와 Claude를 활용한 업무 자동화 및 프롬프트 기초를 함께 공부하고 매일 실습을 인증합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">K</span>
+                    <span>
+                      <b>크루장: 김러닝</b>
+                      <span>AI 교육 강사 · IT 필자</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 온라인 미팅 + 매일 인증</span>
+                  <span><strong>최근 7일 신청:</strong> 12건</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- 카드 2: AI 활용 숏폼 콘텐츠 제작 크루 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend" style="background: rgba(255, 211, 107, 0.12); color: var(--accent-3); border: 1px solid rgba(255, 211, 107, 0.22);">⏰ 마감 임박</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">콘텐츠 제작</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip" style="color: var(--danger); font-weight: 800;">마감임박 7/8명</span>
+                  <span class="chip">초급</span>
+                  <span class="chip">3주 기간</span>
+                </div>
+                <h3>AI 활용 숏폼 콘텐츠 제작 크루</h3>
+                <p>AI 이미지/영상 생성 도구를 활용하여 유튜브 쇼츠 및 인스타 릴스 3개를 직접 기획하고 제작합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">V</span>
+                    <span>
+                      <b>크루장: 비디오메이커</b>
+                      <span>현업 크리에이터 · 영상 PD</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 1회 피드백 + 공동제작</span>
+                  <span><strong>남은 자리:</strong> 1석</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- 카드 3: AI 코딩으로 웹서비스 만들기 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-success">🏆 완주율 높음</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">웹빌드/코딩</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 3/5명</span>
+                  <span class="chip">중급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>AI 코딩으로 한 달 만에 웹서비스 만들기</h3>
+                <p>Cursor와 v0 등 최신 AI 도구를 사용하여 아이디어를 실제 웹사이트로 빌드하고 배포까지 완료합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">D</span>
+                    <span>
+                      <b>크루장: 데브AI</b>
+                      <span>풀스택 개발자 · 1인 기업가</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 2회 코드 리뷰 + 세션</span>
+                  <span><strong>이전 완주율:</strong> 95%</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- 카드 4: AI 자동화를 통한 업무 효율화 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-success" style="background: rgba(121, 167, 255, 0.12); color: var(--accent-2); border: 1px solid rgba(121, 167, 255, 0.22);">⭐ 크루장 인증</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">자동화/부업</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 6/8명</span>
+                  <span class="chip">중급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>AI 자동화를 통한 업무 효율화 프로젝트</h3>
+                <p>Make, Zapier 등을 연동하여 반복되는 업무 프로세스를 자동화하고 비즈니스 수익 모델을 함께 탐색합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">A</span>
+                    <span>
+                      <b>크루장: 오토보스</b>
+                      <span>스타트업 COO · 자동화 전문가</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 과제 수행 + 오프라인 세션</span>
+                  <span><strong>크루장 평점:</strong> 4.9/5.0</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- 카드 5: Midjourney & SD 실무 디자인 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-info" style="background: rgba(139, 255, 189, 0.12); color: var(--accent); border: 1px solid rgba(139, 255, 189, 0.22);">⚡ 최근 활동 활발</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">디자인/예술</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 4/6명</span>
+                  <span class="chip">초급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>AI 이미지 생성 실무 디자인 프로젝트</h3>
+                <p>Midjourney와 Stable Diffusion을 활용하여 상업적 굿즈를 디자인하고 실제 북커버 및 포트폴리오를 만듭니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">D</span>
+                    <span>
+                      <b>크루장: 디자인마스터</b>
+                      <span>브랜드 디자이너 · 디렉터</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주간 피드백 + 온라인 크리틱</span>
+                  <span><strong>오늘 업로드:</strong> 24건</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- 카드 6: AI 에이전트 구축 및 서비스 연동 -->
+            <article class="card crew-card">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-warn" style="background: rgba(255, 211, 107, 0.12); color: var(--accent-3); border: 1px solid rgba(255, 211, 107, 0.22);">⭐ 저장 많은 크루</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">엔지니어링</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 5/10명</span>
+                  <span class="chip">고급</span>
+                  <span class="chip">5주 기간</span>
+                </div>
+                <h3>AI 에이전트 구축 및 API 연동 스터디</h3>
+                <p>LangChain과 LLM API를 활용해 비즈니스 자동 응답 챗봇 및 맞춤형 AI 에이전트 파이프라인을 구축합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">L</span>
+                    <span>
+                      <b>크루장: 랭체인저</b>
+                      <span>AI 엔지니어 · 테크 리더</span>
+                    </span>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 1회 세션 + 디스코드 공유</span>
+                  <span><strong>누적 관심/저장:</strong> 120회+</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <a class="btn btn-primary btn-small" style="width:100%;" data-tab="home" data-scroll="join">참여 신청하기</a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 신뢰 정책 섹션 -->
+        <section class="section" id="policy">
+          <div class="policy-band">
+            <h2>신뢰할 수 있는 크루 문화를 만듭니다.</h2>
+            <div class="policy-copy">
+              <p>CrewUp은 모두가 안심하고 배움과 프로젝트에 집중할 수 있는 환경을 지향합니다.</p>
+              <p class="quote">불법 금전거래, 투자 유도, 리딩방, 허위 포트폴리오 등 타인에게 피해를 주는 활동은 강력히 제재됩니다.</p>
+              <p>서로 존중하고 협력하는 건강한 크루를 만들어 가기 위해 함께 노력해 주세요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 마지막 CTA 섹션 -->
+        <section class="section" id="join">
+          <div class="cta-box">
+            <span class="eyebrow">시작하기</span>
+            <h2>나에게 맞는 크루를 만나보세요</h2>
+            <p>마음이 맞는 동료들과 함께라면 AI 프로젝트도 두렵지 않습니다. 지금 바로 시작해 보세요!</p>
+            <div class="hero-actions" style="justify-content:center; margin-top:0;">
+              <a class="btn btn-primary" data-tab="home" data-scroll="crews">나에게 맞는 크루 찾기</a>
+              <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20새%20크루%20만들기%20문의">새 크루 만들기</a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================== 2. 서비스 소개 탭 영역 ==================== -->
+      <div id="tab-content-about" class="tab-section">
+        <section class="section" id="why">
+          <div class="section-head">
+            <span class="eyebrow">왜 CrewUp인가요?</span>
+            <h2>혼자 하는 AI 학습과 프로젝트,<br>끝까지 완주하기 어려우셨나요?</h2>
+            <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
+          </div>
+          <div class="problem-grid">
+            <article class="card"><div class="num">1</div><h3>작심삼일 독학의 한계</h3><p>혼자 인터넷 강의나 책을 보며 공부하면 금방 지루해지고 도중에 흐지부지되기 쉽습니다.</p></article>
+            <article class="card"><div class="num">2</div><h3>신뢰할 동료 찾기의 어려움</h3><p>목표를 가지고 끝까지 성실하게 함께 완주할 수 있는 검증된 동료를 찾기가 어렵습니다.</p></article>
+            <article class="card"><div class="num">3</div><h3>쉽게 흐트러지는 오픈채팅</h3><p>일상 잡담에 대화방 정보가 묻히고 자료가 유실되어 크루 관리가 불가능해집니다.</p></article>
+          </div>
+        </section>
+
+        <section class="section" id="process">
+          <div class="section-head">
+            <span class="eyebrow">사용 흐름</span>
+            <h2>참여부터 완주까지의 핵심 사용 흐름</h2>
+            <p>CrewUp은 복잡한 절차 없이 직관적인 단계를 거쳐 목표를 달성할 수 있도록 지원합니다.</p>
+          </div>
+          <div class="process-grid">
+            <article class="card">
+              <div class="num">1</div>
+              <h3>나에게 맞는 크루 탐색</h3>
+              <p>다양한 주제와 난이도로 개설된 크루 목록에서 자신의 관심사와 목표에 딱 맞는 모임을 찾아봅니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">2</div>
+              <h3>크루장 및 신뢰 확인</h3>
+              <p>크루장의 실무 이력, 모집 인원, 구체적인 진행 방식과 목표 기간을 꼼꼼하게 확인하여 신뢰도를 검증합니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">3</div>
+              <h3>참여 신청 및 가입</h3>
+              <p>간단한 가입 동기나 사전 설문을 통해 크루 참여를 신청하고, 크루장의 확인을 거쳐 크루원으로 가입합니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">4</div>
+              <h3>함께 협업하고 목표 달성</h3>
+              <p>공유 공간에서 파일과 프롬프트를 나누고, 전용 노트와 채팅을 통해 소통하며 계획했던 결과물을 함께 완성합니다.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================== 3. 요금/플랜 탭 영역 ==================== -->
+      <div id="tab-content-pricing" class="tab-section">
+        <section class="section" id="pricing">
+          <div class="section-head">
+            <span class="eyebrow">합리적인 비용</span>
+            <h2>참여자는 언제나 무료로 시작하세요.</h2>
+            <p>기본적인 크루 활동은 무료이며, 더 큰 규모와 추가 공간이 필요할 때만 요금제를 선택해 공간을 확장합니다.</p>
+          </div>
+          <div class="pricing-grid">
+            <article class="card pricing-card">
+              <h3>Free</h3>
+              <div class="price">무료</div>
+              <p>소규모 크루를 부담 없이 시작합니다.</p>
+              <ul class="plan-list">
+                <li>최대 10명 참여</li>
+                <li>공유 공간 1GB 제공</li>
+                <li>기본 채팅 및 크루노트</li>
+                <li>외부 도구 연동</li>
+              </ul>
+              <a class="btn btn-secondary" data-tab="home" data-scroll="join">무료로 시작하기</a>
+            </article>
+            <article class="card pricing-card highlight">
+              <h3>Plus</h3>
+              <div class="price">4,900<span>원/월</span></div>
+              <p>활동이 활발해진 크루의 공간을 확장합니다.</p>
+              <ul class="plan-list">
+                <li>최대 30명 참여</li>
+                <li>공유 공간 10GB 제공</li>
+                <li>대표 자료 상단 고정</li>
+                <li>자료 태그/컬렉션 분류</li>
+                <li>크루 홈 커스터마이징</li>
+              </ul>
+              <a class="btn btn-primary" data-tab="home" data-scroll="join">시작하기</a>
+            </article>
+            <article class="card pricing-card">
+              <h3>Pro</h3>
+              <div class="price">9,900<span>원/월</span></div>
+              <p>성장한 대규모 크루를 운영합니다.</p>
+              <ul class="plan-list">
+                <li>최대 100명 참여</li>
+                <li>공유 공간 50GB 제공</li>
+                <li>대용량 파일/영상 업로드</li>
+                <li>비공개 크루 개설 지원</li>
+                <li>크루 공개 포트폴리오 생성</li>
+              </ul>
+              <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20Pro%20요금제%20문의">문의하기</a>
+            </article>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer class="footer">
@@ -951,12 +1132,13 @@
     </footer>
 
     <div class="mobile-sticky" aria-label="모바일 고정 CTA">
-      <a class="btn btn-secondary" href="#crews">나에게 맞는 크루 찾기</a>
-      <a class="btn btn-primary" href="#join">새 크루 만들기</a>
+      <a class="btn btn-secondary" data-tab="home" data-scroll="crews">인기 크루 찾기</a>
+      <a class="btn btn-primary" data-tab="home" data-scroll="join">크루 만들기</a>
     </div>
   </div>
 
   <script>
+    // 기존 데모용 폰 내부 탭 데이터 및 이벤트
     const panelContent = {
       assets: `
         <div class="asset-grid">
@@ -984,12 +1166,72 @@
         </div>`
     };
 
-    document.querySelectorAll('.tab').forEach((tab) => {
+    document.querySelectorAll('.phone .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('.phone .tab').forEach((t) => t.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById('phonePanel').innerHTML = panelContent[tab.dataset.tab];
       });
+    });
+
+    // 메인 네비게이션 탭 전환 시스템
+    function switchTab(tabId, scrollToId = null) {
+      // 1. 모든 탭 섹션 활성 상태 제거
+      document.querySelectorAll('.tab-section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // 2. 타겟 탭 섹션 활성화
+      const targetSection = document.getElementById(`tab-content-${tabId}`);
+      if (targetSection) {
+        targetSection.classList.add('active');
+      }
+
+      // 3. 네비게이션 링크 활성 상태 갱신
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.getAttribute('data-tab') === tabId && link.getAttribute('data-scroll') === null) {
+          link.classList.add('active');
+        } else if (tabId === 'home' && link.getAttribute('data-scroll') === 'crews' && scrollToId === 'crews') {
+          // 인기 크루로 명시적 이동할 때 '인기 크루' 탭 메뉴에 active를 활성화
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // 4. 스크롤 동작 수행
+      if (scrollToId) {
+        // 렌더링을 기다리기 위해 약간의 딜레이
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const scrollTarget = document.getElementById(scrollToId);
+            if (scrollTarget) {
+              scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 50);
+        });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // data-tab 및 data-scroll 이벤트 핸들러 등록
+    document.querySelectorAll('[data-tab]').forEach(element => {
+      // 폰 내부 데모 탭은 메인 탭 전환에서 제외
+      if (element.classList.contains('tab') && element.closest('.phone')) return;
+
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabId = element.getAttribute('data-tab');
+        const scrollId = element.getAttribute('data-scroll');
+        switchTab(tabId, scrollId);
+      });
+    });
+
+    // 로고(brand) 클릭 시 홈 탭 전환
+    document.querySelector('.brand').addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab('home');
     });
   </script>
 </body>
