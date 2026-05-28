@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CrewUp AI — 목적이 맞는 AI 크루를 찾는 공간</title>
-  <meta name="description" content="AI 스터디, 프로젝트, 광고 숏폼, 웹빌드, 부업 실험까지. 목적이 맞는 사람들과 소규모 크루를 만들고 자료와 맥락을 한곳에 쌓는 CrewUp AI 프로토타입." />
+  <meta name="description" content="AI 스터디, 프로젝트, 숏폼 콘텐츠 제작, 웹빌드, 자동화 부업까지. 목적이 맞는 사람들과 소규모 크루를 이루어 목표를 달성할 수 있도록 돕는 공간 CrewUp AI." />
   <style>
     :root {
       color-scheme: dark;
@@ -382,10 +382,20 @@
     }
     .section-head p { margin: 0; color: #c2cada; font-size: 18px; }
 
-    .problem-grid, .feature-grid, .pricing-grid, .crew-grid {
+    .problem-grid, .feature-grid, .pricing-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
+    }
+    .crew-grid, .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1100px) {
+      .crew-grid, .process-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
     .card {
       border: 1px solid var(--line);
@@ -590,7 +600,7 @@
       .nav-links { display: none; }
       .hero { grid-template-columns: 1fr; padding-top: 46px; }
       .phone-frame { margin: 0 auto; width: min(100%, 430px); }
-      .problem-grid, .feature-grid, .pricing-grid, .crew-grid { grid-template-columns: 1fr; }
+      .problem-grid, .feature-grid, .pricing-grid, .crew-grid, .process-grid { grid-template-columns: 1fr; }
       .container-story, .policy-band { grid-template-columns: 1fr; }
       .dash-row { grid-template-columns: 1fr; }
       .sidebar { display: none; }
@@ -629,29 +639,29 @@
           <span>CrewUp AI<small>small crews for AI builders</small></span>
         </a>
         <div class="nav-links" aria-label="섹션 이동">
-          <a href="#crews">크루 예시</a>
-          <a href="#container">컨테이너</a>
-          <a href="#pricing">확장 모델</a>
-          <a href="#policy">정책</a>
+          <a href="#why">서비스 소개</a>
+          <a href="#process">사용 흐름</a>
+          <a href="#crews">모집 크루</a>
+          <a href="#pricing">이용 요금</a>
         </div>
-        <a class="nav-cta" href="#join">베타 신청</a>
+        <a class="nav-cta" href="#join">시작하기</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="section hero">
         <div>
-          <span class="eyebrow">AI 스터디부터 프로젝트까지 · 소규모 크루 베이스캠프</span>
-          <h1>AI를 혼자 하지 말고,<br><span class="soft">목적이 맞는 크루로 시작하세요.</span></h1>
-          <p class="lead">CrewUp AI는 크루를 찾고, 크루장 포트폴리오를 확인하고, 가입 후에는 채팅·공유함·크루노트로 자료와 맥락을 쌓는 모바일 웹 중심의 크루 컨테이너입니다.</p>
+          <span class="eyebrow">함께 성장하는 AI 소규모 크루 작업실</span>
+          <h1>AI를 같이 배울 사람과<br><span class="soft">프로젝트 크루를 찾는 곳</span></h1>
+          <p class="lead">CrewUp AI는 혼자서는 지치기 쉬운 AI 학습과 프로젝트를 마음이 맞는 사람들과 함께 완주할 수 있도록 돕는 소규모 크루 전용 공간입니다.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#join">크루 참여 신청하기</a>
-            <a class="btn btn-secondary" href="#crews">크루 예시 보기</a>
+            <a class="btn btn-primary" href="#crews">크루 둘러보기</a>
+            <a class="btn btn-secondary" href="#join">크루 만들기</a>
           </div>
-          <div class="mini-proof" aria-label="서비스 원칙">
-            <span class="proof-pill"><strong>무료 시작</strong> · 성장하면 컨테이너 확장</span>
-            <span class="proof-pill"><strong>외부 툴 연결</strong> · 카톡/디스코드/Meet 지원</span>
-            <span class="proof-pill"><strong>운영 자율</strong> · 플랫폼은 공간 제공</span>
+          <div class="mini-proof" aria-label="서비스 특징">
+            <span class="proof-pill"><strong>간편한 시작</strong> · 누구나 부담 없이 무료 개설</span>
+            <span class="proof-pill"><strong>협업 도구 연동</strong> · 카톡/디스코드/화상회의 지원</span>
+            <span class="proof-pill"><strong>전용 공유 공간</strong> · 자료와 진행 상황을 한눈에 관리</span>
           </div>
         </div>
 
@@ -660,17 +670,17 @@
             <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
             <div class="app-header">
               <div class="app-title">
-                <strong>AI 광고 숏폼 제작 크루</strong>
+                <strong>AI 활용 숏폼 제작 크루</strong>
                 <span>활동중 · 7/10명 · 최근 활동 12분 전</span>
               </div>
               <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
             </div>
             <div class="crew-home-card">
-              <span class="tag">컨테이너 홈</span>
+              <span class="tag">크루 홈</span>
               <h2>4주 안에 광고 숏폼 3개와 블로그 랜딩 1개 만들기</h2>
               <p>이번 주는 제품 후보 조사, 후킹 문구, 이미지 프롬프트 테스트를 진행합니다.</p>
               <div class="progress-strip">
-                <div class="progress-item"><b>3개</b><span>최근 공유 자료</span></div>
+                <div class="progress-item"><b>3개</b><span>공유 자료</span></div>
                 <div class="progress-item"><b>5개</b><span>이번 주 할 일</span></div>
                 <div class="progress-item"><b>2개</b><span>외부 링크</span></div>
               </div>
@@ -698,134 +708,251 @@
 
       <section class="section" id="why">
         <div class="section-head">
-          <span class="eyebrow">왜 또 다른 채팅방이 아닌가</span>
-          <h2>카톡은 대화가 빠르지만, 크루의 맥락은 쉽게 흘러갑니다.</h2>
-          <p>CrewUp은 카톡·디스코드·Meet을 대체하지 않습니다. 대신 크루를 찾고, 신뢰하고, 자료와 결과물을 정리하는 베이스캠프가 됩니다.</p>
+          <span class="eyebrow">왜 CrewUp인가요?</span>
+          <h2>혼자 하는 AI 학습과 프로젝트,<br>끝까지 완주하기 어려우셨나요?</h2>
+          <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
         </div>
         <div class="problem-grid">
-          <article class="card"><div class="num">1</div><h3>가입 전 신뢰 부족</h3><p>오픈채팅방은 방장이 어떤 사람인지, 이 크루가 진짜 무엇을 하는지 판단하기 어렵습니다.</p></article>
-          <article class="card"><div class="num">2</div><h3>자료가 대화에 묻힘</h3><p>프롬프트, 결과물, 링크, 비교표가 채팅 흐름에 묻혀 새 멤버가 맥락을 따라가기 어렵습니다.</p></article>
-          <article class="card"><div class="num">3</div><h3>툴이 파편화됨</h3><p>모집은 게시글, 대화는 카톡, 자료는 드라이브, 정리는 노션으로 나뉘어 흐름이 끊깁니다.</p></article>
+          <article class="card"><div class="num">1</div><h3>작심삼일 독학의 한계</h3><p>혼자 인터넷 강의나 책을 보며 공부하면 금방 지루해지고 도중에 흐지부지되기 쉽습니다.</p></article>
+          <article class="card"><div class="num">2</div><h3>신뢰할 동료 찾기의 어려움</h3><p>목표를 가지고 끝까지 성실하게 함께 완주할 수 있는 검증된 동료를 찾기가 어렵습니다.</p></article>
+          <article class="card"><div class="num">3</div><h3>쉽게 흐트러지는 오픈채팅</h3><p>일상 잡담에 대화방 정보가 묻히고 자료가 유실되어 크루 관리가 불가능해집니다.</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="process">
+        <div class="section-head">
+          <span class="eyebrow">사용 흐름</span>
+          <h2>참여부터 완주까지의 핵심 사용 흐름</h2>
+          <p>CrewUp은 복잡한 절차 없이 직관적인 단계를 거쳐 목표를 달성할 수 있도록 지원합니다.</p>
+        </div>
+        <div class="process-grid">
+          <article class="card">
+            <div class="num">1</div>
+            <h3>나에게 맞는 크루 탐색</h3>
+            <p>다양한 주제와 난이도로 개설된 크루 목록에서 자신의 관심사와 목표에 딱 맞는 모임을 찾아봅니다.</p>
+          </article>
+          <article class="card">
+            <div class="num">2</div>
+            <h3>크루장 및 신뢰 확인</h3>
+            <p>크루장의 실무 이력, 모집 인원, 구체적인 진행 방식과 목표 기간을 꼼꼼하게 확인하여 신뢰도를 검증합니다.</p>
+          </article>
+          <article class="card">
+            <div class="num">3</div>
+            <h3>참여 신청 및 가입</h3>
+            <p>간단한 가입 동기나 사전 설문을 통해 크루 참여를 신청하고, 크루장의 확인을 거쳐 크루원으로 가입합니다.</p>
+          </article>
+          <article class="card">
+            <div class="num">4</div>
+            <h3>함께 협업하고 목표 달성</h3>
+            <p>공유 공간에서 파일과 프롬프트를 나누고, 전용 노트와 채팅을 통해 소통하며 계획했던 결과물을 함께 완성합니다.</p>
+          </article>
         </div>
       </section>
 
       <section class="section" id="crews">
         <div class="section-head">
-          <span class="eyebrow">초기 검증용 크루 3개</span>
-          <h2>전문가 강의가 아니라, 같이 실험하는 크루.</h2>
-          <p>크루장은 정답을 가르치는 사람이 아니라 초기 세팅과 시행착오를 공유하고 함께 발전하는 실험 리더입니다.</p>
+          <span class="eyebrow">진행 중인 크루</span>
+          <h2>전문가 강의가 아니라, 함께 배우고 성장하는 크루.</h2>
+          <p>크루장은 정답을 일방적으로 가르치는 강사가 아니라, 초기 세팅과 시행착오를 공유하며 동료들의 발전을 이끄는 리더입니다.</p>
         </div>
         <div class="crew-grid">
           <article class="card crew-card">
             <div class="crew-top">
-              <div class="crew-meta"><span class="chip">프로젝트형</span><span class="chip">5~8명</span></div>
-              <h3>AI 광고 숏폼 제작 크루</h3>
-              <p>제품 조사, 대본, 이미지/영상 프롬프트, 편집, 블로그 랜딩을 역할별로 나눠 캠페인 1세트를 실험합니다.</p>
+              <div class="crew-meta">
+                <span class="chip">정원 6명</span>
+                <span class="chip">입문</span>
+                <span class="chip">4주 기간</span>
+              </div>
+              <h3>AI 기초 & 프롬프트 입문 스터디</h3>
+              <p>ChatGPT와 Claude를 활용한 업무 자동화 및 프롬프트 기초를 함께 공부하고 매일 실습을 인증합니다.</p>
             </div>
             <div class="crew-bottom">
-              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">H</span><span><b>크루장 포트폴리오</b><span>영상 제작·광고 실험 이력</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
-            </div>
-          </article>
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta"><span class="chip">웹빌드</span><span class="chip">Netlify·Supabase</span></div>
-              <h3>AI 웹사이트 제작 크루</h3>
-              <p>AI 코딩 도구로 랜딩, MVP, 배포를 직접 실험하고 에러·링크·세팅 자료를 공유합니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">W</span><span><b>초기 세팅 공유</b><span>웹 제작 시행착오 기록</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
-            </div>
-          </article>
-          <article class="card crew-card">
-            <div class="crew-top">
-              <div class="crew-meta"><span class="chip">정보공유형</span><span class="chip">수익보장 없음</span></div>
-              <h3>AI 부업 실험실</h3>
-              <p>AI 콘텐츠, 블로그, 제휴, 자동화 실험을 과장 없이 공유합니다. 고액 강의·투자·리딩방 유도는 제재 대상입니다.</p>
-            </div>
-            <div class="crew-bottom">
-              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">S</span><span><b>현실 실험 중심</b><span>실패 사례도 공유</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section" id="container">
-        <div class="section-head">
-          <span class="eyebrow">크루 컨테이너 UI</span>
-          <h2>용량을 파는 게 아니라, 크루의 작업실을 확장합니다.</h2>
-          <p>무료 용량이 부족하다고 바로 결제시키는 구조는 약합니다. CrewUp의 락인은 자료·노트·링크·결과물이 한곳에 정리된 맥락에서 나와야 합니다.</p>
-        </div>
-        <div class="container-story">
-          <div class="story-list">
-            <article class="story-item"><div class="story-icon">홈</div><div><h3>크루 홈</h3><p>목표, 최근 공지, 대표 자료, 외부 링크, 최근 활동을 첫 화면에서 보여줍니다.</p></div></article>
-            <article class="story-item"><div class="story-icon">함</div><div><h3>결과물 공유함</h3><p>파일함이 아니라 AI 결과물 갤러리입니다. 태그, 설명, 툴, 프롬프트를 함께 남깁니다.</p></div></article>
-            <article class="story-item"><div class="story-icon">노트</div><div><h3>크루노트</h3><p>공지, 목표, 링크, 역할을 자유롭게 정리합니다. 공동 실시간 편집은 MVP에서 제외합니다.</p></div></article>
-            <article class="story-item"><div class="story-icon">링크</div><div><h3>외부 도구 허브</h3><p>카톡, 디스코드, Meet, Notion, GitHub를 연결하되 CrewUp은 맥락 정리에 집중합니다.</p></div></article>
-          </div>
-          <div class="dashboard-mock" aria-label="크루 대시보드 데스크톱 미리보기">
-            <div class="dash-inner">
-              <div class="dash-row">
-                <aside class="sidebar"><div class="side-title">AI 광고 숏폼 제작 크루</div><div class="side-link active">컨테이너 홈</div><div class="side-link">채팅</div><div class="side-link">공유함</div><div class="side-link">크루노트</div><div class="side-link">외부 링크</div><div class="side-link">멤버</div></aside>
-                <div class="dash-main">
-                  <div class="dash-top"><div><h3>이번 주 목표</h3><p style="color:var(--muted); margin:6px 0 0;">마우스 제품 후보 조사와 숏폼 후킹 5개 정리</p></div><span class="status-badge">활동중</span></div>
-                  <div class="dash-cards">
-                    <div class="dash-card"><small>대표 자료</small><b>가격대별 마우스 후보 비교표</b></div>
-                    <div class="dash-card"><small>외부 링크</small><b>카카오 오픈채팅 · Google Drive</b></div>
-                    <div class="dash-card"><small>최근 결과물</small><b>PC방 장면 이미지 프롬프트 v2</b></div>
-                    <div class="dash-card"><small>온보딩</small><b>처음 온 멤버가 볼 자료 3개</b></div>
-                  </div>
-                  <div class="activity-list"><div class="activity"><span>J님이 제품 캡처를 업로드</span><span>12분 전</span></div><div class="activity"><span>M님이 후킹 문구 5안을 추가</span><span>29분 전</span></div><div class="activity"><span>크루장이 이번 주 목표를 고정</span><span>1시간 전</span></div></div>
+              <div class="crew-owner">
+                <div class="owner-profile">
+                  <span class="owner-avatar">K</span>
+                  <span>
+                    <b>크루장: 김러닝</b>
+                    <span>AI 교육 강사 · IT 필자</span>
+                  </span>
                 </div>
               </div>
+              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+                <strong>진행 방식:</strong> 주 1회 온라인 미팅 + 일일 실습 인증
+              </div>
+              <div style="margin-top:14px; text-align:right;">
+                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
+              </div>
             </div>
-          </div>
+          </article>
+
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta">
+                <span class="chip">정원 8명</span>
+                <span class="chip">초급</span>
+                <span class="chip">3주 기간</span>
+              </div>
+              <h3>AI 활용 숏폼 콘텐츠 제작 크루</h3>
+              <p>AI 이미지/영상 생성 도구를 활용하여 유튜브 쇼츠 및 인스타 릴스 3개를 직접 기획하고 제작합니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner">
+                <div class="owner-profile">
+                  <span class="owner-avatar">V</span>
+                  <span>
+                    <b>크루장: 비디오메이커</b>
+                    <span>현업 크리에이터 · 영상 PD</span>
+                  </span>
+                </div>
+              </div>
+              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+                <strong>진행 방식:</strong> 주 1회 피드백 + 자율 공동 제작
+              </div>
+              <div style="margin-top:14px; text-align:right;">
+                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta">
+                <span class="chip">정원 5명</span>
+                <span class="chip">중급</span>
+                <span class="chip">4주 기간</span>
+              </div>
+              <h3>AI 코딩으로 한 달 만에 웹서비스 만들기</h3>
+              <p>Cursor와 v0 등 최신 AI 도구를 사용하여 아이디어를 실제 웹사이트로 빌드하고 배포까지 완료합니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner">
+                <div class="owner-profile">
+                  <span class="owner-avatar">D</span>
+                  <span>
+                    <b>크루장: 데브AI</b>
+                    <span>풀스택 개발자 · 1인 기업가</span>
+                  </span>
+                </div>
+              </div>
+              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+                <strong>진행 방식:</strong> 주 2회 코드 리뷰 + 개발 세션
+              </div>
+              <div style="margin-top:14px; text-align:right;">
+                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta">
+                <span class="chip">정원 8명</span>
+                <span class="chip">중급</span>
+                <span class="chip">4주 기간</span>
+              </div>
+              <h3>AI 자동화를 통한 업무 효율화 프로젝트</h3>
+              <p>Make, Zapier 등을 연동하여 반복되는 업무 프로세스를 자동화하고 비즈니스 수익 모델을 함께 탐색합니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner">
+                <div class="owner-profile">
+                  <span class="owner-avatar">A</span>
+                  <span>
+                    <b>크루장: 오토보스</b>
+                    <span>스타트업 COO · 자동화 전문가</span>
+                  </span>
+                </div>
+              </div>
+              <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+                <strong>진행 방식:</strong> 매주 과제 수행 + 주말 오프라인 세션
+              </div>
+              <div style="margin-top:14px; text-align:right;">
+                <a class="btn btn-primary btn-small" style="width:100%;" href="#join">참여 신청하기</a>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
       <section class="section" id="pricing">
         <div class="section-head">
-          <span class="eyebrow">무료 시작 · 성장 시 확장</span>
-          <h2>처음부터 참가자에게 돈을 받지 않습니다.</h2>
-          <p>일반 참가자는 무료로 시작하고, 크루가 커지면 크루장 또는 크루 단위로 컨테이너를 확장하는 구조를 검증합니다.</p>
+          <span class="eyebrow">합리적인 비용</span>
+          <h2>참여자는 언제나 무료로 시작하세요.</h2>
+          <p>기본적인 크루 활동은 무료이며, 더 큰 규모와 추가 공간이 필요할 때만 요금제를 선택해 공간을 확장합니다.</p>
         </div>
         <div class="pricing-grid">
-          <article class="card pricing-card"><h3>Free</h3><div class="price">무료</div><p>작은 크루를 부담 없이 시작합니다.</p><ul class="plan-list"><li>최대 10명</li><li>공유함 1GB</li><li>파일당 50MB</li><li>기본 채팅·노트·링크 허브</li></ul><a class="btn btn-secondary" href="#join">무료 베타 신청</a></article>
-          <article class="card pricing-card highlight"><h3>Plus</h3><div class="price">4,900<span>원/월 후보</span></div><p>활동이 생긴 크루의 작업실을 확장합니다.</p><ul class="plan-list"><li>최대 30명</li><li>공유함 10GB</li><li>대표 자료 고정</li><li>자료 태그/컬렉션</li><li>크루 홈 커스터마이징</li></ul><a class="btn btn-primary" href="#join">확장 수요 남기기</a></article>
-          <article class="card pricing-card"><h3>Pro</h3><div class="price">9,900<span>원/월 후보</span></div><p>성장한 크루를 장기 운영합니다.</p><ul class="plan-list"><li>최대 100명</li><li>공유함 50GB</li><li>대용량 영상 업로드 후보</li><li>비공개 크루</li><li>크루 공개 포트폴리오</li></ul><a class="btn btn-secondary" href="#join">관심 등록</a></article>
+          <article class="card pricing-card">
+            <h3>Free</h3>
+            <div class="price">무료</div>
+            <p>소규모 크루를 부담 없이 시작합니다.</p>
+            <ul class="plan-list">
+              <li>최대 10명 참여</li>
+              <li>공유 공간 1GB 제공</li>
+              <li>기본 채팅 및 크루노트</li>
+              <li>외부 도구 연동</li>
+            </ul>
+            <a class="btn btn-secondary" href="#join">무료로 시작하기</a>
+          </article>
+          <article class="card pricing-card highlight">
+            <h3>Plus</h3>
+            <div class="price">4,900<span>원/월</span></div>
+            <p>활동이 활발해진 크루의 공간을 확장합니다.</p>
+            <ul class="plan-list">
+              <li>최대 30명 참여</li>
+              <li>공유 공간 10GB 제공</li>
+              <li>대표 자료 상단 고정</li>
+              <li>자료 태그/컬렉션 분류</li>
+              <li>크루 홈 커스터마이징</li>
+            </ul>
+            <a class="btn btn-primary" href="#join">시작하기</a>
+          </article>
+          <article class="card pricing-card">
+            <h3>Pro</h3>
+            <div class="price">9,900<span>원/월</span></div>
+            <p>성장한 대규모 크루를 운영합니다.</p>
+            <ul class="plan-list">
+              <li>최대 100명 참여</li>
+              <li>공유 공간 50GB 제공</li>
+              <li>대용량 파일/영상 업로드</li>
+              <li>비공개 크루 개설 지원</li>
+              <li>크루 공개 포트폴리오 생성</li>
+            </ul>
+            <a class="btn btn-secondary" href="#join">문의하기</a>
+          </article>
         </div>
       </section>
 
       <section class="section" id="policy">
         <div class="policy-band">
-          <h2>운영은 자율, 위험 거래는 경고와 신고.</h2>
+          <h2>신뢰할 수 있는 크루 문화를 만듭니다.</h2>
           <div class="policy-copy">
-            <p>CrewUp은 크루 내 금전거래를 전면 금지하지는 않지만, 권장하지 않고 중개·보증·책임지지 않는다는 원칙을 분명히 합니다.</p>
-            <p class="quote">CrewUp은 크루 활동 공간을 제공할 뿐, 크루 내 금전거래를 중개하거나 보증하지 않습니다.</p>
-            <p>수익 보장, 투자 권유, 리딩방, 허위 포트폴리오, 사기성 모집글은 신고와 제재 대상입니다.</p>
+            <p>CrewUp은 모두가 안심하고 배움과 프로젝트에 집중할 수 있는 환경을 지향합니다.</p>
+            <p class="quote">불법 금전거래, 투자 유도, 리딩방, 허위 포트폴리오 등 타인에게 피해를 주는 활동은 강력히 제재됩니다.</p>
+            <p>서로 존중하고 협력하는 건강한 크루를 만들어 가기 위해 함께 노력해 주세요.</p>
           </div>
         </div>
       </section>
 
       <section class="section" id="join">
         <div class="cta-box">
-          <span class="eyebrow">수요 검증용 베타</span>
-          <h2>먼저 3개의 실험 크루로 시작합니다.</h2>
-          <p>AI 광고 숏폼 제작, AI 웹사이트 제작, AI 부업 실험 크루에 참여하거나 직접 크루를 열 의향이 있는지 확인합니다.</p>
+          <span class="eyebrow">시작하기</span>
+          <h2>나에게 맞는 크루를 만나보세요</h2>
+          <p>마음이 맞는 동료들과 함께라면 AI 프로젝트도 두렵지 않습니다. 지금 바로 시작해 보세요!</p>
           <div class="hero-actions" style="justify-content:center; margin-top:0;">
-            <a class="btn btn-primary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20베타%20참여%20신청">크루 참여 신청하기</a>
-            <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20크루장%20신청">크루장으로 신청하기</a>
+            <a class="btn btn-primary" href="#crews">나에게 맞는 크루 찾기</a>
+            <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20새%20크루%20만들기%20문의">새 크루 만들기</a>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <strong>CrewUp AI prototype.</strong> 본 화면은 제품 기획 검증을 위한 정적 웹 프로토타입입니다. 실제 결제, 회원가입, 파일 업로드 기능은 연결되어 있지 않습니다.
+      <strong>© 2026 CrewUp AI.</strong> 본 웹사이트는 서비스 소개를 위한 샘플 페이지입니다. 실제 결제 및 회원 가입 기능은 작동하지 않습니다.
     </footer>
 
     <div class="mobile-sticky" aria-label="모바일 고정 CTA">
-      <a class="btn btn-secondary" href="#crews">크루 보기</a>
-      <a class="btn btn-primary" href="#join">베타 신청</a>
+      <a class="btn btn-secondary" href="#crews">나에게 맞는 크루 찾기</a>
+      <a class="btn btn-primary" href="#join">새 크루 만들기</a>
     </div>
   </div>
 
@@ -841,19 +968,19 @@
       note: `
         <div class="card" style="box-shadow:none; padding:16px; border-radius:20px;">
           <h3 style="margin:0 0 8px; font-size:17px;">크루노트</h3>
-          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 제품 후보 5개, 후킹 문구 5개, 이미지 프롬프트 3개. 공동 실시간 편집은 MVP에서 제외하고 저장형 노트로 시작합니다.</p>
+          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 제품 후보 5개, 후킹 문구 5개, 이미지 프롬프트 3개. 크루 공동의 생각과 아이디어를 한곳에 기록하고 보관해 보세요.</p>
         </div>`,
       chat: `
         <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
           <p style="margin:0; font-size:13px; color:#cbd4df;"><b>J</b> 제품 캡처 공유했어요. 비교표에 넣어주세요.</p>
           <p style="margin:0; font-size:13px; color:#cbd4df;"><b>M</b> 후킹은 “마우스는 가격보다 손에 맞아야 합니다” 괜찮아 보여요.</p>
-          <p style="margin:0; font-size:13px; color:var(--muted);">기본 채팅만 제공하고, 화상회의는 외부 링크로 연결합니다.</p>
+          <p style="margin:0; font-size:13px; color:var(--muted);">실시간 채팅으로 멤버들과 막힘없이 의견을 조율할 수 있습니다.</p>
         </div>`,
       links: `
         <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
-          <p style="margin:0; font-size:13px;"><b>카카오 오픈채팅</b><br><span style="color:var(--muted);">일상 대화용 외부 링크</span></p>
-          <p style="margin:0; font-size:13px;"><b>Google Drive</b><br><span style="color:var(--muted);">대용량 원본 보관용</span></p>
-          <p style="margin:0; font-size:12px; color:var(--muted);">외부 서비스에서 발생하는 거래와 분쟁은 CrewUp이 보증하지 않습니다.</p>
+          <p style="margin:0; font-size:13px;"><b>카카오 오픈채팅</b><br><span style="color:var(--muted);">일상적인 소통을 위한 오픈채팅방 연결</span></p>
+          <p style="margin:0; font-size:13px;"><b>Google Drive</b><br><span style="color:var(--muted);">대용량 파일 공유를 위한 수납함 연결</span></p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">자주 사용하는 다양한 외부 협업 도구를 등록하여 편리하게 오갈 수 있습니다.</p>
         </div>`
     };
 
