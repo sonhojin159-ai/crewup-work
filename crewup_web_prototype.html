@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CrewUp AI — 목적이 맞는 AI 크루를 찾는 공간</title>
+  <meta name="description" content="AI 스터디, 프로젝트, 광고 숏폼, 웹빌드, 부업 실험까지. 목적이 맞는 사람들과 소규모 크루를 만들고 자료와 맥락을 한곳에 쌓는 CrewUp AI 프로토타입." />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --bg-soft: #0f131c;
+      --panel: rgba(19, 24, 35, 0.86);
+      --panel-strong: #151b28;
+      --panel-warm: #171512;
+      --line: rgba(255, 255, 255, 0.10);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --ink: #f4f7fb;
+      --muted: #9aa6b8;
+      --muted-2: #697588;
+      --accent: #8bffbd;
+      --accent-2: #79a7ff;
+      --accent-3: #ffd36b;
+      --danger: #ff7f9b;
+      --success: #8bffbd;
+      --shadow: 0 22px 80px rgba(0,0,0,.42);
+      --shadow-soft: 0 14px 40px rgba(0,0,0,.26);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1180px;
+      --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 2%, rgba(121, 167, 255, .20), transparent 30%),
+        radial-gradient(circle at 82% 8%, rgba(139, 255, 189, .12), transparent 29%),
+        radial-gradient(circle at 50% 88%, rgba(255, 211, 107, .08), transparent 35%),
+        var(--bg);
+      line-height: 1.55;
+      word-break: keep-all;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    .page-shell { min-height: 100vh; }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .075;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23noise)' opacity='.7'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(9, 11, 16, .72);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav {
+      max-width: var(--max);
+      margin: 0 auto;
+      height: 68px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #081018;
+      box-shadow: 0 12px 28px rgba(139,255,189,.18);
+      font-weight: 900;
+    }
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .01em;
+      margin-top: -4px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .nav-links a {
+      padding: 10px 12px;
+      border-radius: 999px;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #0a0d12;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    main { position: relative; z-index: 1; }
+    .section {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 84px 20px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(330px, .98fr);
+      gap: 40px;
+      align-items: center;
+      padding-top: 72px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      padding: 8px 12px;
+      border: 1px solid rgba(139,255,189,.22);
+      border-radius: 999px;
+      background: rgba(139,255,189,.08);
+    }
+    .hero h1 {
+      margin: 20px 0 18px;
+      font-size: clamp(42px, 7.2vw, 86px);
+      line-height: .98;
+      letter-spacing: -.075em;
+      text-wrap: pretty;
+    }
+    .hero h1 .soft { color: #c7d0dd; }
+    .hero p.lead {
+      margin: 0;
+      color: #c7d0dd;
+      font-size: clamp(17px, 2.3vw, 22px);
+      max-width: 650px;
+      letter-spacing: -.02em;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .btn {
+      min-height: 50px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      cursor: pointer;
+      font-weight: 850;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      touch-action: manipulation;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #b5ffd4); color: #06100b; }
+    .btn-secondary { background: rgba(255,255,255,.06); color: var(--ink); border: 1px solid var(--line-strong); }
+    .btn-small { min-height: 40px; padding: 0 14px; font-size: 13px; }
+
+    .mini-proof {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .proof-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 999px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .proof-pill strong { color: var(--ink); }
+
+    .phone-frame {
+      position: relative;
+      max-width: 430px;
+      margin-left: auto;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 44px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.035));
+      box-shadow: var(--shadow);
+    }
+    .phone {
+      overflow: hidden;
+      border-radius: 34px;
+      background: #0b0f17;
+      border: 1px solid rgba(255,255,255,.10);
+      min-height: 660px;
+      position: relative;
+    }
+    .phone-status {
+      height: 38px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(255,255,255,.02);
+    }
+    .app-header {
+      padding: 16px 18px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .app-title strong { display:block; font-size: 18px; letter-spacing: -.03em; }
+    .app-title span { display:block; font-size: 12px; color: var(--muted); }
+    .avatar-stack { display: flex; }
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #0b0f17;
+      margin-left: -8px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 850;
+      color: #0b0f17;
+      background: var(--accent);
+    }
+    .avatar:nth-child(2) { background: var(--accent-2); }
+    .avatar:nth-child(3) { background: var(--accent-3); }
+    .avatar:first-child { margin-left: 0; }
+
+    .crew-home-card {
+      margin: 0 12px 12px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(139,255,189,.10), rgba(121,167,255,.06)),
+        rgba(255,255,255,.035);
+    }
+    .crew-home-card .tag {
+      display: inline-flex;
+      color: var(--accent);
+      background: rgba(139,255,189,.10);
+      border: 1px solid rgba(139,255,189,.22);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 850;
+    }
+    .crew-home-card h2 {
+      margin: 14px 0 8px;
+      font-size: 25px;
+      line-height: 1.05;
+      letter-spacing: -.06em;
+    }
+    .crew-home-card p { margin: 0; color: #c4cfdd; font-size: 13px; }
+    .progress-strip {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .progress-item {
+      border-radius: 16px;
+      background: rgba(255,255,255,.055);
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .progress-item b { display:block; font-size: 14px; }
+    .progress-item span { color: var(--muted); font-size: 10px; }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.035);
+      border-radius: 14px;
+      min-height: 38px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .tab.active { color: #07100b; background: var(--accent); border-color: transparent; }
+    .panel-preview { padding: 0 12px 84px; }
+    .asset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .asset {
+      min-height: 120px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(121,167,255,.18), rgba(255,255,255,.04));
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .asset:nth-child(2) { background: linear-gradient(135deg, rgba(139,255,189,.16), rgba(255,255,255,.04)); }
+    .asset:nth-child(3) { background: linear-gradient(135deg, rgba(255,211,107,.15), rgba(255,255,255,.04)); }
+    .asset:nth-child(4) { background: linear-gradient(135deg, rgba(255,127,155,.13), rgba(255,255,255,.04)); }
+    .asset small { color: var(--muted); font-size: 11px; }
+    .asset b { font-size: 13px; line-height: 1.25; }
+    .bottom-nav {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 68px;
+      background: rgba(8,10,15,.92);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      padding: 0 10px;
+    }
+    .bottom-nav span {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+    }
+    .bottom-nav span.active { color: var(--accent); }
+    .dot-icon { width: 20px; height: 20px; border-radius: 8px; background: currentColor; opacity: .85; }
+
+    .section-head {
+      max-width: 740px;
+      margin-bottom: 28px;
+    }
+    .section-head h2 {
+      margin: 12px 0 10px;
+      font-size: clamp(32px, 5.3vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -.065em;
+    }
+    .section-head p { margin: 0; color: #c2cada; font-size: 18px; }
+
+    .problem-grid, .feature-grid, .pricing-grid, .crew-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -.035em; }
+    .card p { margin: 0; color: var(--muted); }
+    .card .num {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: rgba(139,255,189,.11);
+      color: var(--accent);
+      font-weight: 900;
+      margin-bottom: 16px;
+      border: 1px solid rgba(139,255,189,.18);
+    }
+
+    .crew-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .crew-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 0%, rgba(139,255,189,.13), transparent 36%);
+      pointer-events: none;
+    }
+    .crew-top, .crew-bottom { position: relative; }
+    .crew-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .crew-card h3 { font-size: 24px; line-height: 1.05; margin-bottom: 10px; }
+    .crew-owner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .owner-profile { display:flex; align-items:center; gap:10px; }
+    .owner-avatar {
+      width: 38px; height: 38px; border-radius: 14px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#07100b; font-weight: 900;
+    }
+    .owner-profile b { display:block; font-size: 13px; }
+    .owner-profile span { display:block; color: var(--muted); font-size: 11px; }
+
+    .container-story {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .story-list { display: grid; gap: 12px; }
+    .story-item {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.04);
+    }
+    .story-icon {
+      width: 44px; height: 44px; border-radius: 16px;
+      display:grid; place-items:center;
+      color:#07100b; background: var(--accent);
+      font-weight: 950;
+    }
+    .story-item h3 { margin: 0 0 4px; font-size: 16px; }
+    .story-item p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .dashboard-mock {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .dash-inner {
+      border-radius: 22px;
+      background: #0d1119;
+      border: 1px solid rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .dash-row { display:grid; grid-template-columns: 190px 1fr; min-height: 430px; }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      background: rgba(255,255,255,.025);
+    }
+    .sidebar .side-title { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+    .side-link {
+      padding: 10px 12px;
+      border-radius: 13px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .side-link.active { color: var(--ink); background: rgba(139,255,189,.10); border: 1px solid rgba(139,255,189,.20); }
+    .dash-main { padding: 18px; }
+    .dash-top { display:flex; justify-content:space-between; gap:12px; align-items:start; margin-bottom: 16px; }
+    .dash-top h3 { margin:0; font-size: 24px; letter-spacing:-.04em; }
+    .status-badge { color: var(--accent); background: rgba(139,255,189,.09); border: 1px solid rgba(139,255,189,.18); padding: 7px 10px; border-radius:999px; font-size:12px; font-weight:850; }
+    .dash-cards { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dash-card { border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.035); padding:14px; min-height:112px; }
+    .dash-card small { color:var(--muted); }
+    .dash-card b { display:block; margin-top:7px; }
+    .activity-list { margin-top: 12px; display:grid; gap: 8px; }
+    .activity { display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.035); color:var(--muted); font-size:13px; }
+
+    .pricing-card { min-height: 390px; display:flex; flex-direction:column; }
+    .pricing-card.highlight { border-color: rgba(139,255,189,.32); background: linear-gradient(180deg, rgba(139,255,189,.10), rgba(255,255,255,.04)); }
+    .price { font-size: 36px; letter-spacing: -.06em; font-weight: 900; margin: 10px 0 4px; }
+    .price span { font-size: 14px; color: var(--muted); font-weight: 700; letter-spacing: 0; }
+    .plan-list { margin: 18px 0 0; padding: 0; list-style: none; display:grid; gap: 10px; color: #c5cfdb; font-size: 14px; }
+    .plan-list li::before { content: "•"; color: var(--accent); margin-right: 8px; }
+    .pricing-card .btn { margin-top: auto; width: 100%; }
+
+    .policy-band {
+      border: 1px solid rgba(255,211,107,.22);
+      background: linear-gradient(135deg, rgba(255,211,107,.09), rgba(255,255,255,.035));
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .policy-band h2 { margin:0; font-size: clamp(28px, 4vw, 48px); line-height:1.05; letter-spacing:-.055em; }
+    .policy-copy { color:#c9d1dc; }
+    .policy-copy p { margin: 0 0 14px; }
+    .quote {
+      border-left: 3px solid var(--accent-3);
+      padding-left: 14px;
+      color: #f2dfad;
+      font-weight: 750;
+    }
+
+    .cta-box {
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 36px;
+      padding: 54px 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(139,255,189,.14), transparent 40%),
+        rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+    }
+    .cta-box h2 { margin: 0 auto 14px; max-width: 780px; font-size: clamp(34px, 5vw, 64px); line-height: 1.02; letter-spacing: -.065em; }
+    .cta-box p { margin: 0 auto 26px; max-width: 620px; color: #c6cfdd; font-size: 18px; }
+    .footer { max-width: var(--max); margin: 0 auto; padding: 28px 20px 48px; color: var(--muted-2); font-size: 13px; border-top: 1px solid var(--line); }
+
+    .mobile-sticky {
+      display: none;
+      position: fixed;
+      z-index: 30;
+      left: 12px; right: 12px; bottom: 12px;
+      background: rgba(12,15,22,.88);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--line-strong);
+      border-radius: 22px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .mobile-sticky .btn { min-height: 46px; font-size: 13px; padding: 0 10px; }
+
+    @media (max-width: 940px) {
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding-top: 46px; }
+      .phone-frame { margin: 0 auto; width: min(100%, 430px); }
+      .problem-grid, .feature-grid, .pricing-grid, .crew-grid { grid-template-columns: 1fr; }
+      .container-story, .policy-band { grid-template-columns: 1fr; }
+      .dash-row { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .section { padding: 64px 18px; }
+      .mobile-sticky { display: grid; }
+      .footer { padding-bottom: 92px; }
+    }
+    @media (max-width: 520px) {
+      .nav { height: 62px; padding: 0 14px; }
+      .brand small { display:none; }
+      .nav-cta { display:none; }
+      .hero-actions .btn { width: 100%; }
+      .hero p.lead, .section-head p, .cta-box p { font-size: 16px; }
+      .phone { min-height: 610px; }
+      .progress-strip { grid-template-columns: 1fr; }
+      .asset-grid { grid-template-columns: 1fr 1fr; }
+      .dash-cards { grid-template-columns: 1fr; }
+      .card { padding: 19px; }
+      .policy-band, .cta-box { border-radius: 26px; padding: 28px 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn { transition: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="page-shell">
+    <header class="topbar">
+      <nav class="nav" aria-label="주요 메뉴">
+        <a class="brand" href="#top" aria-label="CrewUp AI 홈">
+          <span class="brand-mark">C</span>
+          <span>CrewUp AI<small>small crews for AI builders</small></span>
+        </a>
+        <div class="nav-links" aria-label="섹션 이동">
+          <a href="#crews">크루 예시</a>
+          <a href="#container">컨테이너</a>
+          <a href="#pricing">확장 모델</a>
+          <a href="#policy">정책</a>
+        </div>
+        <a class="nav-cta" href="#join">베타 신청</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="section hero">
+        <div>
+          <span class="eyebrow">AI 스터디부터 프로젝트까지 · 소규모 크루 베이스캠프</span>
+          <h1>AI를 혼자 하지 말고,<br><span class="soft">목적이 맞는 크루로 시작하세요.</span></h1>
+          <p class="lead">CrewUp AI는 크루를 찾고, 크루장 포트폴리오를 확인하고, 가입 후에는 채팅·공유함·크루노트로 자료와 맥락을 쌓는 모바일 웹 중심의 크루 컨테이너입니다.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#join">크루 참여 신청하기</a>
+            <a class="btn btn-secondary" href="#crews">크루 예시 보기</a>
+          </div>
+          <div class="mini-proof" aria-label="서비스 원칙">
+            <span class="proof-pill"><strong>무료 시작</strong> · 성장하면 컨테이너 확장</span>
+            <span class="proof-pill"><strong>외부 툴 연결</strong> · 카톡/디스코드/Meet 지원</span>
+            <span class="proof-pill"><strong>운영 자율</strong> · 플랫폼은 공간 제공</span>
+          </div>
+        </div>
+
+        <div class="phone-frame" aria-label="CrewUp 모바일 화면 미리보기">
+          <div class="phone">
+            <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
+            <div class="app-header">
+              <div class="app-title">
+                <strong>AI 광고 숏폼 제작 크루</strong>
+                <span>활동중 · 7/10명 · 최근 활동 12분 전</span>
+              </div>
+              <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
+            </div>
+            <div class="crew-home-card">
+              <span class="tag">컨테이너 홈</span>
+              <h2>4주 안에 광고 숏폼 3개와 블로그 랜딩 1개 만들기</h2>
+              <p>이번 주는 제품 후보 조사, 후킹 문구, 이미지 프롬프트 테스트를 진행합니다.</p>
+              <div class="progress-strip">
+                <div class="progress-item"><b>3개</b><span>최근 공유 자료</span></div>
+                <div class="progress-item"><b>5개</b><span>이번 주 할 일</span></div>
+                <div class="progress-item"><b>2개</b><span>외부 링크</span></div>
+              </div>
+            </div>
+            <div class="tabs" role="tablist" aria-label="크루 내부 탭">
+              <button class="tab active" type="button" data-tab="assets">공유함</button>
+              <button class="tab" type="button" data-tab="note">노트</button>
+              <button class="tab" type="button" data-tab="chat">채팅</button>
+              <button class="tab" type="button" data-tab="links">링크</button>
+            </div>
+            <div class="panel-preview" id="phonePanel">
+              <div class="asset-grid">
+                <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
+                <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
+                <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
+                <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
+              </div>
+            </div>
+            <div class="bottom-nav" aria-hidden="true">
+              <span><i class="dot-icon"></i>홈</span><span class="active"><i class="dot-icon"></i>크루</span><span><i class="dot-icon"></i>만들기</span><span><i class="dot-icon"></i>프로필</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="why">
+        <div class="section-head">
+          <span class="eyebrow">왜 또 다른 채팅방이 아닌가</span>
+          <h2>카톡은 대화가 빠르지만, 크루의 맥락은 쉽게 흘러갑니다.</h2>
+          <p>CrewUp은 카톡·디스코드·Meet을 대체하지 않습니다. 대신 크루를 찾고, 신뢰하고, 자료와 결과물을 정리하는 베이스캠프가 됩니다.</p>
+        </div>
+        <div class="problem-grid">
+          <article class="card"><div class="num">1</div><h3>가입 전 신뢰 부족</h3><p>오픈채팅방은 방장이 어떤 사람인지, 이 크루가 진짜 무엇을 하는지 판단하기 어렵습니다.</p></article>
+          <article class="card"><div class="num">2</div><h3>자료가 대화에 묻힘</h3><p>프롬프트, 결과물, 링크, 비교표가 채팅 흐름에 묻혀 새 멤버가 맥락을 따라가기 어렵습니다.</p></article>
+          <article class="card"><div class="num">3</div><h3>툴이 파편화됨</h3><p>모집은 게시글, 대화는 카톡, 자료는 드라이브, 정리는 노션으로 나뉘어 흐름이 끊깁니다.</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="crews">
+        <div class="section-head">
+          <span class="eyebrow">초기 검증용 크루 3개</span>
+          <h2>전문가 강의가 아니라, 같이 실험하는 크루.</h2>
+          <p>크루장은 정답을 가르치는 사람이 아니라 초기 세팅과 시행착오를 공유하고 함께 발전하는 실험 리더입니다.</p>
+        </div>
+        <div class="crew-grid">
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta"><span class="chip">프로젝트형</span><span class="chip">5~8명</span></div>
+              <h3>AI 광고 숏폼 제작 크루</h3>
+              <p>제품 조사, 대본, 이미지/영상 프롬프트, 편집, 블로그 랜딩을 역할별로 나눠 캠페인 1세트를 실험합니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">H</span><span><b>크루장 포트폴리오</b><span>영상 제작·광고 실험 이력</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
+            </div>
+          </article>
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta"><span class="chip">웹빌드</span><span class="chip">Netlify·Supabase</span></div>
+              <h3>AI 웹사이트 제작 크루</h3>
+              <p>AI 코딩 도구로 랜딩, MVP, 배포를 직접 실험하고 에러·링크·세팅 자료를 공유합니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">W</span><span><b>초기 세팅 공유</b><span>웹 제작 시행착오 기록</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
+            </div>
+          </article>
+          <article class="card crew-card">
+            <div class="crew-top">
+              <div class="crew-meta"><span class="chip">정보공유형</span><span class="chip">수익보장 없음</span></div>
+              <h3>AI 부업 실험실</h3>
+              <p>AI 콘텐츠, 블로그, 제휴, 자동화 실험을 과장 없이 공유합니다. 고액 강의·투자·리딩방 유도는 제재 대상입니다.</p>
+            </div>
+            <div class="crew-bottom">
+              <div class="crew-owner"><div class="owner-profile"><span class="owner-avatar">S</span><span><b>현실 실험 중심</b><span>실패 사례도 공유</span></span></div><button class="btn btn-secondary btn-small">보기</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="container">
+        <div class="section-head">
+          <span class="eyebrow">크루 컨테이너 UI</span>
+          <h2>용량을 파는 게 아니라, 크루의 작업실을 확장합니다.</h2>
+          <p>무료 용량이 부족하다고 바로 결제시키는 구조는 약합니다. CrewUp의 락인은 자료·노트·링크·결과물이 한곳에 정리된 맥락에서 나와야 합니다.</p>
+        </div>
+        <div class="container-story">
+          <div class="story-list">
+            <article class="story-item"><div class="story-icon">홈</div><div><h3>크루 홈</h3><p>목표, 최근 공지, 대표 자료, 외부 링크, 최근 활동을 첫 화면에서 보여줍니다.</p></div></article>
+            <article class="story-item"><div class="story-icon">함</div><div><h3>결과물 공유함</h3><p>파일함이 아니라 AI 결과물 갤러리입니다. 태그, 설명, 툴, 프롬프트를 함께 남깁니다.</p></div></article>
+            <article class="story-item"><div class="story-icon">노트</div><div><h3>크루노트</h3><p>공지, 목표, 링크, 역할을 자유롭게 정리합니다. 공동 실시간 편집은 MVP에서 제외합니다.</p></div></article>
+            <article class="story-item"><div class="story-icon">링크</div><div><h3>외부 도구 허브</h3><p>카톡, 디스코드, Meet, Notion, GitHub를 연결하되 CrewUp은 맥락 정리에 집중합니다.</p></div></article>
+          </div>
+          <div class="dashboard-mock" aria-label="크루 대시보드 데스크톱 미리보기">
+            <div class="dash-inner">
+              <div class="dash-row">
+                <aside class="sidebar"><div class="side-title">AI 광고 숏폼 제작 크루</div><div class="side-link active">컨테이너 홈</div><div class="side-link">채팅</div><div class="side-link">공유함</div><div class="side-link">크루노트</div><div class="side-link">외부 링크</div><div class="side-link">멤버</div></aside>
+                <div class="dash-main">
+                  <div class="dash-top"><div><h3>이번 주 목표</h3><p style="color:var(--muted); margin:6px 0 0;">마우스 제품 후보 조사와 숏폼 후킹 5개 정리</p></div><span class="status-badge">활동중</span></div>
+                  <div class="dash-cards">
+                    <div class="dash-card"><small>대표 자료</small><b>가격대별 마우스 후보 비교표</b></div>
+                    <div class="dash-card"><small>외부 링크</small><b>카카오 오픈채팅 · Google Drive</b></div>
+                    <div class="dash-card"><small>최근 결과물</small><b>PC방 장면 이미지 프롬프트 v2</b></div>
+                    <div class="dash-card"><small>온보딩</small><b>처음 온 멤버가 볼 자료 3개</b></div>
+                  </div>
+                  <div class="activity-list"><div class="activity"><span>J님이 제품 캡처를 업로드</span><span>12분 전</span></div><div class="activity"><span>M님이 후킹 문구 5안을 추가</span><span>29분 전</span></div><div class="activity"><span>크루장이 이번 주 목표를 고정</span><span>1시간 전</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pricing">
+        <div class="section-head">
+          <span class="eyebrow">무료 시작 · 성장 시 확장</span>
+          <h2>처음부터 참가자에게 돈을 받지 않습니다.</h2>
+          <p>일반 참가자는 무료로 시작하고, 크루가 커지면 크루장 또는 크루 단위로 컨테이너를 확장하는 구조를 검증합니다.</p>
+        </div>
+        <div class="pricing-grid">
+          <article class="card pricing-card"><h3>Free</h3><div class="price">무료</div><p>작은 크루를 부담 없이 시작합니다.</p><ul class="plan-list"><li>최대 10명</li><li>공유함 1GB</li><li>파일당 50MB</li><li>기본 채팅·노트·링크 허브</li></ul><a class="btn btn-secondary" href="#join">무료 베타 신청</a></article>
+          <article class="card pricing-card highlight"><h3>Plus</h3><div class="price">4,900<span>원/월 후보</span></div><p>활동이 생긴 크루의 작업실을 확장합니다.</p><ul class="plan-list"><li>최대 30명</li><li>공유함 10GB</li><li>대표 자료 고정</li><li>자료 태그/컬렉션</li><li>크루 홈 커스터마이징</li></ul><a class="btn btn-primary" href="#join">확장 수요 남기기</a></article>
+          <article class="card pricing-card"><h3>Pro</h3><div class="price">9,900<span>원/월 후보</span></div><p>성장한 크루를 장기 운영합니다.</p><ul class="plan-list"><li>최대 100명</li><li>공유함 50GB</li><li>대용량 영상 업로드 후보</li><li>비공개 크루</li><li>크루 공개 포트폴리오</li></ul><a class="btn btn-secondary" href="#join">관심 등록</a></article>
+        </div>
+      </section>
+
+      <section class="section" id="policy">
+        <div class="policy-band">
+          <h2>운영은 자율, 위험 거래는 경고와 신고.</h2>
+          <div class="policy-copy">
+            <p>CrewUp은 크루 내 금전거래를 전면 금지하지는 않지만, 권장하지 않고 중개·보증·책임지지 않는다는 원칙을 분명히 합니다.</p>
+            <p class="quote">CrewUp은 크루 활동 공간을 제공할 뿐, 크루 내 금전거래를 중개하거나 보증하지 않습니다.</p>
+            <p>수익 보장, 투자 권유, 리딩방, 허위 포트폴리오, 사기성 모집글은 신고와 제재 대상입니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="join">
+        <div class="cta-box">
+          <span class="eyebrow">수요 검증용 베타</span>
+          <h2>먼저 3개의 실험 크루로 시작합니다.</h2>
+          <p>AI 광고 숏폼 제작, AI 웹사이트 제작, AI 부업 실험 크루에 참여하거나 직접 크루를 열 의향이 있는지 확인합니다.</p>
+          <div class="hero-actions" style="justify-content:center; margin-top:0;">
+            <a class="btn btn-primary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20베타%20참여%20신청">크루 참여 신청하기</a>
+            <a class="btn btn-secondary" href="mailto:hello@crewup.ai?subject=CrewUp%20AI%20크루장%20신청">크루장으로 신청하기</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <strong>CrewUp AI prototype.</strong> 본 화면은 제품 기획 검증을 위한 정적 웹 프로토타입입니다. 실제 결제, 회원가입, 파일 업로드 기능은 연결되어 있지 않습니다.
+    </footer>
+
+    <div class="mobile-sticky" aria-label="모바일 고정 CTA">
+      <a class="btn btn-secondary" href="#crews">크루 보기</a>
+      <a class="btn btn-primary" href="#join">베타 신청</a>
+    </div>
+  </div>
+
+  <script>
+    const panelContent = {
+      assets: `
+        <div class="asset-grid">
+          <div class="asset"><small>#상세페이지</small><b>G304 제품 캡처</b></div>
+          <div class="asset"><small>#카피</small><b>숏폼 후킹 5안</b></div>
+          <div class="asset"><small>#프롬프트</small><b>PC방 장면 v2</b></div>
+          <div class="asset"><small>#비교표</small><b>가격대별 후보</b></div>
+        </div>`,
+      note: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px;">
+          <h3 style="margin:0 0 8px; font-size:17px;">크루노트</h3>
+          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 제품 후보 5개, 후킹 문구 5개, 이미지 프롬프트 3개. 공동 실시간 편집은 MVP에서 제외하고 저장형 노트로 시작합니다.</p>
+        </div>`,
+      chat: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>J</b> 제품 캡처 공유했어요. 비교표에 넣어주세요.</p>
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>M</b> 후킹은 “마우스는 가격보다 손에 맞아야 합니다” 괜찮아 보여요.</p>
+          <p style="margin:0; font-size:13px; color:var(--muted);">기본 채팅만 제공하고, 화상회의는 외부 링크로 연결합니다.</p>
+        </div>`,
+      links: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
+          <p style="margin:0; font-size:13px;"><b>카카오 오픈채팅</b><br><span style="color:var(--muted);">일상 대화용 외부 링크</span></p>
+          <p style="margin:0; font-size:13px;"><b>Google Drive</b><br><span style="color:var(--muted);">대용량 원본 보관용</span></p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">외부 서비스에서 발생하는 거래와 분쟁은 CrewUp이 보증하지 않습니다.</p>
+        </div>`
+    };
+
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('phonePanel').innerHTML = panelContent[tab.dataset.tab];
+      });
+    });
+  </script>
+</body>
+</html>
