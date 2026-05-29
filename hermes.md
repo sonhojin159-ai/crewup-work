@@ -23,10 +23,10 @@ Hermes는 실무 코드를 직접 구현하거나 직접 코드 리뷰하지 않
 - 복잡한 UI 제작
 
 ### Codex: `sub.md`
-- 서브 코더
-- 단순 유틸리티 함수 구현
-- 반복적인 코드 작성
-- 단위 테스트 구현
+- 수정/패치 담당 코더
+- Telegram으로 소통 가능한 코드 수정 담당
+- 기존 코드의 버그 수정, UI 미세 조정, 작은 기능 변경
+- 신규 메인 구현을 분담하지 않는다
 
 ### Anti-Gravity: `search.md` / `test.md`
 - 웹 서칭 및 전문 검수원
@@ -45,8 +45,9 @@ Hermes는 실무 코드를 직접 구현하거나 직접 코드 리뷰하지 않
 
 예시:
 - 최신 API 확인 필요 → Anti-Gravity `search.md`
-- 복잡한 설계/핵심 구현 → Claude Code `main.md`
-- 단순 유틸/테스트/반복 구현 → Codex `sub.md`
+- 신규 메인 구현/전체 코드 작성 → 사용자가 VS Code workspace에서 Claude Code 실행, Hermes는 `main.md` 지시서 작성
+- 기존 코드 수정/버그 수정/UI 미세 조정 → Codex `sub.md`
+- 서브 코딩이라는 별도 분담 개념은 사용하지 않는다
 - 코드가 완성되기 전에는 Anti-Gravity에게 검수 지시 금지
 
 ## 지시서 작성 규칙
@@ -75,7 +76,7 @@ Hermes는 실무 코드를 직접 구현하거나 직접 코드 리뷰하지 않
 
 ## 업무 완료 및 피드백 루프
 
-1. Claude/Codex가 작업을 마치고 `_done.md`를 제출한다.
+1. Claude Code 또는 Codex가 작업을 마치고 `_done.md`를 제출한다.
 2. 사용자가 보고서를 Hermes에게 전달한다.
 3. Hermes는 코드를 직접 읽지 않고 보고서 기반으로 판단한다.
 4. 코더 작업 완료 후 Anti-Gravity에게 검수 지시서 `test.md`를 발행한다.
