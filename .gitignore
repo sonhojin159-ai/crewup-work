@@ -4,3 +4,6 @@ logs/
 .antigravitycli/
 *.pyc
 E0F
+
+# Local Netlify folder
+.netlify
