@@ -1,0 +1,1573 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crew Up — 함께 성장하는 AI 크루를 찾는 공간</title>
+  <meta name="description" content="AI 스터디, 프로젝트, 숏폼 콘텐츠 제작, 웹페이지 제작, 자동화 부업까지. 목적이 맞는 동료들과 크루를 이루어 함께 성장하고 목표를 달성할 수 있도록 돕는 공간 Crew Up." />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --bg-soft: #0f131c;
+      --panel: rgba(19, 24, 35, 0.86);
+      --panel-strong: #151b28;
+      --panel-warm: #171512;
+      --line: rgba(255, 255, 255, 0.10);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --ink: #f4f7fb;
+      --muted: #9aa6b8;
+      --muted-2: #697588;
+      --accent: #8bffbd;
+      --accent-2: #79a7ff;
+      --accent-3: #ffd36b;
+      --danger: #ff7f9b;
+      --success: #8bffbd;
+      --shadow: 0 22px 80px rgba(0,0,0,.42);
+      --shadow-soft: 0 14px 40px rgba(0,0,0,.26);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1180px;
+      --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 2%, rgba(121, 167, 255, .20), transparent 30%),
+        radial-gradient(circle at 82% 8%, rgba(139, 255, 189, .12), transparent 29%),
+        radial-gradient(circle at 50% 88%, rgba(255, 211, 107, .08), transparent 35%),
+        var(--bg);
+      line-height: 1.55;
+      word-break: keep-all;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    .page-shell { min-height: 100vh; }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .075;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23noise)' opacity='.7'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(9, 11, 16, .72);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav {
+      max-width: var(--max);
+      margin: 0 auto;
+      height: 68px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #081018;
+      box-shadow: 0 12px 28px rgba(139,255,189,.18);
+      font-weight: 900;
+    }
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .01em;
+      margin-top: -4px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .nav-links a {
+      padding: 10px 12px;
+      border-radius: 999px;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #0a0d12;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    main { position: relative; z-index: 1; }
+    .section {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 84px 20px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(330px, .98fr);
+      gap: 40px;
+      align-items: center;
+      padding-top: 72px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      padding: 8px 12px;
+      border: 1px solid rgba(139,255,189,.22);
+      border-radius: 999px;
+      background: rgba(139,255,189,.08);
+    }
+    .hero h1 {
+      margin: 20px 0 18px;
+      font-size: clamp(42px, 7.2vw, 86px);
+      line-height: .98;
+      letter-spacing: -.075em;
+      text-wrap: pretty;
+    }
+    .hero h1 .soft { color: #c7d0dd; }
+    .hero p.lead {
+      margin: 0;
+      color: #c7d0dd;
+      font-size: clamp(17px, 2.3vw, 22px);
+      max-width: 650px;
+      letter-spacing: -.02em;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .btn {
+      min-height: 50px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      cursor: pointer;
+      font-weight: 850;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      touch-action: manipulation;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #b5ffd4); color: #06100b; }
+    .btn-secondary { background: rgba(255,255,255,.06); color: var(--ink); border: 1px solid var(--line-strong); }
+    .btn-small { min-height: 40px; padding: 0 14px; font-size: 13px; }
+
+    .mini-proof {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .proof-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 999px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .proof-pill strong { color: var(--ink); }
+
+    .phone-frame {
+      position: relative;
+      max-width: 430px;
+      margin-left: auto;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 44px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.035));
+      box-shadow: var(--shadow);
+    }
+    .phone {
+      overflow: hidden;
+      border-radius: 34px;
+      background: #0b0f17;
+      border: 1px solid rgba(255,255,255,.10);
+      min-height: 660px;
+      position: relative;
+    }
+    .phone-status {
+      height: 38px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(255,255,255,.02);
+    }
+    .app-header {
+      padding: 16px 18px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .app-title strong { display:block; font-size: 18px; letter-spacing: -.03em; }
+    .app-title span { display:block; font-size: 12px; color: var(--muted); }
+    .avatar-stack { display: flex; }
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #0b0f17;
+      margin-left: -8px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 850;
+      color: #0b0f17;
+      background: var(--accent);
+    }
+    .avatar:nth-child(2) { background: var(--accent-2); }
+    .avatar:nth-child(3) { background: var(--accent-3); }
+    .avatar:first-child { margin-left: 0; }
+
+    .crew-home-card {
+      margin: 0 12px 12px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(139,255,189,.10), rgba(121,167,255,.06)),
+        rgba(255,255,255,.035);
+    }
+    .crew-home-card .tag {
+      display: inline-flex;
+      color: var(--accent);
+      background: rgba(139,255,189,.10);
+      border: 1px solid rgba(139,255,189,.22);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 850;
+    }
+    .crew-home-card h2 {
+      margin: 14px 0 8px;
+      font-size: 25px;
+      line-height: 1.05;
+      letter-spacing: -.06em;
+    }
+    .crew-home-card p { margin: 0; color: #c4cfdd; font-size: 13px; }
+    .progress-strip {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .progress-item {
+      border-radius: 16px;
+      background: rgba(255,255,255,.055);
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .progress-item b { display:block; font-size: 14px; }
+    .progress-item span { color: var(--muted); font-size: 10px; }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.035);
+      border-radius: 14px;
+      min-height: 38px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .tab.active { color: #07100b; background: var(--accent); border-color: transparent; }
+    .panel-preview { padding: 0 12px 84px; }
+    .asset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .asset {
+      min-height: 120px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(121,167,255,.18), rgba(255,255,255,.04));
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .asset:nth-child(2) { background: linear-gradient(135deg, rgba(139,255,189,.16), rgba(255,255,255,.04)); }
+    .asset:nth-child(3) { background: linear-gradient(135deg, rgba(255,211,107,.15), rgba(255,255,255,.04)); }
+    .asset:nth-child(4) { background: linear-gradient(135deg, rgba(255,127,155,.13), rgba(255,255,255,.04)); }
+    .asset small { color: var(--muted); font-size: 11px; }
+    .asset b { font-size: 13px; line-height: 1.25; }
+    .bottom-nav {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 68px;
+      background: rgba(8,10,15,.92);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      padding: 0 10px;
+    }
+    .bottom-nav span {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+    }
+    .bottom-nav span.active { color: var(--accent); }
+    .dot-icon { width: 20px; height: 20px; border-radius: 8px; background: currentColor; opacity: .85; }
+
+    .section-head {
+      max-width: 740px;
+      margin-bottom: 28px;
+    }
+    .section-head h2 {
+      margin: 12px 0 10px;
+      font-size: clamp(32px, 5.3vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -.065em;
+    }
+    .section-head p { margin: 0; color: #c2cada; font-size: 18px; }
+
+    .problem-grid, .feature-grid, .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .crew-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1100px) {
+      .process-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .crew-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .crew-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -.035em; }
+    .card p { margin: 0; color: var(--muted); }
+    .card .num {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: rgba(139,255,189,.11);
+      color: var(--accent);
+      font-weight: 900;
+      margin-bottom: 16px;
+      border: 1px solid rgba(139,255,189,.18);
+    }
+
+    .crew-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .crew-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 0%, rgba(139,255,189,.13), transparent 36%);
+      pointer-events: none;
+    }
+    .crew-top, .crew-bottom { position: relative; }
+    .crew-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .crew-card h3 { font-size: 24px; line-height: 1.05; margin-bottom: 10px; }
+    .crew-owner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .owner-profile { display:flex; align-items:center; gap:10px; }
+    .owner-avatar {
+      width: 38px; height: 38px; border-radius: 14px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#07100b; font-weight: 900;
+    }
+    .owner-profile { min-width: 0; }
+    .owner-profile > span { min-width: 0; }
+    .owner-profile b { display:block; font-size: 13px; }
+    .owner-profile span { display:block; color: var(--muted); font-size: 11px; }
+    .portfolio-btn {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(139,255,189,.22);
+      background: rgba(139,255,189,.09);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .crew-list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+    }
+    .crew-list-head .section-head { margin-bottom: 0; }
+    .about-head { max-width: 960px; }
+    .about-head h2 { font-size: clamp(30px, 4.4vw, 50px); }
+    .about-head .no-break { white-space: nowrap; }
+    .about-head p { max-width: 900px; white-space: nowrap; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+    }
+    .modal-backdrop.active { display: grid; }
+    .modal-card {
+      width: min(560px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: 28px;
+      background: #101720;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .modal-card h3 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.04em; }
+    .modal-card p { margin: 0 0 16px; color: var(--muted); }
+    .modal-fields { display: grid; gap: 12px; }
+    .modal-fields label { display: grid; gap: 6px; font-size: 12px; color: #cbd4df; font-weight: 800; }
+    .modal-fields input, .modal-fields textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.055);
+      color: var(--ink);
+      padding: 11px 12px;
+      outline: none;
+    }
+    .modal-fields small { color: var(--muted); font-weight: 600; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
+
+    .container-story {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .story-list { display: grid; gap: 12px; }
+    .story-item {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.04);
+    }
+    .story-icon {
+      width: 44px; height: 44px; border-radius: 16px;
+      display:grid; place-items:center;
+      color:#07100b; background: var(--accent);
+      font-weight: 950;
+    }
+    .story-item h3 { margin: 0 0 4px; font-size: 16px; }
+    .story-item p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .dashboard-mock {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .dash-inner {
+      border-radius: 22px;
+      background: #0d1119;
+      border: 1px solid rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .dash-row { display:grid; grid-template-columns: 190px 1fr; min-height: 430px; }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      background: rgba(255,255,255,.025);
+    }
+    .sidebar .side-title { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+    .side-link {
+      padding: 10px 12px;
+      border-radius: 13px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .side-link.active { color: var(--ink); background: rgba(139,255,189,.10); border: 1px solid rgba(139,255,189,.20); }
+    .dash-main { padding: 18px; }
+    .dash-top { display:flex; justify-content:space-between; gap:12px; align-items:start; margin-bottom: 16px; }
+    .dash-top h3 { margin:0; font-size: 24px; letter-spacing:-.04em; }
+    .status-badge { color: var(--accent); background: rgba(139,255,189,.09); border: 1px solid rgba(139,255,189,.18); padding: 7px 10px; border-radius:999px; font-size:12px; font-weight:850; }
+    .dash-cards { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dash-card { border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.035); padding:14px; min-height:112px; }
+    .dash-card small { color:var(--muted); }
+    .dash-card b { display:block; margin-top:7px; }
+    .activity-list { margin-top: 12px; display:grid; gap: 8px; }
+    .activity { display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.035); color:var(--muted); font-size:13px; }
+
+    .pricing-card { min-height: 430px; display:flex; flex-direction:column; }
+    .pricing-card.highlight { border-color: var(--line); background: var(--panel); }
+    .price { font-size: 36px; letter-spacing: -.06em; font-weight: 900; margin: 10px 0 4px; }
+    .price span { font-size: 14px; color: var(--muted); font-weight: 700; letter-spacing: 0; }
+    .plan-list { margin: 18px 0 0; padding: 0; list-style: none; display:grid; gap: 10px; color: #c5cfdb; font-size: 14px; }
+    .plan-list li::before { content: "•"; color: var(--accent); margin-right: 8px; }
+    .pricing-card .btn { margin-top: auto; width: 100%; }
+
+    .policy-band {
+      border: 1px solid rgba(255,211,107,.22);
+      background: linear-gradient(135deg, rgba(255,211,107,.09), rgba(255,255,255,.035));
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .policy-band h2 { margin:0; font-size: clamp(28px, 4vw, 48px); line-height:1.05; letter-spacing:-.055em; }
+    .policy-copy { color:#c9d1dc; }
+    .policy-copy p { margin: 0 0 14px; }
+    .quote {
+      border-left: 3px solid var(--accent-3);
+      padding-left: 14px;
+      color: #f2dfad;
+      font-weight: 750;
+    }
+
+    .cta-box {
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 36px;
+      padding: 54px 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(139,255,189,.14), transparent 40%),
+        rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+    }
+    .cta-box h2 { margin: 0 auto 14px; max-width: 780px; font-size: clamp(34px, 5vw, 64px); line-height: 1.02; letter-spacing: -.065em; }
+    .cta-box p { margin: 0 auto 26px; max-width: 620px; color: #c6cfdd; font-size: 18px; }
+    .footer { max-width: var(--max); margin: 0 auto; padding: 28px 20px 48px; color: var(--muted-2); font-size: 13px; border-top: 1px solid var(--line); }
+
+    .mobile-sticky {
+      display: none;
+      position: fixed;
+      z-index: 30;
+      left: 12px; right: 12px; bottom: 12px;
+      background: rgba(12,15,22,.88);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--line-strong);
+      border-radius: 22px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .mobile-sticky .btn { min-height: 46px; font-size: 13px; padding: 0 10px; }
+
+    @media (max-width: 940px) {
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding-top: 46px; }
+      .phone-frame { margin: 0 auto; width: min(100%, 430px); }
+      .problem-grid, .feature-grid, .pricing-grid, .crew-grid, .process-grid { grid-template-columns: 1fr; }
+      .container-story, .policy-band { grid-template-columns: 1fr; }
+      .dash-row { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .section { padding: 64px 18px; }
+      .mobile-sticky { display: grid; }
+      .footer { padding-bottom: 92px; }
+    }
+    @media (max-width: 520px) {
+      .nav { height: 62px; padding: 0 14px; }
+      .brand small { display:none; }
+      .nav-cta { display:none; }
+      .hero-actions .btn { width: 100%; }
+      .hero p.lead, .section-head p, .cta-box p { font-size: 16px; }
+      .crew-list-head { align-items: stretch; flex-direction: column; }
+      .about-head .no-break, .about-head p { white-space: normal; }
+      .phone { min-height: 610px; }
+      .progress-strip { grid-template-columns: 1fr; }
+      .asset-grid { grid-template-columns: 1fr 1fr; }
+      .dash-cards { grid-template-columns: 1fr; }
+      .card { padding: 19px; }
+      .policy-band, .cta-box { border-radius: 26px; padding: 28px 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn { transition: none; }
+      .btn:hover { transform: none; }
+    }
+
+    /* 탭 메뉴 전환 스타일 */
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active {
+      display: block;
+      animation: fadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .nav-links a {
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 750;
+    }
+
+    /* 인기 크루 전용 배지 스타일 */
+    .pop-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge-trend {
+      background: rgba(255, 127, 155, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(255, 127, 155, 0.22);
+    }
+    .badge-success {
+      background: rgba(139, 255, 189, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(139, 255, 189, 0.22);
+    }
+    .badge-info {
+      background: rgba(121, 167, 255, 0.12);
+      color: var(--accent-2);
+      border: 1px solid rgba(121, 167, 255, 0.22);
+    }
+    .badge-warn {
+      background: rgba(255, 211, 107, 0.12);
+      color: var(--accent-3);
+      border: 1px solid rgba(255, 211, 107, 0.22);
+    }
+    /* 크루 목록 필터 칩 스타일 */
+    .crew-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+    }
+    .filter-btn.active {
+      background: var(--accent);
+      color: #07100b;
+      border-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="page-shell">
+    <header class="topbar">
+      <nav class="nav" aria-label="주요 메뉴">
+        <a class="brand" href="#top" aria-label="Crew Up 홈">
+          <span class="brand-mark">C</span>
+          <span>Crew Up<small>crewup-work</small></span>
+        </a>
+        <div class="nav-links" aria-label="섹션 이동">
+          <a class="active" data-tab="home">홈</a>
+          <a data-tab="about">서비스 소개</a>
+          <a data-tab="crews">크루 목록</a>
+          <a data-tab="pricing">요금/플랜</a>
+        </div>
+        <a class="nav-cta" data-tab="home" data-scroll="join" style="cursor: pointer;">시작하기</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <!-- ==================== 1. 홈 탭 영역 ==================== -->
+      <div id="tab-content-home" class="tab-section active">
+        <section class="section hero">
+          <div>
+            <span class="eyebrow">Crew Up</span>
+            <h1>함께 성장하는<br><span class="soft">AI 크루 작업실</span></h1>
+            <p class="lead">마음이 맞는 동료들과 시작해 AI 프로젝트를 끝까지 완주하고, 더 큰 크루로 함께 성장할 수 있는 최적의 협업 공간입니다.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" data-tab="crews">크루 목록 보기</a>
+              <button class="btn btn-secondary" type="button" data-action="create-crew">크루 만들기</button>
+            </div>
+            <div class="mini-proof" aria-label="서비스 특징">
+              <span class="proof-pill"><strong>간편한 시작</strong> · 누구나 부담 없이 무료 개설</span>
+              <span class="proof-pill"><strong>협업 도구 연동</strong> · 카톡/디스코드/화상회의 지원</span>
+              <span class="proof-pill"><strong>전용 공유 공간</strong> · 자료와 진행 상황을 한눈에 관리</span>
+            </div>
+          </div>
+
+          <div class="phone-frame" aria-label="Crew Up 모바일 화면 미리보기">
+            <div class="phone">
+              <div class="phone-status"><span>9:41</span><span>5G · 82%</span></div>
+              <div class="app-header">
+                <div class="app-title">
+                  <strong>AI 프로젝트 성장 크루</strong>
+                  <span>활동중 · 멤버 모집중 · 최근 활동 12분 전</span>
+                </div>
+                <div class="avatar-stack" aria-hidden="true"><span class="avatar">나</span><span class="avatar">J</span><span class="avatar">M</span></div>
+              </div>
+              <div class="crew-home-card">
+                <span class="tag">크루 홈</span>
+                <h2>이번 주 목표와 역할을 함께 정리해요</h2>
+                <p>새 멤버 온보딩, 자료 공유, 주간 체크리스트를 한곳에서 확인합니다.</p>
+                <div class="progress-strip">
+                  <div class="progress-item"><b>4개</b><span>공유 자료</span></div>
+                  <div class="progress-item"><b>6개</b><span>이번 주 할 일</span></div>
+                  <div class="progress-item"><b>12명</b><span>참여 멤버</span></div>
+                </div>
+              </div>
+              <div class="tabs" role="tablist" aria-label="크루 내부 탭">
+                <button class="tab active" type="button" data-tab="assets">자료</button>
+                <button class="tab" type="button" data-tab="note">노트</button>
+                <button class="tab" type="button" data-tab="chat">채팅</button>
+                <button class="tab" type="button" data-tab="links">링크</button>
+              </div>
+              <div class="panel-preview" id="phonePanel">
+                <div class="asset-grid">
+                  <div class="asset"><small>#가이드</small><b>온보딩 가이드</b></div>
+                  <div class="asset"><small>#체크리스트</small><b>이번 주 할 일</b></div>
+                  <div class="asset"><small>#자료</small><b>참고 자료 모음</b></div>
+                  <div class="asset"><small>#회의록</small><b>주간 회의 기록</b></div>
+                </div>
+              </div>
+              <div class="bottom-nav" aria-hidden="true">
+                <span><i class="dot-icon"></i>홈</span><span class="active"><i class="dot-icon"></i>크루</span><span><i class="dot-icon"></i>만들기</span><span><i class="dot-icon"></i>프로필</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 홈 인기 크루 섹션: 시안용 placeholder 카드입니다. 실제 구현 시 DB/API/CMS/관리자 입력 데이터로 교체합니다. -->
+        <section class="section" id="popular-crews">
+          <div class="section-head">
+            <span class="eyebrow">현재 인기 크루</span>
+            <h2>지금 주목받는 크루</h2>
+            <p>최근 신청과 활동성이 높은 크루를 먼저 보여드립니다.</p>
+          </div>
+          <div class="crew-grid">
+            <!-- 카드 1: 프롬프트 & AI 도구 입문 크루 -->
+            <article class="card crew-card" data-category="study">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend">🔥 신청 급상승</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI 학습/스터디</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 5/6명</span>
+                  <span class="chip">입문</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>프롬프트 & AI 도구 입문 크루</h3>
+                <p>ChatGPT와 Claude를 활용한 업무 자동화 및 프롬프트 기초를 함께 공부하고 매일 실습을 인증합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">K</span>
+                    <span>
+                      <b>크루장: 김러닝</b>
+                      <span>AI 교육 강사 · IT 필자</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 온라인 미팅 + 매일 인증</span>
+                  <span><strong>최근 7일 신청:</strong> 12건</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 2: AI 숏폼 & 릴스 제작 크루 -->
+            <article class="card crew-card" data-category="content">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend" style="background: rgba(255, 211, 107, 0.12); color: var(--accent-3); border: 1px solid rgba(255, 211, 107, 0.22);">⏰ 마감 임박</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">콘텐츠 제작</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip" style="color: var(--danger); font-weight: 800;">마감임박 7/8명</span>
+                  <span class="chip">초급</span>
+                  <span class="chip">3주 기간</span>
+                </div>
+                <h3>AI 숏폼 & 릴스 제작 크루</h3>
+                <p>AI 이미지/영상 생성 도구를 활용하여 유튜브 쇼츠 및 인스타 릴스를 직접 기획하고 제작하여 채널을 성장시킵니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">V</span>
+                    <span>
+                      <b>크루장: 비디오메이커</b>
+                      <span>현업 크리에이터 · 영상 PD</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 1회 피드백 + 공동제작</span>
+                  <span><strong>남은 자리:</strong> 1석</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 3: 노코드 & AI 웹페이지 제작 크루 -->
+            <article class="card crew-card" data-category="web">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-success">🏆 완주율 높음</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">웹페이지 제작</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 3/5명</span>
+                  <span class="chip">중급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>노코드 & AI 웹페이지 제작 크루</h3>
+                <p>Cursor와 v0 등 최신 AI 도구를 사용하여 코딩 지식 없이도 아이디어를 실제 웹사이트로 빌드하고 배포까지 완료합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">D</span>
+                    <span>
+                      <b>크루장: 데브AI</b>
+                      <span>풀스택 개발자 · 1인 기업가</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 2회 코드 리뷰 + 세션</span>
+                  <span><strong>이전 완주율:</strong> 95%</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div class="hero-actions" style="justify-content:center; margin-top:24px;">
+            <a class="btn btn-secondary" data-tab="crews">전체 크루 목록 보기</a>
+          </div>
+        </section>
+
+        <!-- 신뢰 정책 섹션 -->
+        <section class="section" id="policy">
+          <div class="policy-band">
+            <h2>신뢰할 수 있는 크루 문화를 만듭니다.</h2>
+            <div class="policy-copy">
+              <p>Crew Up은 모두가 안심하고 배움과 프로젝트에 집중할 수 있는 환경을 지향합니다.</p>
+              <p class="quote">불법 금전거래, 투자 유도, 리딩방, 허위 포트폴리오 등 타인에게 피해를 주는 활동은 강력히 제재됩니다.</p>
+              <p>서로 존중하고 협력하는 건강한 크루를 만들어 가기 위해 함께 노력해 주세요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 마지막 CTA 섹션 -->
+        <section class="section" id="join">
+          <div class="cta-box">
+            <span class="eyebrow">시작하기</span>
+            <h2>나에게 맞는 크루를 만나보세요</h2>
+            <p>마음이 맞는 동료들과 함께라면 AI 프로젝트도 두렵지 않습니다. 지금 바로 시작해 보세요!</p>
+            <div class="hero-actions" style="justify-content:center; margin-top:0;">
+              <a class="btn btn-primary" data-tab="crews">나에게 맞는 크루 찾기</a>
+              <a class="btn btn-secondary" href="mailto:hello@crewup-work.com?subject=Crew%20Up%20새%20크루%20만들기%20문의">새 크루 만들기</a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================== 2. 크루 목록 탭 영역 ==================== -->
+      <div id="tab-content-crews" class="tab-section">
+        <!-- 전체 크루 목록 섹션: 시안용 placeholder 카드입니다. 실제 구현 시 DB/API/CMS/관리자 입력 데이터로 교체합니다. -->
+        <section class="section" id="crews">
+          <div class="crew-list-head">
+            <div class="section-head">
+              <span class="eyebrow">크루 탐색</span>
+              <h2>전체 크루 목록</h2>
+              <p>카테고리별로 원하는 분야의 AI 크루를 찾고 함께 성장의 기회를 만드세요.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-action="create-crew">크루 만들기</button>
+          </div>
+
+          <div class="crew-filters" aria-label="크루 필터">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="content">콘텐츠 제작</button>
+            <button class="filter-btn" data-filter="sidejob">부업</button>
+            <button class="filter-btn" data-filter="web">웹페이지 제작</button>
+            <button class="filter-btn" data-filter="automation">자동화</button>
+            <button class="filter-btn" data-filter="study">AI 학습/스터디</button>
+          </div>
+          
+          <div class="crew-grid">
+            <!-- 카드 1: 프롬프트 & AI 도구 입문 크루 -->
+            <article class="card crew-card" data-category="study">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend">🔥 신청 급상승</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI 학습/스터디</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 5/6명</span>
+                  <span class="chip">입문</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>프롬프트 & AI 도구 입문 크루</h3>
+                <p>ChatGPT와 Claude를 활용한 업무 자동화 및 프롬프트 기초를 함께 공부하고 매일 실습을 인증합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">K</span>
+                    <span>
+                      <b>크루장: 김러닝</b>
+                      <span>AI 교육 강사 · IT 필자</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 온라인 미팅 + 매일 인증</span>
+                  <span><strong>최근 7일 신청:</strong> 12건</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 2: AI 숏폼 & 릴스 제작 크루 -->
+            <article class="card crew-card" data-category="content">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-trend" style="background: rgba(255, 211, 107, 0.12); color: var(--accent-3); border: 1px solid rgba(255, 211, 107, 0.22);">⏰ 마감 임박</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">콘텐츠 제작</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip" style="color: var(--danger); font-weight: 800;">마감임박 7/8명</span>
+                  <span class="chip">초급</span>
+                  <span class="chip">3주 기간</span>
+                </div>
+                <h3>AI 숏폼 & 릴스 제작 크루</h3>
+                <p>AI 이미지/영상 생성 도구를 활용하여 유튜브 쇼츠 및 인스타 릴스를 직접 기획하고 제작하여 채널을 성장시킵니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">V</span>
+                    <span>
+                      <b>크루장: 비디오메이커</b>
+                      <span>현업 크리에이터 · 영상 PD</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 1회 피드백 + 공동제작</span>
+                  <span><strong>남은 자리:</strong> 1석</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 3: 노코드 & AI 웹페이지 제작 크루 -->
+            <article class="card crew-card" data-category="web">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-success">🏆 완주율 높음</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">웹페이지 제작</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 3/5명</span>
+                  <span class="chip">중급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>노코드 & AI 웹페이지 제작 크루</h3>
+                <p>Cursor와 v0 등 최신 AI 도구를 사용하여 코딩 지식 없이도 아이디어를 실제 웹사이트로 빌드하고 배포까지 완료합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">D</span>
+                    <span>
+                      <b>크루장: 데브AI</b>
+                      <span>풀스택 개발자 · 1인 기업가</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 2회 코드 리뷰 + 세션</span>
+                  <span><strong>이전 완주율:</strong> 95%</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 4: 업무 자동화 & 마케팅 자동화 크루 -->
+            <article class="card crew-card" data-category="automation">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-success" style="background: rgba(121, 167, 255, 0.12); color: var(--accent-2); border: 1px solid rgba(121, 167, 255, 0.22);">⭐ 크루장 인증</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">자동화</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 6/8명</span>
+                  <span class="chip">중급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>업무 자동화 & 마케팅 자동화 크루</h3>
+                <p>Make, Zapier 등을 연동하여 반복되는 업무 프로세스를 자동화하고 비즈니스 수익 모델과 마케팅 효율을 개선합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">A</span>
+                    <span>
+                      <b>크루장: 오토보스</b>
+                      <span>스타트업 COO · 자동화 전문가</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 과제 수행 + 온라인 세션</span>
+                  <span><strong>크루장 평점:</strong> 4.9/5.0</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 5: AI 부업 실전 크루 -->
+            <article class="card crew-card" data-category="sidejob">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-info" style="background: rgba(139, 255, 189, 0.12); color: var(--accent); border: 1px solid rgba(139, 255, 189, 0.22);">⚡ 최근 활동 활발</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">부업</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 4/6명</span>
+                  <span class="chip">초급</span>
+                  <span class="chip">4주 기간</span>
+                </div>
+                <h3>AI 부업 실전 크루</h3>
+                <p>AI를 활용한 콘텐츠 자동화, 전자책 제작, 이미지 굿즈 디자인 등을 통해 실질적인 부수입 파이프라인을 구축합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">S</span>
+                    <span>
+                      <b>크루장: 부업러너</b>
+                      <span>1인 비즈니스 구축러 · 부업 코치</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 온라인 미팅 + 실전 매일 인증</span>
+                  <span><strong>오늘 업로드:</strong> 18건</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+            <!-- 카드 6: AI 에이전트 구축 및 서비스 연동 -->
+            <article class="card crew-card" data-category="automation">
+              <div class="crew-top">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="pop-badge badge-warn" style="background: rgba(255, 211, 107, 0.12); color: var(--accent-3); border: 1px solid rgba(255, 211, 107, 0.22);">⭐ 저장 많은 크루</span>
+                  <span style="font-size: 11px; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">자동화</span>
+                </div>
+                <div class="crew-meta">
+                  <span class="chip">모집중 5/10명</span>
+                  <span class="chip">고급</span>
+                  <span class="chip">5주 기간</span>
+                </div>
+                <h3>AI 에이전트 구축 및 API 연동 스터디</h3>
+                <p>LangChain과 LLM API를 활용해 비즈니스 자동 응답 챗봇 및 맞춤형 AI 에이전트 파이프라인을 구축하고 연동합니다.</p>
+              </div>
+              <div class="crew-bottom">
+                <div class="crew-owner">
+                  <div class="owner-profile">
+                    <span class="owner-avatar">L</span>
+                    <span>
+                      <b>크루장: 랭체인저</b>
+                      <span>AI 엔지니어 · 테크 리더</span>
+                    </span>
+                  </div>
+                  <button class="portfolio-btn" type="button" data-action="portfolio">포트폴리오</button>
+                </div>
+                <div style="margin-top:12px; font-size:11px; color:var(--muted); display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 10px;">
+                  <span><strong>진행:</strong> 주 1회 세션 + 디스코드 공유</span>
+                  <span><strong>누적 관심/저장:</strong> 120회+</span>
+                </div>
+                <div style="margin-top:14px; text-align:right;">
+                  <button class="btn btn-primary btn-small" type="button" style="width:100%;" data-action="apply">참여 신청하기</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================== 3. 서비스 소개 탭 영역 ==================== -->
+      <div id="tab-content-about" class="tab-section">
+        <section class="section" id="why">
+          <div class="section-head about-head">
+            <span class="eyebrow">왜 Crew Up인가요?</span>
+            <h2><span class="no-break">혼자 하는 AI 학습과</span><br><span class="no-break">프로젝트 완주가 어려우셨나요?</span></h2>
+            <p>지치고 흩어지는 비효율을 걷어내고, 함께 완수할 수 있는 가장 직관적인 환경을 제공합니다.</p>
+          </div>
+          <div class="problem-grid">
+            <article class="card"><div class="num">1</div><h3>작심삼일 독학의 한계</h3><p>혼자 인터넷 강의나 책을 보며 공부하면 금방 지루해지고 도중에 흐지부지되기 쉽습니다.</p></article>
+            <article class="card"><div class="num">2</div><h3>신뢰할 동료 찾기의 어려움</h3><p>목표를 가지고 끝까지 성실하게 함께 완주할 수 있는 검증된 동료를 찾기가 어렵습니다.</p></article>
+            <article class="card"><div class="num">3</div><h3>쉽게 흐트러지는 오픈채팅</h3><p>일상 잡담에 대화방 정보가 묻히고 자료가 유실되어 크루 관리가 불가능해집니다.</p></article>
+          </div>
+        </section>
+
+        <section class="section" id="process">
+          <div class="section-head">
+            <span class="eyebrow">사용 흐름</span>
+            <h2 style="white-space: nowrap; font-size: clamp(26px, 4.2vw, 48px);">참여부터 완주까지의 핵심 사용 흐름</h2>
+            <p>Crew Up은 복잡한 절차 없이 직관적인 단계를 거쳐 목표를 달성할 수 있도록 지원합니다.</p>
+          </div>
+          <div class="process-grid">
+            <article class="card">
+              <div class="num">1</div>
+              <h3>나에게 맞는 크루 탐색</h3>
+              <p>다양한 주제와 난이도로 개설된 크루 목록에서 자신의 관심사와 목표에 딱 맞는 모임을 찾아봅니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">2</div>
+              <h3>크루장 및 신뢰 확인</h3>
+              <p>크루장의 실무 이력, 모집 인원, 구체적인 진행 방식과 목표 기간을 꼼꼼하게 확인하여 신뢰도를 검증합니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">3</div>
+              <h3>참여 신청 및 가입</h3>
+              <p>간단한 가입 동기나 사전 설문을 통해 크루 참여를 신청하고, 크루장의 확인을 거쳐 크루원으로 가입합니다.</p>
+            </article>
+            <article class="card">
+              <div class="num">4</div>
+              <h3>함께 협업하고 목표 달성</h3>
+              <p>공유 공간에서 파일과 프롬프트를 나누고, 전용 노트와 채팅을 통해 소통하며 계획했던 결과물을 함께 완성합니다.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==================== 4. 요금/플랜 탭 영역 ==================== -->
+      <div id="tab-content-pricing" class="tab-section">
+        <section class="section" id="pricing" style="padding-top: 96px;">
+          <div class="section-head">
+            <span class="eyebrow">합리적인 비용</span>
+            <h2 style="white-space: nowrap; font-size: clamp(26px, 4.2vw, 48px);">참여자는 언제나 무료로 시작하세요</h2>
+            <p>기본적인 크루 활동은 무료이며, 더 큰 규모와 추가 공간이 필요할 때만 요금제를 선택해 공간을 확장합니다.</p>
+          </div>
+          <div class="pricing-grid">
+            <article class="card pricing-card">
+              <h3>Free</h3>
+              <div class="price">무료</div>
+              <p>함께 성장할 크루를 부담 없이 시작합니다.</p>
+              <ul class="plan-list">
+                <li>최대 10명 참여</li>
+                <li>공유 공간 1GB 제공</li>
+                <li>기본 채팅 및 크루노트</li>
+                <li>외부 도구 연동</li>
+              </ul>
+              <a class="btn btn-secondary" data-tab="home" data-scroll="join">시작하기</a>
+            </article>
+            <article class="card pricing-card">
+              <h3>Plus</h3>
+              <div class="price">4,900<span>원/월</span></div>
+              <p>활동이 활발해진 크루의 공간을 확장합니다.</p>
+              <ul class="plan-list">
+                <li>최대 30명 참여</li>
+                <li>공유 공간 10GB 제공</li>
+                <li>대표 자료 상단 고정</li>
+                <li>자료 태그/컬렉션 분류</li>
+                <li>크루 홈 커스터마이징</li>
+              </ul>
+              <a class="btn btn-secondary" data-tab="home" data-scroll="join">시작하기</a>
+            </article>
+            <article class="card pricing-card">
+              <h3>Pro</h3>
+              <div class="price">9,900<span>원/월</span></div>
+              <p>성장한 대규모 크루를 운영합니다.</p>
+              <ul class="plan-list">
+                <li>최대 100명 참여</li>
+                <li>공유 공간 50GB 제공</li>
+                <li>대용량 파일/영상 업로드</li>
+                <li>비공개 크루 개설 지원</li>
+                <li>크루 공개 포트폴리오 생성</li>
+              </ul>
+              <a class="btn btn-secondary" data-tab="home" data-scroll="join">시작하기</a>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <strong>© 2026 Crew Up.</strong> 본 웹사이트는 서비스 소개를 위한 샘플 페이지입니다. 실제 결제 및 회원 가입 기능은 작동하지 않습니다.
+    </footer>
+
+    <div class="mobile-sticky" aria-label="모바일 고정 CTA">
+      <a class="btn btn-secondary" data-tab="crews">크루 목록 보기</a>
+      <button class="btn btn-primary" type="button" data-action="create-crew">크루 만들기</button>
+    </div>
+
+    <div class="modal-backdrop" id="actionModal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h3 id="modalTitle">크루 신청</h3>
+        <p id="modalDesc">관심 있는 크루에 참여 신청을 남기는 화면 예시입니다.</p>
+        <div class="modal-fields" id="modalFields"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary btn-small" type="button" data-action="close-modal">닫기</button>
+          <button class="btn btn-primary btn-small" type="button">저장하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 스마트폰 목업용 범용 placeholder 데이터입니다. 실제 서비스 구현 시 DB/API/CMS/관리자 입력 데이터로 교체해야 합니다.
+    const panelContent = {
+      assets: `
+        <div class="asset-grid">
+          <div class="asset"><small>#가이드</small><b>온보딩 가이드</b></div>
+          <div class="asset"><small>#체크리스트</small><b>이번 주 할 일</b></div>
+          <div class="asset"><small>#자료</small><b>참고 자료 모음</b></div>
+          <div class="asset"><small>#회의록</small><b>주간 회의 기록</b></div>
+        </div>`,
+      note: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px;">
+          <h3 style="margin:0 0 8px; font-size:17px;">크루노트</h3>
+          <p style="font-size:13px; color:var(--muted);">이번 주 목표: 역할 분담 정리, 참고 자료 공유, 다음 미팅 안건 준비. 크루 공동의 생각과 아이디어를 한곳에 기록하고 보관해 보세요.</p>
+        </div>`,
+      chat: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>J</b> 온보딩 가이드 초안을 공유했어요. 새 멤버에게 안내하면 좋겠습니다.</p>
+          <p style="margin:0; font-size:13px; color:#cbd4df;"><b>M</b> 이번 주 체크리스트에 역할 분담 항목을 추가해둘게요.</p>
+          <p style="margin:0; font-size:13px; color:var(--muted);">실시간 채팅으로 멤버들과 막힘없이 의견을 조율할 수 있습니다.</p>
+        </div>`,
+      links: `
+        <div class="card" style="box-shadow:none; padding:16px; border-radius:20px; display:grid; gap:10px;">
+          <p style="margin:0; font-size:13px;"><b>카카오 오픈채팅</b><br><span style="color:var(--muted);">일상적인 소통을 위한 오픈채팅방 연결</span></p>
+          <p style="margin:0; font-size:13px;"><b>Google Drive</b><br><span style="color:var(--muted);">대용량 파일 공유를 위한 수납함 연결</span></p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">자주 사용하는 다양한 외부 협업 도구를 등록하여 편리하게 오갈 수 있습니다.</p>
+        </div>`
+    };
+
+    document.querySelectorAll('.phone .tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.phone .tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('phonePanel').innerHTML = panelContent[tab.dataset.tab];
+      });
+    });
+
+    // 메인 네비게이션 탭 전환 시스템
+    function switchTab(tabId, scrollToId = null) {
+      // 1. 모든 탭 섹션 활성 상태 제거
+      document.querySelectorAll('.tab-section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // 2. 타겟 탭 섹션 활성화
+      const targetSection = document.getElementById(`tab-content-${tabId}`);
+      if (targetSection) {
+        targetSection.classList.add('active');
+      }
+
+      // 3. 네비게이션 링크 활성 상태 갱신
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.getAttribute('data-tab') === tabId && link.getAttribute('data-scroll') === null) {
+          link.classList.add('active');
+        } else if (tabId === 'home' && link.getAttribute('data-scroll') === 'crews' && scrollToId === 'crews') {
+          // 크루 목록으로 명시적 이동할 때 '크루 목록' 탭 메뉴에 active를 활성화
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // 4. 스크롤 동작 수행
+      if (scrollToId) {
+        // 렌더링을 기다리기 위해 약간의 딜레이
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const scrollTarget = document.getElementById(scrollToId);
+            if (scrollTarget) {
+              scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 50);
+        });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // data-tab 및 data-scroll 이벤트 핸들러 등록
+    document.querySelectorAll('[data-tab]').forEach(element => {
+      // 폰 내부 데모 탭은 메인 탭 전환에서 제외
+      if (element.classList.contains('tab') && element.closest('.phone')) return;
+
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabId = element.getAttribute('data-tab');
+        const scrollId = element.getAttribute('data-scroll');
+        switchTab(tabId, scrollId);
+      });
+    });
+
+    // 로고(brand) 클릭 시 홈 탭 전환
+    document.querySelector('.brand').addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab('home');
+    });
+
+    const modal = document.getElementById('actionModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalFields = document.getElementById('modalFields');
+
+    const modalTemplates = {
+      apply: {
+        title: '크루 참여 신청',
+        desc: '선택한 크루에 참여 의사를 남기는 화면 예시입니다. 실제 구현 시 로그인/신청 API로 연결합니다.',
+        fields: `
+          <label>신청 메시지<textarea rows="3" maxlength="120" placeholder="참여하고 싶은 이유를 간단히 적어주세요"></textarea></label>
+          <label>연락 가능한 이메일<input type="email" placeholder="name@example.com"></label>`
+      },
+      'create-crew': {
+        title: '새 크루 만들기',
+        desc: '크루장이 직접 크루를 개설하는 화면 예시입니다. 실제 구현 시 관리자/DB 저장 흐름으로 연결합니다.',
+        fields: `
+          <label>크루 이름<input type="text" placeholder="예: AI 숏폼 공동제작 크루"></label>
+          <label>크루 소개<textarea rows="3" maxlength="160" placeholder="어떤 목표로 모이는 크루인지 적어주세요"></textarea></label>
+          <label>카테고리<input type="text" placeholder="AI 학습, 콘텐츠, 웹페이지 제작 등"></label>`
+      },
+      portfolio: {
+        title: '크루장 포트폴리오',
+        desc: '크루장이 신뢰도를 보여줄 수 있도록 영상 1개, 사진 3개, 50자 메시지를 등록하는 화면 예시입니다.',
+        fields: `
+          <label>소개 영상 1개<input type="file" accept="video/*"><small>영상은 1개만 등록</small></label>
+          <label>대표 사진 최대 3개<input type="file" accept="image/*" multiple data-max-files="3"><small>3개 초과 선택 시 다시 선택하도록 안내</small></label>
+          <label>한 줄 메시지<textarea rows="2" maxlength="50" placeholder="50자 이내로 크루장을 소개하세요"></textarea><small>최대 50자</small></label>`
+      }
+    };
+
+    function openModal(type) {
+      const template = modalTemplates[type];
+      if (!template || !modal) return;
+      modalTitle.textContent = template.title;
+      modalDesc.textContent = template.desc;
+      modalFields.innerHTML = template.fields;
+      const photoInput = modalFields.querySelector('[data-max-files="3"]');
+      photoInput?.addEventListener('change', () => {
+        if (photoInput.files.length > 3) {
+          alert('대표 사진은 최대 3개까지만 등록할 수 있습니다.');
+          photoInput.value = '';
+        }
+      });
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.querySelectorAll('[data-action]').forEach(element => {
+      element.addEventListener('click', (e) => {
+        const action = element.getAttribute('data-action');
+        if (action === 'close-modal') {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+        if (modalTemplates[action]) {
+          e.preventDefault();
+          openModal(action);
+        }
+      });
+    });
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // 크루 목록 카테고리 필터링 기능: 전체 크루 목록 탭 안의 카드만 필터링합니다.
+    document.querySelectorAll('.crew-filters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filterWrap = btn.closest('.crew-filters');
+        const section = btn.closest('section');
+        if (!filterWrap || !section) return;
+
+        filterWrap.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        const cards = section.querySelectorAll('.crew-grid .crew-card');
+
+        cards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
