@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crew Up — 작업실</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ============================================================
+   Crew Up — design system
+   Dark, trustworthy slate base · mint + blue dual accents
+   ============================================================ */
+
+:root {
+  /* base surfaces (cool slate) */
+  --bg:            #0b0f14;
+  --bg-soft:       #0e131a;
+  --surface:       #141b24;
+  --surface-2:     #1a222d;
+  --surface-3:     #212c39;
+  --line:          rgba(255, 255, 255, 0.075);
+  --line-strong:   rgba(255, 255, 255, 0.14);
+
+  /* text */
+  --text:          #e9eef4;
+  --text-2:        #9faec0;
+  --text-3:        #6c7b8d;
+
+  /* accents */
+  --mint:          #3dd8b8;
+  --mint-soft:     rgba(61, 216, 184, 0.14);
+  --mint-line:     rgba(61, 216, 184, 0.30);
+  --blue:          #4d8dff;
+  --blue-soft:     rgba(77, 141, 255, 0.14);
+  --blue-line:     rgba(77, 141, 255, 0.30);
+
+  /* status */
+  --open:          #3dd8b8;
+  --soon:          #f0b54d;
+  --closed:        #7b8a9c;
+
+  /* themed roles (overridden by [data-theme]) */
+  --btn-bg:    var(--mint);
+  --btn-fg:    #06231d;
+  --on-mint:   #06231d;
+  --hl:        rgba(61,216,184,0.30);
+  --soon-soft: rgba(240,181,77,0.12);
+  --soon-line: rgba(240,181,77,0.30);
+  --nav-bg:    rgba(11,15,20,0.72);
+  --page-fade: rgba(11,15,20,0.92);
+  --glow-a:    rgba(61,216,184,0.13);
+  --glow-b:    rgba(77,141,255,0.13);
+
+  /* shape */
+  --r-sm: 10px;
+  --r:    14px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+
+  --shadow:    0 1px 0 rgba(255,255,255,0.03) inset, 0 18px 40px -24px rgba(0,0,0,0.8);
+  --shadow-lg: 0 30px 70px -30px rgba(0,0,0,0.85);
+
+  --maxw: 1140px;
+  --nav-h: 64px;
+
+  --ff: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+        system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 12px); }
+
+body {
+  margin: 0;
+  font-family: var(--ff);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+img, svg { display: block; max-width: 100%; }
+
+::selection { background: var(--mint-soft); }
+
+/* ----- layout ----- */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 20px; }
+
+.section { padding-block: clamp(56px, 9vw, 110px); position: relative; }
+.section-head { max-width: 620px; margin-bottom: clamp(28px, 4vw, 48px); }
+.section-head.center { margin-inline: auto; text-align: center; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--mint);
+  background: var(--mint-soft);
+  border: 1px solid var(--mint-line);
+  padding: 5px 12px; border-radius: 999px;
+  margin-bottom: 18px;
+}
+.eyebrow.blue { color: var(--blue); background: var(--blue-soft); border-color: var(--blue-line); }
+
+h1, h2, h3, h4 { margin: 0; line-height: 1.18; letter-spacing: -0.025em; font-weight: 700; text-wrap: balance; }
+.h-sec { font-size: clamp(1.65rem, 4vw, 2.6rem); font-weight: 800; }
+.lead  { color: var(--text-2); font-size: clamp(1rem, 2.4vw, 1.18rem); margin-top: 14px; text-wrap: pretty; }
+
+/* ----- buttons ----- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 50px; padding: 0 22px; border-radius: var(--r);
+  font-size: 15px; font-weight: 700; border: 1px solid transparent;
+  white-space: nowrap; transition: transform .12s ease, background .18s ease, border-color .18s ease;
+}
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn-sm { height: 40px; padding: 0 15px; font-size: 13.5px; border-radius: var(--r-sm); font-weight: 600; }
+.btn-primary { background: var(--btn-bg); color: var(--btn-fg); }
+.btn-primary:hover { filter: brightness(1.07); }
+.btn-ghost { background: var(--surface-2); color: var(--text); border-color: var(--line-strong); }
+.btn-ghost:hover { background: var(--surface-3); border-color: var(--mint-line); }
+.btn-outline { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-outline:hover { border-color: var(--mint-line); color: #fff; }
+.btn-block { width: 100%; }
+
+/* ============================================================
+   Header
+   ============================================================ */
+.nav {
+  position: sticky; top: 0; z-index: 60;
+  height: var(--nav-h);
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner { height: 100%; display: flex; align-items: center; gap: 22px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -0.03em; }
+.brand .mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--mint), var(--blue));
+  display: grid; place-items: center; color: var(--on-mint); font-weight: 900; font-size: 15px;
+  box-shadow: 0 6px 16px -6px rgba(61,216,184,0.5);
+}
+.nav-links { display: none; gap: 4px; margin-left: 10px; }
+.nav-links a {
+  font-size: 14.5px; font-weight: 500; color: var(--text-2);
+  padding: 8px 13px; border-radius: 9px; transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: var(--surface-2); }
+.nav-cta { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.nav-cta .login { display: none; }
+
+/* theme toggle (header) */
+.theme-toggle { display: none; width: 42px; height: 42px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text); place-items: center; transition: border-color .15s, background .15s; }
+.theme-toggle:hover { border-color: var(--mint-line); }
+.theme-toggle svg { width: 19px; height: 19px; }
+.theme-toggle .ico-sun { display: none; }
+:root[data-theme="blush"] .theme-toggle .ico-moon { display: none; }
+:root[data-theme="blush"] .theme-toggle .ico-sun { display: block; }
+
+/* theme control (mobile drawer) */
+.drawer-theme { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; margin-top: 6px; border-top: 1px solid var(--line); }
+.dt-label { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.dt-seg { display: flex; gap: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.dt-seg button { font-size: 13px; font-weight: 600; color: var(--text-2); background: transparent; border: none; padding: 8px 16px; border-radius: 7px; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+.dt-seg button.on { background: var(--btn-bg); color: var(--btn-fg); }
+.nav-burger {
+  display: inline-grid; place-items: center; width: 42px; height: 42px;
+  border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text);
+}
+.nav-burger svg { width: 20px; height: 20px; }
+
+/* mobile drawer */
+.drawer { position: fixed; inset: 0; z-index: 80; display: none; }
+.drawer.open { display: block; }
+.drawer-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }
+.drawer-panel {
+  position: absolute; top: 0; right: 0; height: 100%; width: min(82vw, 320px);
+  background: var(--bg-soft); border-left: 1px solid var(--line); padding: 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  transform: translateX(100%); transition: transform .26s cubic-bezier(.4,0,.2,1);
+}
+.drawer.open .drawer-panel { transform: translateX(0); }
+.drawer-panel a { padding: 14px 12px; border-radius: 10px; font-weight: 600; font-size: 16px; color: var(--text); }
+.drawer-panel a:hover { background: var(--surface-2); }
+.drawer-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.x-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text); display: grid; place-items: center; }
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero { position: relative; padding-top: clamp(40px, 7vw, 76px); padding-bottom: clamp(34px, 5.5vw, 68px); overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: -20% 0 auto 0; height: 560px; z-index: 0;
+  background:
+    radial-gradient(620px 300px at 22% 8%, var(--glow-a), transparent 60%),
+    radial-gradient(620px 320px at 82% 0%, var(--glow-b), transparent 60%);
+  pointer-events: none;
+}
+.hero-grid { position: relative; z-index: 1; display: grid; gap: clamp(34px, 5vw, 56px); }
+.hero h1 {
+  font-size: clamp(2.1rem, 8.4vw, 4.05rem); font-weight: 800; letter-spacing: -0.035em;
+}
+.hero h1 .hl {
+  color: var(--text);
+  background: linear-gradient(transparent 60%, var(--hl) 0, var(--hl) 92%, transparent 0);
+  padding: 0 .12em; margin: 0 -.02em; border-radius: 7px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+}
+.hero .lead { max-width: 30ch; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-actions .btn { flex: 1 1 auto; min-width: 150px; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 26px; color: var(--text-3); font-size: 13.5px; }
+.hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
+.hero-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); }
+.hero-meta .dot.b { background: var(--blue); }
+
+/* hero workspace mock */
+.mock {
+  position: relative; z-index: 1;
+  background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+  border: 1px solid var(--line-strong); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.mock-bar { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.mock-bar .crew-ico { width: 34px; height: 34px; border-radius: 10px; display:grid; place-items:center; font-weight:800; font-size:13px; background: color-mix(in oklab, var(--mint) 16%, var(--surface-2)); color: var(--mint); border: 1px solid var(--mint-line); }
+.mock-bar .crew-name { font-weight: 700; font-size: 15px; }
+.mock-bar .crew-sub { font-size: 12.5px; color: var(--text-3); }
+.mock-bar .badge { margin-left: auto; }
+.mock-tabs { display: flex; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.mock-tabs::-webkit-scrollbar { display: none; }
+.mock-tabs .t { font-size: 13px; font-weight: 600; color: var(--text-3); padding: 8px 13px; border-radius: 8px; white-space: nowrap; }
+.mock-tabs .t.on { color: var(--text); background: var(--surface-2); }
+.mock-body { padding: 16px; display: grid; gap: 11px; }
+.mock-row { display: flex; gap: 11px; align-items: flex-start; }
+.mock-ava { width: 32px; height: 32px; border-radius: 9px; flex: 0 0 auto; display:grid; place-items:center; font-size:12px; font-weight:700; color:var(--on-mint); }
+.mock-msg { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+.mock-msg b { color: var(--text); }
+.mock-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mock-file { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--text-2); }
+.mock-file .fi { width: 22px; height: 22px; border-radius: 6px; background: var(--blue-soft); border: 1px solid var(--blue-line); }
+
+/* status badge */
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
+.badge .pip { width: 7px; height: 7px; border-radius: 50%; }
+.badge.open   { color: var(--open);   background: var(--mint-soft); border: 1px solid var(--mint-line); }
+.badge.open .pip { background: var(--open); box-shadow: 0 0 0 3px var(--mint-soft); }
+.badge.soon   { color: var(--soon);   background: var(--soon-soft); border: 1px solid var(--soon-line); }
+.badge.soon .pip { background: var(--soon); }
+.badge.closed { color: var(--closed); background: rgba(123,138,156,0.12); border: 1px solid var(--line-strong); }
+.badge.closed .pip { background: var(--closed); }
+
+/* ============================================================
+   Crew cards
+   ============================================================ */
+.cards { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.crew-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 18px; display: flex; flex-direction: column; gap: 14px;
+  transition: border-color .18s, transform .18s, background .18s;
+}
+.crew-card:hover { border-color: var(--mint-line); transform: translateY(-2px); }
+.crew-top { display: flex; align-items: flex-start; gap: 12px; }
+.crew-thumb {
+  width: 46px; height: 46px; border-radius: 13px; flex: 0 0 auto;
+  display: grid; place-items: center; font-weight: 800; font-size: 17px;
+  --c: var(--mint);
+  background: color-mix(in oklab, var(--c) 15%, var(--surface-2));
+  color: var(--c);
+  border: 1px solid color-mix(in oklab, var(--c) 36%, transparent);
+}
+.crew-cat { font-size: 12px; font-weight: 600; color: var(--text-3); margin-bottom: 3px; }
+.crew-name { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.crew-top .badge { margin-left: auto; }
+.crew-purpose { font-size: 14px; color: var(--text-2); line-height: 1.5; }
+.crew-leader { display: flex; align-items: center; gap: 10px; padding-top: 13px; border-top: 1px solid var(--line); }
+.crew-leader .ava { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; display:grid; place-items:center; font-size:12px; font-weight:700; background: var(--surface-3); color: var(--text-2); border: 1px solid var(--line-strong); }
+.crew-leader .who { font-size: 13px; line-height: 1.35; }
+.crew-leader .who b { font-weight: 700; }
+.crew-leader .who span { color: var(--text-3); }
+.crew-actions { display: flex; gap: 8px; margin-top: 2px; }
+.crew-actions .btn { flex: 1; }
+
+/* horizontal scroller for popular crews on mobile */
+.scroller { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; margin-inline: -20px; padding-inline: 20px; scrollbar-width: none; }
+.scroller::-webkit-scrollbar { display: none; }
+.scroller .crew-card { scroll-snap-align: start; flex: 0 0 86%; max-width: 340px; }
+
+/* featured popular-crew layout */
+.popular { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.crew-card.featured { gap: 18px; }
+.feat-left, .feat-right { display: grid; gap: 14px; align-content: start; }
+.feat-media { display: flex; align-items: center; gap: 14px; }
+.feat-media .crew-thumb { width: 58px; height: 58px; font-size: 22px; border-radius: 16px; }
+.feat-media .badge { margin-left: auto; }
+.feat-name { font-size: 22px; font-weight: 800; letter-spacing: -0.025em; }
+.featured .crew-cat { font-size: 12.5px; }
+.featured .crew-purpose { font-size: 15px; }
+.feat-note { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.feat-note .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 3px var(--mint-soft); }
+
+/* ============================================================
+   서비스 소개 — problem / solution
+   ============================================================ */
+.intro-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.intro-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; }
+.intro-card .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 16px; }
+.intro-card .ic svg { width: 22px; height: 22px; }
+.intro-card.solve { background: linear-gradient(180deg, var(--mint-soft), var(--surface)); border-color: var(--mint-line); }
+.intro-card h3 { font-size: 18px; margin-bottom: 8px; }
+.intro-card p { color: var(--text-2); font-size: 14.5px; margin: 0; }
+.intro-card .tag { font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.04em; margin-bottom: 12px; }
+.intro-card.solve .tag { color: var(--mint); }
+
+/* ============================================================
+   작업실 미리보기
+   ============================================================ */
+.studio { background: var(--bg-soft); border: 1px solid var(--line-strong); border-radius: var(--r-xl); box-shadow: var(--shadow); overflow: hidden; }
+.studio-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.studio-head .crew-thumb { width: 42px; height: 42px; }
+.studio-tabs { display: flex; gap: 4px; padding: 10px 12px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.studio-tabs::-webkit-scrollbar { display: none; }
+.studio-tab {
+  display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600;
+  color: var(--text-3); background: transparent; border: 1px solid transparent;
+  padding: 9px 15px; border-radius: 10px; white-space: nowrap; transition: all .15s;
+}
+.studio-tab svg { width: 16px; height: 16px; }
+.studio-tab:hover { color: var(--text-2); }
+.studio-tab.on { color: var(--text); background: var(--surface-2); border-color: var(--line-strong); }
+.studio-panels { padding: clamp(16px, 3vw, 26px); display: grid; }
+.studio-panel { grid-area: 1 / 1; visibility: hidden; opacity: 0; transition: opacity .22s ease; }
+.studio-panel.on { visibility: visible; opacity: 1; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.panel-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.tile h4 { font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--text); }
+.tile h4 .k { font-size: 11px; font-weight: 700; color: var(--text-3); background: var(--surface-2); padding: 3px 8px; border-radius: 6px; margin-left: auto; }
+.tile ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.tile li { font-size: 13.5px; color: var(--text-2); display: flex; align-items: center; gap: 10px; }
+.tile li .lead-ico { width: 18px; height: 18px; border-radius: 5px; flex: 0 0 auto; }
+
+.chat-thread { display: grid; gap: 12px; max-width: 560px; }
+.note-doc { max-width: 620px; }
+.note-doc .h { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+.note-doc p { color: var(--text-2); font-size: 14px; margin: 0 0 10px; }
+.link-list { display: grid; gap: 10px; }
+.link-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 13px 15px; }
+.link-row .lk { width: 34px; height: 34px; border-radius: 9px; flex:0 0 auto; display:grid; place-items:center; }
+.link-row .lk svg { width: 16px; height: 16px; color: var(--blue); }
+.link-row .meta b { font-size: 14px; }
+.link-row .meta span { display: block; font-size: 12px; color: var(--text-3); }
+
+/* placeholder media */
+.ph {
+  border-radius: var(--r); border: 1px dashed var(--line-strong);
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.022) 0 10px, transparent 10px 20px);
+  background-color: var(--surface);
+  display: grid; place-items: center; text-align: center; color: var(--text-3);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; letter-spacing: 0.02em;
+  min-height: 120px; padding: 14px;
+}
+.ph .play { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid var(--line-strong); display: grid; place-items: center; margin-bottom: 10px; }
+.ph .play svg { width: 18px; height: 18px; color: var(--text-2); }
+
+/* ============================================================
+   전체 크루 목록 — filters
+   ============================================================ */
+.filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-inline: -20px; padding-inline: 20px; scrollbar-width: none; margin-bottom: 22px; }
+.filters::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto; font-size: 14px; font-weight: 600; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 10px 16px; transition: all .15s;
+}
+.chip:hover { border-color: var(--mint-line); color: var(--text); }
+.chip.on { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
+
+/* ============================================================
+   요금 / 플랜
+   ============================================================ */
+.plans { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; display: flex; flex-direction: column; }
+.plan.feat { border-color: var(--mint-line); background: linear-gradient(180deg, var(--mint-soft), var(--surface)); position: relative; }
+.plan .ribbon { position: absolute; top: 18px; right: 18px; font-size: 11px; font-weight: 700; color: var(--on-mint); background: var(--mint); padding: 4px 10px; border-radius: 999px; }
+.plan .pname { font-size: 15px; font-weight: 700; color: var(--text); }
+.plan .price { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; margin: 10px 0 2px; }
+.plan .price small { font-size: 14px; font-weight: 600; color: var(--text-3); }
+.plan .pdesc { color: var(--text-2); font-size: 13.5px; margin: 6px 0 18px; min-height: 40px; }
+.plan ul { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 11px; }
+.plan li { font-size: 13.5px; color: var(--text-2); display: flex; gap: 10px; align-items: flex-start; }
+.plan li svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--mint); margin-top: 2px; }
+.plan .btn { margin-top: auto; }
+.plan-note { text-align: center; color: var(--text-3); font-size: 12.5px; margin-top: 18px; }
+
+/* ============================================================
+   신뢰 / 정책
+   ============================================================ */
+.trust { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl); padding: clamp(24px, 4vw, 40px); }
+.trust-grid { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 8px; }
+.trust-item { display: flex; gap: 13px; align-items: flex-start; }
+.trust-item .ti { width: 38px; height: 38px; border-radius: 11px; flex: 0 0 auto; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line-strong); }
+.trust-item .ti svg { width: 19px; height: 19px; color: var(--mint); }
+.trust-item h4 { font-size: 15px; margin-bottom: 4px; }
+.trust-item p { font-size: 13.5px; color: var(--text-2); margin: 0; }
+
+/* ============================================================
+   마지막 CTA
+   ============================================================ */
+.final {
+  text-align: center; border-radius: var(--r-xl); overflow: hidden; position: relative;
+  background: linear-gradient(160deg, var(--surface-2), var(--bg-soft));
+  border: 1px solid var(--line-strong); padding: clamp(40px, 7vw, 76px) 24px;
+}
+.final::before { content:""; position:absolute; inset:0; z-index:0; background: radial-gradient(500px 240px at 30% 0%, var(--glow-a), transparent 60%), radial-gradient(500px 240px at 75% 100%, var(--glow-b), transparent 60%); }
+.final > * { position: relative; z-index: 1; }
+.final h2 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; }
+.final .lead { margin-inline: auto; max-width: 40ch; }
+.final-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+.final-actions .btn { flex: 1 1 auto; min-width: 180px; max-width: 280px; }
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer { border-top: 1px solid var(--line); padding-block: 40px; color: var(--text-3); }
+.footer-grid { display: flex; flex-direction: column; gap: 22px; }
+.footer .brand { font-size: 16px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 18px 26px; font-size: 13.5px; }
+.foot-links a { color: var(--text-2); }
+.foot-links a:hover { color: var(--text); }
+.foot-fine { font-size: 12px; color: var(--text-3); max-width: 60ch; line-height: 1.6; }
+
+/* ============================================================
+   Mobile sticky CTA
+   ============================================================ */
+.mcta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 55;
+  display: flex; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, var(--page-fade) 30%);
+  transform: translateY(120%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.mcta.show { transform: translateY(0); }
+.mcta .btn { flex: 1; height: 48px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.7); }
+
+/* ============================================================
+   Modals
+   ============================================================ */
+.modal { position: fixed; inset: 0; z-index: 100; display: none; }
+.modal.open { display: block; }
+.modal-scrim { position: absolute; inset: 0; background: rgba(4,7,11,0.7); backdrop-filter: blur(4px); animation: fade .2s ease; }
+.modal-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px)); max-height: min(86vh, 760px); overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg); padding: 0;
+  animation: pop .26s cubic-bezier(.34,1.4,.5,1);
+}
+@keyframes pop { from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+.modal-head { display: flex; align-items: flex-start; gap: 14px; padding: 22px 22px 0; }
+.modal-head .crew-thumb { width: 48px; height: 48px; }
+.modal-head .x-btn { margin-left: auto; }
+.modal-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+.modal-sub { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.modal-body { padding: 20px 22px 22px; display: grid; gap: 16px; }
+.field { display: grid; gap: 7px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.field input, .field textarea, .field select {
+  width: 100%; background: var(--bg-soft); border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  color: var(--text); font-family: inherit; font-size: 14.5px; padding: 12px 14px; transition: border-color .15s;
+}
+.field textarea { resize: vertical; min-height: 84px; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--mint-line); }
+.field .hint { font-size: 12px; color: var(--text-3); }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg .opt { font-size: 13px; font-weight: 600; color: var(--text-2); background: var(--bg-soft); border: 1px solid var(--line-strong); border-radius: 999px; padding: 9px 14px; cursor: pointer; transition: all .14s; }
+.seg .opt:hover { border-color: var(--mint-line); }
+.seg .opt.on { background: var(--mint); color: var(--on-mint); border-color: var(--mint); }
+.modal-foot { display: flex; gap: 10px; margin-top: 4px; }
+.modal-foot .btn { flex: 1; }
+.modal-note { font-size: 12px; color: var(--text-3); text-align: center; line-height: 1.5; }
+
+/* portfolio modal specifics */
+.pf-hero { display: flex; gap: 14px; align-items: center; }
+.pf-hero .ava { width: 58px; height: 58px; border-radius: 16px; flex: 0 0 auto; display: grid; place-items: center; font-weight: 800; font-size: 22px; --c: var(--mint); background: color-mix(in oklab, var(--c) 16%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 36%, transparent); }
+.pf-msg { font-size: 14.5px; color: var(--text); background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; line-height: 1.5; }
+.pf-imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pf-imgs .ph { min-height: 84px; font-size: 10px; }
+.pf-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-tags .t { font-size: 12px; font-weight: 600; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.pf-style { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+.pf-block-label { font-size: 12px; font-weight: 700; color: var(--text-3); letter-spacing: 0.04em; margin-bottom: 9px; }
+
+/* lock body scroll */
+body.locked { overflow: hidden; }
+
+/* ============================================================
+   Page routing (tab = separate view)
+   ============================================================ */
+.page { display: none; }
+.page.on { display: block; animation: pagein .32s cubic-bezier(.22,.61,.36,1); }
+@keyframes pagein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.nav-links a.active { color: var(--text); background: var(--surface-2); }
+.drawer-panel a.active { color: var(--mint); background: var(--surface-2); }
+
+/* page header strip for inner pages */
+.page-intro { padding-top: clamp(34px, 5vw, 60px); }
+.page-intro .section-head { margin-bottom: clamp(20px, 3vw, 34px); }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (min-width: 680px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .intro-grid { grid-template-columns: repeat(3, 1fr); }
+  .panel-grid { grid-template-columns: repeat(2, 1fr); }
+  .plans { grid-template-columns: repeat(3, 1fr); }
+  .trust-grid { grid-template-columns: repeat(2, 1fr); }
+  .scroller { display: grid; grid-template-columns: repeat(2, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
+  .scroller .crew-card { flex: none; max-width: none; }
+  .hero-actions .btn { flex: 0 0 auto; }
+  .popular { grid-template-columns: 1fr 1fr; }
+  .crew-card.featured { grid-column: 1 / -1; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 28px; padding: 26px; }
+  .crew-card.featured .feat-left { display: grid; gap: 16px; }
+  .sp-grid { grid-template-columns: repeat(3, 1fr); }
+  .perm-notes { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 980px) {
+  :root { --nav-h: 70px; }
+  .nav-links { display: flex; }
+  .nav-cta .login { display: inline-flex; }
+  .theme-toggle { display: grid; }
+  .nav-burger { display: none; }
+  .hero-grid { grid-template-columns: 1.05fr 0.95fr; align-items: center; }
+  .cards { grid-template-columns: repeat(3, 1fr); }
+  .scroller { grid-template-columns: repeat(3, 1fr); }
+  .mcta { display: none !important; }
+  .footer-grid { flex-direction: row; align-items: center; }
+  .footer .brand { margin-right: auto; }
+}
+
+@media (min-width: 1180px) {
+  .all-crews .cards { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ============================================================
+   Pricing — crew-plan callout + grouped feature + 보관 정책
+   ============================================================ */
+.plan-callout {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--blue-soft); border: 1px solid var(--blue-line); border-radius: var(--r-lg);
+  padding: 16px 18px; margin-bottom: 24px;
+}
+.plan-callout .pc-ico { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 11px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--blue-line); color: var(--blue); }
+.plan-callout .pc-ico svg { width: 20px; height: 20px; }
+.plan-callout p { margin: 0; font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+.plan-callout p b { color: var(--text); font-weight: 700; }
+
+.plan li.li-group { align-items: flex-start; }
+.plan li.li-group span { display: flex; flex-direction: column; }
+.plan li.li-group small { font-size: 12px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
+
+.store-policy { margin-top: clamp(40px, 6vw, 64px); }
+.sp-head { margin-bottom: 22px; }
+.sp-title { font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 800; margin-top: 14px; }
+.sp-lead { color: var(--text-2); font-size: 14.5px; margin-top: 12px; line-height: 1.6; }
+.sp-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.sp-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; }
+.sp-ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--mint-soft); border: 1px solid var(--mint-line); color: var(--mint); margin-bottom: 14px; }
+.sp-ico svg { width: 20px; height: 20px; }
+.sp-card h4 { font-size: 15.5px; margin-bottom: 12px; }
+.sp-card ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.sp-card li { font-size: 13.5px; color: var(--text-2); line-height: 1.5; padding-left: 16px; position: relative; }
+.sp-card li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--mint); }
+
+/* ============================================================
+   Upload-permission management UI
+   ============================================================ */
+.perm-card { background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-xl); box-shadow: var(--shadow); overflow: hidden; }
+.perm-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.perm-title { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+.perm-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.perm-quota { margin-left: auto; display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.perm-quota .q-bar { width: 84px; height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.perm-quota .q-fill { display: block; height: 100%; background: var(--mint); border-radius: 99px; }
+
+.perm-block { padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.perm-block:last-child { border-bottom: none; }
+.perm-block-label { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--text-3); margin-bottom: 14px; }
+.perm-all { display: flex; flex-wrap: wrap; gap: 10px; }
+.perm-chk { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; background: var(--bg-soft); border: 1px solid var(--line-strong); border-radius: 11px; padding: 11px 14px; transition: border-color .15s, background .15s; user-select: none; }
+.perm-chk:hover { border-color: var(--mint-line); }
+.perm-chk input { position: absolute; opacity: 0; width: 0; height: 0; }
+.perm-chk .box { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--line-strong); display: grid; place-items: center; flex: 0 0 auto; transition: background .15s, border-color .15s; }
+.perm-chk .box::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--btn-fg); border-bottom: 2px solid var(--btn-fg); transform: rotate(-45deg) scale(0); transform-origin: center; margin-top: -2px; transition: transform .15s; }
+.perm-chk input:checked + .box { background: var(--mint); border-color: var(--mint); }
+.perm-chk input:checked + .box::after { transform: rotate(-45deg) scale(1); }
+.perm-chk .lbl { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.perm-chk input:focus-visible + .box { outline: 2px solid var(--mint); outline-offset: 2px; }
+.perm-hint { font-size: 12.5px; color: var(--text-3); margin: 13px 0 0; line-height: 1.5; }
+
+.perm-table { display: grid; gap: 2px; }
+.perm-row { display: grid; grid-template-columns: 1fr 56px 56px 56px; align-items: center; gap: 8px; padding: 11px 4px; border-radius: 10px; }
+.perm-row.member:hover { background: var(--bg-soft); }
+.perm-rowhead { padding-top: 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
+.perm-rowhead span { font-size: 11.5px; font-weight: 700; color: var(--text-3); }
+.perm-rowhead .c-tog, .perm-row .c-tog { text-align: center; justify-self: center; }
+.c-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.m-ava { width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-size: 12px; font-weight: 700; --c: var(--blue); background: color-mix(in oklab, var(--c) 15%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 34%, transparent); }
+.m-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.m-meta b { font-size: 14px; font-weight: 700; }
+.m-meta span { font-size: 11.5px; color: var(--text-3); }
+.owner-pill { font-size: 10.5px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); border-radius: 99px; padding: 4px 8px; white-space: nowrap; }
+
+.tog { width: 42px; height: 25px; border-radius: 99px; background: var(--surface-3); border: 1px solid var(--line-strong); position: relative; padding: 0; transition: background .18s, border-color .18s; }
+.tog .knob { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.35); transition: transform .18s cubic-bezier(.4,0,.2,1); }
+.tog.on { background: var(--mint); border-color: var(--mint); }
+.tog.on .knob { transform: translateX(17px); }
+.tog.locked { opacity: 0.55; cursor: not-allowed; }
+.perm-legend { font-size: 12px; color: var(--text-3); margin: 14px 0 0; line-height: 1.55; }
+
+.perm-notes { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 16px; }
+.perm-note { display: flex; gap: 13px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.perm-note .pn-ico { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 10px; display: grid; place-items: center; }
+.perm-note .pn-ico svg { width: 18px; height: 18px; }
+.perm-note .pn-ico.warn { background: var(--soon-soft); border: 1px solid var(--soon-line); color: var(--soon); }
+.perm-note .pn-ico.full { background: var(--blue-soft); border: 1px solid var(--blue-line); color: var(--blue); }
+.perm-note b { font-size: 13.5px; }
+.perm-note p { font-size: 13px; color: var(--text-2); margin: 5px 0 0; line-height: 1.5; }
+
+/* ============================================================
+   THEME · Blush (light)  —  toggled via Tweaks
+   #FCFCFC · #F7567C · #FFFAE3 · #99E1D9 · #5D576B
+   ============================================================ */
+:root[data-theme="blush"] {
+  --bg:          #F2F5FF;
+  --bg-soft:     #F7F3FC;
+  --surface:     #FFFFFF;
+  --surface-2:   #EEF1FB;
+  --surface-3:   #E2E6F4;
+  --line:        rgba(58,52,78,0.12);
+  --line-strong: rgba(58,52,78,0.20);
+
+  --text:        #2C2A3A;
+  --text-2:      #5C5870;
+  --text-3:      #9893A8;
+
+  --mint:        #1FAE9C;
+  --mint-soft:   rgba(85,214,194,0.30);
+  --mint-line:   rgba(31,174,156,0.36);
+  --blue:        #8E72C7;
+  --blue-soft:   rgba(223,178,244,0.32);
+  --blue-line:   rgba(142,114,199,0.32);
+
+  --open:        #189684;
+  --soon:        #C0712C;
+  --closed:      #9893a8;
+
+  --btn-bg:      #F49097;
+  --btn-fg:      #2C2A3A;
+  --on-mint:     #06352F;
+  --hl:          rgba(245,233,96,0.60);
+  --soon-soft:   rgba(192,113,44,0.13);
+  --soon-line:   rgba(192,113,44,0.28);
+  --nav-bg:      rgba(242,245,255,0.82);
+  --page-fade:   rgba(242,245,255,0.94);
+  --glow-a:      rgba(85,214,194,0.16);
+  --glow-b:      rgba(223,178,244,0.22);
+
+  --shadow:    0 1px 0 rgba(255,255,255,0.6) inset, 0 14px 32px -22px rgba(58,52,78,0.40);
+  --shadow-lg: 0 26px 60px -28px rgba(58,52,78,0.38);
+}
+/* keep modal backdrop dim in both themes */
+:root[data-theme="blush"] .modal-scrim { background: rgba(44,42,58,0.45); }
+:root[data-theme="blush"] .drawer-scrim { background: rgba(44,42,58,0.4); }
+
+/* ============================================================
+   Tweaks panel
+   ============================================================ */
+#tweaks-panel {
+  position: fixed; right: 16px; bottom: 84px; z-index: 120; width: 254px;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px;
+  box-shadow: var(--shadow-lg); padding: 15px; display: none; font-family: var(--ff);
+}
+#tweaks-panel.open { display: block; animation: pop .22s cubic-bezier(.34,1.4,.5,1); }
+#tweaks-panel .tw-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+#tweaks-panel .tw-title { font-weight: 800; font-size: 15px; color: var(--text); letter-spacing: -0.01em; }
+#tweaks-panel .tw-x { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text); display: grid; place-items: center; }
+#tweaks-panel .tw-label { font-size: 11.5px; font-weight: 700; color: var(--text-3); margin-bottom: 8px; letter-spacing: 0.03em; }
+#tweaks-panel .tw-seg { display: flex; gap: 5px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 11px; padding: 4px; }
+#tweaks-panel .tw-opt { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-2); padding: 9px 6px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+#tweaks-panel .tw-opt.on { background: var(--btn-bg); color: var(--btn-fg); }
+#tweaks-panel .tw-note { font-size: 12px; color: var(--text-3); margin: 12px 0 0; line-height: 1.5; }
+
+@media (min-width: 980px) {
+  #tweaks-panel { bottom: 16px; }
+}
+
+
+/* ============================================================
+   Crew Up — internal app (logged-in)
+   App shell · sidebar · bottom tabbar · dashboard · members ·
+   settings · auth (magic-link) · multi-step create flow
+   Reuses tokens + components from styles.css
+   ============================================================ */
+
+/* ---------- app shell ---------- */
+.app {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100dvh;
+}
+.app.authed { /* nothing special, gate hides */ }
+
+/* hide app chrome until authed */
+body[data-auth="out"] .app-shell { display: none; }
+body[data-auth="out"] .app-shell-tab { display: none !important; }
+body[data-auth="in"]  #auth-gate { display: none; }
+
+/* ============================================================
+   Auth gate (login / signup live here as modals)
+   ============================================================ */
+#auth-gate {
+  position: fixed; inset: 0; z-index: 90; overflow: auto;
+  display: grid; place-items: center; padding: 24px;
+  background:
+    radial-gradient(680px 360px at 22% 6%, var(--glow-a), transparent 60%),
+    radial-gradient(640px 340px at 84% 0%, var(--glow-b), transparent 62%),
+    var(--bg);
+}
+.auth-stage { width: min(440px, 100%); text-align: center; }
+.auth-brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 800; font-size: 21px; letter-spacing: -0.03em; margin-bottom: 26px; }
+.auth-brand .mark {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: linear-gradient(135deg, var(--mint), var(--blue));
+  display: grid; place-items: center; color: var(--on-mint); font-weight: 900; font-size: 18px;
+  box-shadow: 0 8px 20px -7px rgba(61,216,184,0.55);
+}
+.auth-card {
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg); padding: clamp(24px, 5vw, 36px); text-align: left;
+}
+.auth-h { font-size: clamp(1.4rem, 4vw, 1.75rem); font-weight: 800; letter-spacing: -0.025em; }
+.auth-sub { color: var(--text-2); font-size: 14.5px; margin: 9px 0 24px; line-height: 1.55; }
+.auth-tabs { display: flex; gap: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 22px; }
+.auth-tabs button { flex: 1; font-size: 14px; font-weight: 700; color: var(--text-2); background: transparent; border: none; padding: 11px; border-radius: 9px; transition: background .15s, color .15s; }
+.auth-tabs button.on { background: var(--surface-2); color: var(--text); box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset; }
+.auth-pane { display: none; }
+.auth-pane.on { display: block; animation: fade .2s ease; }
+.auth-foot-note { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 22px; line-height: 1.55; }
+.auth-foot-note a { color: var(--text-2); text-decoration: underline; text-underline-offset: 2px; }
+
+/* sent (magic link) confirmation */
+.auth-sent { text-align: center; padding: 8px 0 2px; }
+.auth-sent .env {
+  width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center;
+  background: var(--mint-soft); border: 1px solid var(--mint-line); color: var(--mint);
+}
+.auth-sent .env svg { width: 28px; height: 28px; }
+.auth-sent h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+.auth-sent p { color: var(--text-2); font-size: 14px; margin: 0 auto 6px; max-width: 32ch; line-height: 1.55; }
+.auth-sent .mail-pill { display: inline-block; font-weight: 700; color: var(--text); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 13px; font-size: 13px; margin: 4px 0 18px; }
+.auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-3); font-size: 12px; margin: 18px 0; }
+.auth-divider::before, .auth-divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+
+/* ============================================================
+   Sidebar (desktop)
+   ============================================================ */
+.side {
+  display: none;
+  position: sticky; top: 0; align-self: start; height: 100dvh;
+  background: var(--bg-soft); border-right: 1px solid var(--line);
+  flex-direction: column; padding: 16px 14px; gap: 6px;
+}
+.side-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: -0.03em; padding: 4px 6px 14px; }
+.side-brand .mark { width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(135deg, var(--mint), var(--blue)); display: grid; place-items: center; color: var(--on-mint); font-weight: 900; font-size: 14px; }
+
+/* crew switcher */
+.crew-switch { position: relative; }
+.crew-switch-btn {
+  width: 100%; display: flex; align-items: center; gap: 11px; text-align: left;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: 13px; padding: 10px 11px;
+  transition: border-color .15s;
+}
+.crew-switch-btn:hover { border-color: var(--mint-line); }
+.crew-switch-btn .crew-thumb { width: 38px; height: 38px; border-radius: 11px; font-size: 15px; }
+.crew-switch-btn .cs-meta { min-width: 0; flex: 1; line-height: 1.25; display: flex; flex-direction: column; }
+.crew-switch-btn .cs-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crew-switch-btn .cs-plan { font-size: 11.5px; color: var(--text-3); }
+.crew-switch-btn .cs-caret { color: var(--text-3); flex: 0 0 auto; }
+.crew-switch-btn .cs-caret svg { width: 16px; height: 16px; }
+
+.crew-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: 14px; box-shadow: var(--shadow-lg);
+  padding: 7px; display: none;
+}
+.crew-menu.open { display: block; animation: pop .18s cubic-bezier(.34,1.4,.5,1); }
+.crew-menu-item { display: flex; align-items: center; gap: 10px; padding: 9px 9px; border-radius: 10px; cursor: pointer; }
+.crew-menu-item:hover { background: var(--surface-2); }
+.crew-menu-item .crew-thumb { width: 30px; height: 30px; border-radius: 9px; font-size: 12px; }
+.crew-menu-item .cm-name { font-size: 13.5px; font-weight: 600; }
+.crew-menu-item.add { color: var(--mint); font-weight: 700; font-size: 13.5px; border-top: 1px solid var(--line); margin-top: 5px; padding-top: 12px; }
+.crew-menu-item.add .plus { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--mint-soft); border: 1px solid var(--mint-line); }
+.crew-menu-item.add .plus svg { width: 15px; height: 15px; }
+
+.side-sec { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-3); padding: 6px 8px 4px; margin-top: 8px; }
+.side-nav { display: flex; flex-direction: column; gap: 2px; }
+.side-link {
+  display: flex; align-items: center; gap: 11px; padding: 10px 11px; border-radius: 11px;
+  font-size: 14px; font-weight: 600; color: var(--text-2); cursor: pointer; transition: background .14s, color .14s;
+}
+.side-link svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.side-link:hover { background: var(--surface-2); color: var(--text); }
+.side-link.on { background: var(--surface-2); color: var(--text); }
+.side-link.on svg { color: var(--mint); }
+.side-link .count { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); border-radius: 999px; min-width: 20px; height: 20px; padding: 0 6px; display: grid; place-items: center; }
+
+.side-foot { margin-top: auto; display: grid; gap: 10px; padding-top: 12px; }
+.side-storage { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 12px; }
+.side-storage .ss-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 9px; }
+.side-storage .ss-top .plan-tag { font-size: 10.5px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); border-radius: 999px; padding: 2px 8px; }
+.q-bar { height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.q-bar .q-fill { display: block; height: 100%; background: var(--mint); border-radius: 99px; }
+.side-storage .ss-num { font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+
+.acct {
+  display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 13px; padding: 9px 10px; position: relative; cursor: pointer; transition: border-color .15s;
+}
+.acct:hover { border-color: var(--line-strong); }
+.acct .a-ava { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-weight: 700; font-size: 13px; --c: var(--blue); background: color-mix(in oklab, var(--c) 16%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 34%, transparent); }
+.acct .a-meta { min-width: 0; line-height: 1.25; display: flex; flex-direction: column; }
+.acct .a-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct .a-mail { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct .a-caret { margin-left: auto; color: var(--text-3); }
+.acct .a-caret svg { width: 15px; height: 15px; }
+.acct-menu { position: absolute; bottom: calc(100% + 7px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 13px; box-shadow: var(--shadow-lg); padding: 6px; display: none; z-index: 30; }
+.acct-menu.open { display: block; animation: pop .18s cubic-bezier(.34,1.4,.5,1); }
+.acct-menu button { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: transparent; border: none; color: var(--text-2); font-size: 13.5px; font-weight: 600; padding: 10px; border-radius: 9px; }
+.acct-menu button:hover { background: var(--surface-2); color: var(--text); }
+.acct-menu button svg { width: 16px; height: 16px; }
+.acct-menu button.danger { color: #ff8e8e; }
+
+/* ============================================================
+   Main column + topbar (mobile) + bottom tabbar (mobile)
+   ============================================================ */
+.main { min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+
+.appbar {
+  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px;
+  height: 58px; padding: 0 16px; background: var(--nav-bg); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.appbar .ab-crew { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.appbar .ab-crew .crew-thumb { width: 32px; height: 32px; border-radius: 9px; font-size: 13px; }
+.appbar .ab-crew .ab-name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.appbar .ab-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-strong); color: var(--text); display: grid; place-items: center; }
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn .ico-sun { display: none; }
+:root[data-theme="blush"] .icon-btn .ico-moon { display: none; }
+:root[data-theme="blush"] .icon-btn .ico-sun { display: block; }
+.appbar .ab-ava { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; --c: var(--blue); background: color-mix(in oklab, var(--c) 16%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 34%, transparent); }
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: flex;
+  background: var(--nav-bg); backdrop-filter: blur(16px); border-top: 1px solid var(--line);
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar .tb {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: transparent; border: none; color: var(--text-3); font-size: 10.5px; font-weight: 600;
+  padding: 7px 4px; border-radius: 11px; position: relative;
+}
+.tabbar .tb svg { width: 21px; height: 21px; }
+.tabbar .tb.on { color: var(--mint); }
+.tabbar .tb .dot { position: absolute; top: 5px; right: 50%; margin-right: -16px; width: 7px; height: 7px; border-radius: 50%; background: var(--soon); border: 1.5px solid var(--bg-soft); }
+
+/* ============================================================
+   View container + page header
+   ============================================================ */
+.view { display: none; padding: clamp(18px, 3vw, 30px); max-width: 1080px; width: 100%; margin-inline: auto; }
+.view.on { display: block; animation: pagein .3s cubic-bezier(.22,.61,.36,1); }
+.view-pad-bottom { height: 78px; }
+
+.vhead { margin-bottom: 22px; }
+.vhead .vh-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.vhead h1 { font-size: clamp(1.45rem, 3.6vw, 2rem); font-weight: 800; letter-spacing: -0.03em; }
+.vhead .vh-sub { color: var(--text-2); font-size: 14.5px; margin-top: 8px; line-height: 1.55; }
+.vhead .vh-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* segmented control for dashboard layout switch */
+.view-seg { display: inline-flex; gap: 4px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 11px; padding: 4px; }
+.view-seg button { font-size: 12.5px; font-weight: 700; color: var(--text-2); background: transparent; border: none; padding: 8px 13px; border-radius: 8px; white-space: nowrap; transition: background .15s, color .15s; }
+.view-seg button.on { background: var(--surface-2); color: var(--text); }
+
+/* ============================================================
+   Dashboard
+   ============================================================ */
+/* welcome / onboarding banner (new-crew) */
+.welcome {
+  position: relative; overflow: hidden;
+  background: linear-gradient(150deg, var(--surface-2), var(--bg-soft));
+  border: 1px solid var(--line-strong); border-radius: var(--r-xl); padding: clamp(20px, 3.4vw, 30px); margin-bottom: 16px;
+}
+.welcome::before { content: ""; position: absolute; inset: 0; z-index: 0; background: radial-gradient(420px 200px at 88% -10%, var(--glow-a), transparent 60%); pointer-events: none; }
+.welcome > * { position: relative; z-index: 1; }
+.welcome .w-eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); padding: 4px 11px; border-radius: 999px; margin-bottom: 14px; white-space: nowrap; }
+.welcome h2 { font-size: clamp(1.3rem, 3.2vw, 1.7rem); font-weight: 800; letter-spacing: -0.025em; }
+.welcome p { color: var(--text-2); font-size: 14.5px; margin: 10px 0 0; max-width: 52ch; line-height: 1.6; }
+
+/* onboarding checklist */
+.checklist { display: grid; gap: 10px; margin-top: 20px; }
+.check-item {
+  display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 13px 15px; cursor: pointer; transition: border-color .15s, background .15s;
+}
+.check-item:hover { border-color: var(--mint-line); }
+.check-item .ck {
+  width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; border: 1.8px solid var(--line-strong);
+  display: grid; place-items: center; transition: background .15s, border-color .15s;
+}
+.check-item .ck svg { width: 13px; height: 13px; color: var(--btn-fg); opacity: 0; transition: opacity .15s; }
+.check-item.done .ck { background: var(--mint); border-color: var(--mint); }
+.check-item.done .ck svg { opacity: 1; }
+.check-item .ci-meta { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.check-item .ci-title { font-size: 14px; font-weight: 700; }
+.check-item.done .ci-title { color: var(--text-3); text-decoration: line-through; }
+.check-item .ci-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.check-item .ci-go { font-size: 12.5px; font-weight: 700; color: var(--mint); flex: 0 0 auto; }
+.check-progress { display: flex; align-items: center; gap: 11px; margin-top: 6px; font-size: 12.5px; color: var(--text-3); font-weight: 600; }
+.check-progress .cp-bar { flex: 1; max-width: 220px; height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.check-progress .cp-fill { display: block; height: 100%; background: var(--mint); border-radius: 99px; transition: width .3s ease; }
+
+/* dashboard grids */
+.dash-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+/* layout-driven visibility (beats [hidden] UA rule as author style) */
+.dash-grid.layout-activity .only-board { display: none; }
+.dash-grid.layout-board .only-activity { display: none; }
+.dash-grid.layout-board .card.only-board { display: block; }
+.dash-main { display: grid; gap: 14px; align-content: start; }
+.dash-side { display: grid; gap: 14px; align-content: start; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.card-head h3 { font-size: 15px; font-weight: 700; }
+.card-head .ch-act { margin-left: auto; font-size: 12.5px; font-weight: 700; color: var(--mint); cursor: pointer; }
+.card-head .k { font-size: 11px; font-weight: 700; color: var(--text-3); background: var(--surface-2); padding: 3px 8px; border-radius: 6px; margin-left: auto; }
+
+/* quick actions row */
+.quick { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
+.quick-btn {
+  display: flex; align-items: center; gap: 12px; text-align: left; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 15px; transition: border-color .15s, transform .15s, background .15s;
+}
+.quick-btn:hover { border-color: var(--mint-line); transform: translateY(-2px); }
+.quick-btn .qb-ico { width: 40px; height: 40px; border-radius: 11px; flex: 0 0 auto; display: grid; place-items: center; background: var(--mint-soft); border: 1px solid var(--mint-line); color: var(--mint); }
+.quick-btn .qb-ico.blue { background: var(--blue-soft); border-color: var(--blue-line); color: var(--blue); }
+.quick-btn .qb-ico svg { width: 19px; height: 19px; }
+.quick-btn .qb-title { font-size: 14px; font-weight: 700; }
+.quick-btn > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.quick-btn .qb-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+/* activity feed */
+.feed { display: grid; gap: 0; }
+.feed-item { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.feed-item:last-child { border-bottom: none; padding-bottom: 0; }
+.feed-item:first-child { padding-top: 0; }
+.feed-ico { width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2); }
+.feed-ico svg { width: 16px; height: 16px; }
+.feed-ico.mint { background: var(--mint-soft); border-color: var(--mint-line); color: var(--mint); }
+.feed-ico.blue { background: var(--blue-soft); border-color: var(--blue-line); color: var(--blue); }
+.feed-body { min-width: 0; flex: 1; }
+.feed-body .ft { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+.feed-body .ft b { font-weight: 700; }
+.feed-body .fts { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+
+/* member rail */
+.member-rail { display: flex; align-items: center; gap: 0; }
+.member-rail .m { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; --c: var(--mint); background: color-mix(in oklab, var(--c) 18%, var(--surface-2)); color: var(--c); border: 2px solid var(--surface); margin-left: -8px; }
+.member-rail .m:first-child { margin-left: 0; }
+.member-rail .m.more { background: var(--surface-3); color: var(--text-2); border-color: var(--surface); }
+.member-rail .m.invite { background: transparent; border: 2px dashed var(--line-strong); color: var(--text-3); }
+
+/* mini empty state inside cards */
+.mini-empty { text-align: center; padding: 22px 12px; color: var(--text-3); }
+.mini-empty .me-ico { width: 44px; height: 44px; border-radius: 13px; margin: 0 auto 12px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); }
+.mini-empty .me-ico svg { width: 21px; height: 21px; color: var(--text-3); }
+.mini-empty p { font-size: 13px; margin: 0 0 14px; line-height: 1.5; }
+
+/* goal tile (board layout) */
+.goal { display: flex; align-items: flex-start; gap: 12px; }
+.goal .g-num { width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--line); }
+.goal .g-txt { font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+.goal .g-txt b { color: var(--text); }
+
+/* purpose block */
+.purpose-box { font-size: 14.5px; color: var(--text); line-height: 1.6; }
+.purpose-box .ph-empty { color: var(--text-3); font-style: normal; }
+
+/* ============================================================
+   Chat / files / notes / links views (workspace tabs)
+   ============================================================ */
+.ws-shell { background: var(--bg-soft); border: 1px solid var(--line-strong); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow); }
+.ws-head { display: flex; align-items: center; gap: 11px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+.ws-head .crew-thumb { width: 38px; height: 38px; }
+.ws-head .wh-name { font-size: 15px; font-weight: 700; }
+.ws-head .wh-sub { font-size: 12px; color: var(--text-3); }
+
+/* chat */
+.chat-scroll { padding: 18px; display: grid; gap: 14px; min-height: 320px; max-height: 56vh; overflow-y: auto; }
+.chat-day { text-align: center; font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+.msg { display: flex; gap: 11px; align-items: flex-start; }
+.msg .m-ava { width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto; display: grid; place-items: center; font-size: 12.5px; font-weight: 700; --c: var(--mint); background: color-mix(in oklab, var(--c) 18%, var(--surface-2)); color: var(--c); }
+.msg .m-bubble { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 10px 14px; max-width: 78%; }
+.msg .m-name { font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 3px; }
+.msg .m-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+.msg.me { flex-direction: row-reverse; }
+.msg.me .m-bubble { background: var(--mint-soft); border-color: var(--mint-line); }
+.msg.sys { justify-content: center; }
+.msg.sys .m-sys { font-size: 12.5px; color: var(--text-3); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; text-align: center; max-width: 80%; }
+.chat-compose { display: flex; gap: 10px; padding: 13px 16px; border-top: 1px solid var(--line); }
+.chat-compose input { flex: 1; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px; color: var(--text); font-family: inherit; font-size: 14px; padding: 12px 14px; }
+.chat-compose input:focus { outline: none; border-color: var(--mint-line); }
+.chat-compose button { width: 48px; flex: 0 0 auto; border-radius: 12px; background: var(--btn-bg); color: var(--btn-fg); border: none; display: grid; place-items: center; }
+.chat-compose button svg { width: 18px; height: 18px; }
+
+/* big empty state (files / notes / links) */
+.empty {
+  display: grid; place-items: center; text-align: center; padding: clamp(34px, 7vw, 64px) 20px;
+}
+.empty .e-ico { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line-strong); margin-bottom: 18px; }
+.empty .e-ico svg { width: 28px; height: 28px; color: var(--text-2); }
+.empty h3 { font-size: 18px; font-weight: 800; }
+.empty p { color: var(--text-2); font-size: 14px; margin: 9px auto 20px; max-width: 38ch; line-height: 1.55; }
+.empty .e-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* file grid (active state) */
+.file-grid { display: grid; gap: 12px; grid-template-columns: 1fr; padding: 18px; }
+.file-card { display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 13px 15px; }
+.file-card .f-ico { width: 42px; height: 42px; border-radius: 11px; flex: 0 0 auto; display: grid; place-items: center; background: var(--blue-soft); border: 1px solid var(--blue-line); color: var(--blue); }
+.file-card .f-ico.mint { background: var(--mint-soft); border-color: var(--mint-line); color: var(--mint); }
+.file-card .f-ico svg { width: 19px; height: 19px; }
+.file-card .f-meta { min-width: 0; flex: 1; }
+.file-card .f-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-card .f-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+/* drop zone */
+.dropzone {
+  margin: 0 18px 18px; border-radius: var(--r); border: 1.5px dashed var(--line-strong);
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 10px, transparent 10px 20px);
+  background-color: var(--surface); display: grid; place-items: center; text-align: center;
+  padding: 22px; color: var(--text-3); font-size: 12.5px; cursor: pointer; transition: border-color .15s, background .15s;
+}
+.dropzone:hover { border-color: var(--mint-line); }
+.dropzone .dz-ico { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); margin: 0 auto 10px; }
+.dropzone .dz-ico svg { width: 18px; height: 18px; color: var(--text-2); }
+
+/* permission notice (no upload right) */
+.perm-notice { margin: 0 18px 18px; display: flex; gap: 12px; align-items: flex-start; background: var(--soon-soft); border: 1px solid var(--soon-line); border-radius: var(--r); padding: 14px 16px; }
+.perm-notice .pn-ico { width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto; display: grid; place-items: center; color: var(--soon); }
+.perm-notice .pn-ico svg { width: 17px; height: 17px; }
+.perm-notice b { font-size: 13.5px; color: var(--text); }
+.perm-notice p { font-size: 12.5px; color: var(--text-2); margin: 4px 0 0; line-height: 1.5; }
+
+/* ============================================================
+   Members view
+   ============================================================ */
+.section-block { margin-bottom: 26px; }
+.section-block > .sb-label { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 13px; }
+.section-block > .sb-label .cnt { font-size: 11px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); border-radius: 999px; padding: 2px 8px; }
+
+/* applicant card */
+.applicant { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; margin-bottom: 12px; }
+.applicant .ap-top { display: flex; align-items: center; gap: 12px; }
+.applicant .ap-ava { width: 42px; height: 42px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-weight: 700; font-size: 15px; --c: var(--blue); background: color-mix(in oklab, var(--c) 16%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 34%, transparent); }
+.applicant .ap-name { font-size: 15px; font-weight: 700; }
+.applicant .ap-meta { font-size: 12px; color: var(--text-3); }
+.applicant .ap-stage { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
+.applicant .ap-msg { font-size: 13.5px; color: var(--text-2); line-height: 1.55; background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; margin: 13px 0; }
+.applicant .ap-actions { display: flex; gap: 9px; }
+.applicant .ap-actions .btn { flex: 1; }
+.btn-danger-ghost { background: transparent; color: #ff8e8e; border: 1px solid color-mix(in oklab, #ff8e8e 32%, transparent); }
+.btn-danger-ghost:hover { background: color-mix(in oklab, #ff8e8e 12%, transparent); }
+
+/* member list */
+.mlist { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.mlist .mrow:first-child { border-top-left-radius: var(--r-lg); border-top-right-radius: var(--r-lg); }
+.mlist .mrow:last-child { border-bottom-left-radius: var(--r-lg); border-bottom-right-radius: var(--r-lg); }
+.mrow { display: flex; align-items: center; gap: 13px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.mrow:last-child { border-bottom: none; }
+.mrow .mr-ava { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-weight: 700; font-size: 14px; --c: var(--mint); background: color-mix(in oklab, var(--c) 16%, var(--surface-2)); color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 34%, transparent); }
+.mrow .mr-meta { min-width: 0; flex: 1; }
+.mrow .mr-name { font-size: 14.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.mrow .mr-role { font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 2px 8px; }
+.mrow .mr-role.owner { color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); }
+.mrow .mr-role.member { color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-strong); }
+.mrow .mr-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.mrow .mr-act { margin-left: auto; position: relative; }
+.mrow .mr-act .icon-btn { width: 36px; height: 36px; }
+.mrow .mr-act .icon-btn svg { width: 17px; height: 17px; }
+.row-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 184px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 6px; display: none; z-index: 60; }
+.row-menu.up { top: auto; bottom: calc(100% + 6px); }
+.row-menu.open { display: block; animation: pop .16s ease; }
+.row-menu button { width: 100%; text-align: left; display: flex; align-items: center; gap: 9px; background: transparent; border: none; color: var(--text-2); font-size: 13px; font-weight: 600; padding: 9px 10px; border-radius: 8px; white-space: nowrap; }
+.row-menu button:hover { background: var(--surface-2); color: var(--text); }
+.row-menu button svg { width: 15px; height: 15px; flex: 0 0 auto; }
+.row-menu button.danger { color: #ff8e8e; }
+.row-menu .rm-sep { height: 1px; background: var(--line); margin: 5px 4px; }
+
+/* ============================================================
+   Settings view
+   ============================================================ */
+.set-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(18px, 3vw, 24px); margin-bottom: 16px; }
+.set-card > .sc-title { font-size: 15.5px; font-weight: 800; letter-spacing: -0.01em; }
+.set-card > .sc-desc { font-size: 13px; color: var(--text-3); margin: 5px 0 18px; line-height: 1.5; }
+.set-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.set-row:first-of-type { border-top: none; padding-top: 0; }
+.set-row .sr-meta { min-width: 0; flex: 1; }
+.set-row .sr-title { font-size: 14px; font-weight: 700; }
+.set-row .sr-sub { font-size: 12.5px; color: var(--text-3); margin-top: 3px; line-height: 1.5; }
+.set-row .sr-control { flex: 0 0 auto; }
+
+/* reuse .tog from styles.css for toggles */
+
+/* number stepper (max members) */
+.stepper { display: inline-flex; align-items: center; gap: 0; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 11px; overflow: hidden; }
+.stepper button { width: 40px; height: 42px; background: transparent; border: none; color: var(--text); display: grid; place-items: center; font-size: 18px; transition: background .14s; }
+.stepper button:hover:not(:disabled) { background: var(--surface-3); }
+.stepper button:disabled { opacity: .32; cursor: default; }
+.stepper button svg { width: 16px; height: 16px; }
+.stepper .step-val { min-width: 58px; text-align: center; font-size: 15px; font-weight: 800; border-left: 1px solid var(--line); border-right: 1px solid var(--line); padding: 0 6px; line-height: 42px; }
+.cap-note { font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+.cap-note b { color: var(--text-2); }
+
+.danger-zone { border-color: color-mix(in oklab, #ff8e8e 30%, var(--line-strong)); }
+.danger-zone > .sc-title { color: #ff8e8e; }
+
+/* thumb color picker (settings) */
+.swatches { display: flex; gap: 9px; flex-wrap: wrap; }
+.swatch { width: 34px; height: 34px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; position: relative; }
+.swatch.on { border-color: var(--text); }
+.swatch.on::after { content: ""; position: absolute; inset: 0; border-radius: 8px; border: 2px solid var(--bg); }
+
+/* recruit seg (settings) — reuse .seg .opt from styles.css */
+
+/* ============================================================
+   Multi-step create flow modal
+   ============================================================ */
+.flow-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px)); max-height: min(90vh, 820px); overflow: hidden;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+  animation: pop .26s cubic-bezier(.34,1.4,.5,1);
+}
+.flow-top { padding: 20px 22px 0; }
+.flow-top .ft-row { display: flex; align-items: center; gap: 12px; }
+.flow-top .ft-step { font-size: 12px; font-weight: 700; color: var(--text-3); white-space: nowrap; }
+
+/* keep app seg pills + category labels on one line per word-group */
+.view .seg .opt { white-space: nowrap; }
+.flow-top .x-btn { margin-left: auto; }
+.flow-bar { display: flex; gap: 6px; margin-top: 14px; }
+.flow-bar .seg-bar { flex: 1; height: 5px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.flow-bar .seg-bar i { display: block; height: 100%; width: 0; background: var(--mint); border-radius: 99px; transition: width .3s ease; }
+.flow-bar .seg-bar.done i { width: 100%; }
+.flow-bar .seg-bar.cur i { width: 100%; }
+
+.flow-body { padding: 22px; overflow-y: auto; }
+.flow-step { display: none; }
+.flow-step.on { display: block; animation: fade .22s ease; }
+.flow-step h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+.flow-step .fs-sub { font-size: 13.5px; color: var(--text-2); margin: 8px 0 20px; line-height: 1.55; }
+
+.flow-foot { display: flex; gap: 10px; padding: 16px 22px 22px; border-top: 1px solid var(--line); }
+.flow-foot .ff-spring { flex: 1; }
+.flow-foot .btn { min-width: 110px; }
+
+/* category card picker */
+.cat-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
+.cat-opt {
+  display: flex; align-items: center; gap: 12px; text-align: left; background: var(--bg-soft);
+  border: 1.5px solid var(--line-strong); border-radius: var(--r); padding: 14px; transition: border-color .15s, background .15s;
+}
+.cat-opt:hover { border-color: var(--mint-line); }
+.cat-opt.on { border-color: var(--mint); background: var(--mint-soft); }
+.cat-opt .co-ico { width: 38px; height: 38px; border-radius: 11px; flex: 0 0 auto; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2); }
+.cat-opt.on .co-ico { background: var(--surface); border-color: var(--mint-line); color: var(--mint); }
+.cat-opt .co-ico svg { width: 18px; height: 18px; }
+.cat-opt .co-name { font-size: 13.5px; font-weight: 700; }
+
+/* plan picker (compact) */
+.plan-pick { display: grid; gap: 10px; }
+.plan-opt {
+  display: flex; align-items: flex-start; gap: 13px; background: var(--bg-soft); border: 1.5px solid var(--line-strong);
+  border-radius: var(--r); padding: 15px; cursor: pointer; transition: border-color .15s, background .15s;
+}
+.plan-opt:hover { border-color: var(--mint-line); }
+.plan-opt.on { border-color: var(--mint); background: var(--mint-soft); }
+.plan-opt .po-radio { width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; border: 2px solid var(--line-strong); margin-top: 2px; position: relative; transition: border-color .15s; }
+.plan-opt.on .po-radio { border-color: var(--mint); }
+.plan-opt.on .po-radio::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--mint); }
+.plan-opt .po-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.plan-opt .po-name { font-size: 14.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.plan-opt .po-name .po-price { margin-left: auto; font-weight: 800; }
+.plan-opt .po-name .po-price small { font-size: 11px; font-weight: 600; color: var(--text-3); }
+.plan-opt .po-feat { font-size: 12.5px; color: var(--text-2); margin-top: 5px; line-height: 1.5; }
+.plan-opt .po-tag { font-size: 10px; font-weight: 700; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--mint-line); border-radius: 999px; padding: 2px 7px; }
+
+/* completion */
+.flow-done { text-align: center; padding: 14px 6px 4px; }
+.flow-done .fd-ring { width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 20px; display: grid; place-items: center; background: var(--mint-soft); border: 1px solid var(--mint-line); color: var(--mint); }
+.flow-done .fd-ring svg { width: 36px; height: 36px; }
+.flow-done h2 { font-size: 22px; }
+.flow-done p { color: var(--text-2); font-size: 14px; margin: 10px auto 0; max-width: 34ch; line-height: 1.6; }
+.flow-summary { text-align: left; background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin-top: 22px; display: grid; gap: 11px; }
+.flow-summary .sm-row { display: flex; gap: 12px; font-size: 13px; }
+.flow-summary .sm-row .sm-k { color: var(--text-3); width: 72px; flex: 0 0 auto; }
+.flow-summary .sm-row .sm-v { color: var(--text); font-weight: 600; }
+
+/* ============================================================
+   Tweaks panel — extra controls
+   ============================================================ */
+#tweaks-panel .tw-group { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 979px) {
+  .main { padding-bottom: 70px; } /* room for tabbar */
+}
+
+@media (min-width: 680px) {
+  .dash-grid { grid-template-columns: 1.6fr 1fr; }
+  .file-grid { grid-template-columns: repeat(2, 1fr); }
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 980px) {
+  .app { grid-template-columns: 268px 1fr; }
+  .side { display: flex; }
+  .appbar { display: none; }
+  .tabbar { display: none; }
+  .main { padding-bottom: 0; }
+}
+
+@media (min-width: 1180px) {
+  .dash-grid.layout-board { grid-template-columns: 1fr 1fr; }
+}
+
+</style>
+<script>
+  /* Tweakable defaults — host persists this block on change */
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "theme": "blush",
+    "dash": "board",
+    "crewstate": "active"
+  }/*EDITMODE-END*/;
+  (function () {
+    const root = document.documentElement;
+    const KEY = "crewup-theme";
+    function applyTheme(t) {
+      if (t === "blush") root.setAttribute("data-theme", "blush");
+      else root.removeAttribute("data-theme");
+    }
+    let saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    const initial = saved || TWEAKS.theme || "dark";
+    applyTheme(initial);
+    window.__tweaks = { state: { theme: initial, dash: TWEAKS.dash, crewstate: TWEAKS.crewstate }, applyTheme };
+    window.__setTheme = function (t) {
+      window.__tweaks.state.theme = t;
+      applyTheme(t);
+      try { localStorage.setItem(KEY, t); } catch (e) {}
+      document.dispatchEvent(new CustomEvent("themechange", { detail: t }));
+    };
+  })();
+</script>
+<style id="state-vis">
+  /* crew-state driven visibility */
+  body[data-crewstate="new"]    .when-active { display: none !important; }
+  body[data-crewstate="active"] .when-new    { display: none !important; }
+</style>
+</head>
+<body data-auth="out" data-crewstate="new">
+
+<!-- ===================================================================
+     AUTH GATE — login / signup (magic link)
+     =================================================================== -->
+<div id="auth-gate">
+  <div class="auth-stage">
+    <span class="auth-brand"><span class="mark">C</span>Crew Up</span>
+
+    <div class="auth-card">
+      <!-- form view -->
+      <div id="auth-form">
+        <div class="auth-tabs" id="auth-tabs">
+          <button class="on" data-auth-tab="login">로그인</button>
+          <button data-auth-tab="signup">회원가입</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="auth-pane on" data-auth-pane="login">
+          <h1 class="auth-h">다시 오셨네요</h1>
+          <p class="auth-sub">이메일로 로그인 링크를 보내드려요. 비밀번호는 필요 없습니다.</p>
+          <form data-magic="login">
+            <div class="field"><label>이메일</label><input type="email" placeholder="you@example.com" required></div>
+            <div style="height:16px"></div>
+            <button type="submit" class="btn btn-primary btn-block">로그인 링크 받기</button>
+          </form>
+          <p class="auth-foot-note">계정이 없으신가요? <a href="#" data-goto-tab="signup">회원가입</a></p>
+        </div>
+
+        <!-- SIGNUP -->
+        <div class="auth-pane" data-auth-pane="signup">
+          <h1 class="auth-h">크루를 시작해볼까요</h1>
+          <p class="auth-sub">이메일만 있으면 바로 시작할 수 있어요. 가입 링크를 보내드립니다.</p>
+          <form data-magic="signup">
+            <div class="field"><label>닉네임</label><input type="text" placeholder="크루에서 불릴 이름" required></div>
+            <div style="height:14px"></div>
+            <div class="field"><label>이메일</label><input type="email" placeholder="you@example.com" required></div>
+            <div style="height:16px"></div>
+            <button type="submit" class="btn btn-primary btn-block">가입 링크 받기</button>
+          </form>
+          <p class="auth-foot-note">가입 시 <a href="#">운영 정책</a>과 금전 거래 비중개 원칙에 동의하게 됩니다.</p>
+        </div>
+      </div>
+
+      <!-- magic-link sent view -->
+      <div id="auth-sent" class="auth-sent" style="display:none">
+        <div class="env">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        </div>
+        <h3>메일함을 확인하세요</h3>
+        <p>로그인 링크를 보냈어요. 메일의 버튼을 누르면 바로 들어옵니다.</p>
+        <span class="mail-pill" id="sent-mail">you@example.com</span>
+        <div class="auth-divider">확인용 입장</div>
+        <button class="btn btn-primary btn-block" id="demo-enter">메일 링크로 입장하기</button>
+        <p class="auth-foot-note"><a href="#" id="auth-back">다른 이메일로 다시 시도</a></p>
+      </div>
+    </div>
+
+    <p class="auth-foot-note" style="margin-top:18px">
+      <a href="index.html">← 서비스 소개로 돌아가기</a>
+    </p>
+  </div>
+</div>
+
+<!-- ===================================================================
+     APP SHELL
+     =================================================================== -->
+<div class="app-shell">
+<div class="app">
+
+  <!-- ---------- SIDEBAR (desktop) ---------- -->
+  <aside class="side">
+    <div class="side-brand"><span class="mark">C</span>Crew Up</div>
+
+    <div class="crew-switch">
+      <button class="crew-switch-btn" id="crew-switch-btn">
+        <span class="crew-thumb" style="--c:#3dd8b8">숏</span>
+        <span class="cs-meta">
+          <span class="cs-name">숏폼 제작 크루</span>
+          <span class="cs-plan">Free 크루 · 멤버 <span data-member-count>2</span></span>
+        </span>
+        <span class="cs-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg></span>
+      </button>
+      <div class="crew-menu" id="crew-menu">
+        <div class="crew-menu-item"><span class="crew-thumb" style="--c:#3dd8b8">숏</span><span class="cm-name">숏폼 제작 크루</span></div>
+        <div class="crew-menu-item"><span class="crew-thumb" style="--c:#5b9dff">프</span><span class="cm-name">프롬프트 연구회</span></div>
+        <div class="crew-menu-item add" data-open-flow><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>새 크루 만들기</div>
+      </div>
+    </div>
+
+    <div class="side-sec">작업실</div>
+    <nav class="side-nav">
+      <a class="side-link on" data-view="dash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>대시보드</a>
+      <a class="side-link" data-view="chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>채팅</a>
+      <a class="side-link" data-view="files">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>공유함</a>
+      <a class="side-link" data-view="notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 9h6M8 13h8M8 17h5"/></svg>노트</a>
+      <a class="side-link" data-view="links">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>링크</a>
+    </nav>
+
+    <div class="side-sec">관리</div>
+    <nav class="side-nav">
+      <a class="side-link" data-view="members">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>멤버 관리<span class="count when-new">1</span></a>
+      <a class="side-link" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>크루 설정</a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-storage">
+        <div class="ss-top"><span>저장공간</span><span class="plan-tag">Free</span></div>
+        <span class="q-bar"><span class="q-fill" data-storage-fill style="width:4%"></span></span>
+        <div class="ss-num" data-storage-num>0.04 / 1 GB 사용</div>
+      </div>
+      <div class="acct" id="acct">
+        <span class="a-ava" style="--c:#3dd8b8">지</span>
+        <span class="a-meta">
+          <span class="a-name">지훈</span>
+          <span class="a-mail">jihoon@example.com</span>
+        </span>
+        <span class="a-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="acct-menu" id="acct-menu">
+          <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M5 12H3M21 12h-2"/></svg>크루 설정</button>
+          <button id="logout-btn" class="danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>로그아웃</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ---------- MAIN ---------- -->
+  <div class="main">
+
+    <!-- mobile top bar -->
+    <header class="appbar">
+      <button class="ab-crew" id="appbar-crew" style="background:none;border:none;padding:0;color:inherit">
+        <span class="crew-thumb" style="--c:#3dd8b8">숏</span>
+        <span class="ab-name">숏폼 제작 크루</span>
+      </button>
+      <div class="ab-right">
+        <button class="icon-btn" id="theme-toggle-m" aria-label="테마 전환">
+          <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <span class="ab-ava" style="--c:#3dd8b8">지</span>
+      </div>
+    </header>
+
+    <!-- ============ VIEW · 대시보드 ============ -->
+    <section class="view on" data-view="dash">
+      <div class="vhead">
+        <div class="vh-row">
+          <div>
+            <h1>대시보드</h1>
+            <p class="vh-sub when-new">크루를 막 열었어요. 아래 단계를 마치면 작업실이 살아납니다.</p>
+            <p class="vh-sub when-active">이번 주도 함께 달려볼까요. 최근 활동을 한눈에 확인하세요.</p>
+          </div>
+          <div class="vh-actions">
+            <div class="view-seg" id="dash-seg">
+              <button data-dash="activity" class="on">활동형</button>
+              <button data-dash="board">보드형</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- welcome + onboarding (new crew) -->
+      <div class="welcome when-new">
+        <span class="w-eyebrow"><span style="width:6px;height:6px;border-radius:50%;background:var(--mint);display:inline-block"></span>새 크루 생성 완료</span>
+        <h2>숏폼 제작 크루에 오신 걸 환영해요, 지훈님</h2>
+        <p>아직 비어 있지만 괜찮아요. 목적을 적고, 첫 멤버를 초대하고, 자료를 한 곳에 모으면 크루가 움직이기 시작합니다.</p>
+
+        <div class="checklist" id="checklist">
+          <div class="check-item done" data-step="create">
+            <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="ci-meta"><span class="ci-title">크루 만들기</span><span class="ci-sub">숏폼 제작 크루 작업실이 열렸어요</span></span>
+          </div>
+          <div class="check-item" data-step="purpose" data-view="settings">
+            <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="ci-meta"><span class="ci-title">크루 목적·진행 방식 정하기</span><span class="ci-sub">사람들이 보고 신청을 결정해요</span></span>
+            <span class="ci-go">설정 →</span>
+          </div>
+          <div class="check-item" data-step="invite" data-open-invite>
+            <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="ci-meta"><span class="ci-title">첫 멤버 초대하기</span><span class="ci-sub">링크를 공유해 함께할 사람을 데려와요</span></span>
+            <span class="ci-go">초대 →</span>
+          </div>
+          <div class="check-item" data-step="file" data-view="files">
+            <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="ci-meta"><span class="ci-title">첫 자료 올리기</span><span class="ci-sub">공유함에 레퍼런스나 템플릿을 모아요</span></span>
+            <span class="ci-go">공유함 →</span>
+          </div>
+        </div>
+        <div class="check-progress">
+          <span class="cp-bar"><span class="cp-fill" id="cp-fill" style="width:25%"></span></span>
+          <span id="cp-text">1 / 4 완료</span>
+        </div>
+      </div>
+
+      <!-- dashboard body -->
+      <div class="dash-grid layout-activity" id="dash-grid">
+
+        <!-- ===== MAIN COLUMN ===== -->
+        <div class="dash-main">
+          <!-- 목적 (active mainly, but show in both) -->
+          <div class="card only-board" hidden>
+            <div class="card-head"><h3>크루 목적</h3><span class="k">고정</span></div>
+            <div class="purpose-box when-active">AI로 쇼츠·광고 영상을 만들어 <b>매주 한 편씩 발행</b>합니다. 결과보다 꾸준한 리듬을 함께 만드는 걸 우선해요.</div>
+            <div class="purpose-box when-new"><span class="ph-empty">아직 목적이 비어 있어요. 설정에서 무엇을 어떤 리듬으로 함께할지 적어주세요.</span></div>
+          </div>
+
+          <!-- 활동 피드 -->
+          <div class="card only-activity">
+            <div class="card-head"><h3>최근 활동</h3></div>
+            <!-- new state feed -->
+            <div class="feed when-new">
+              <div class="feed-item">
+                <span class="feed-ico mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                <div class="feed-body"><div class="ft"><b>지훈</b>님이 <b>숏폼 제작 크루</b> 크루를 만들었어요</div><div class="fts">방금 전</div></div>
+              </div>
+              <div class="feed-item">
+                <span class="feed-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+                <div class="feed-body"><div class="ft"><b>민지</b>님이 크루에 합류했어요</div><div class="fts">방금 전</div></div>
+              </div>
+            </div>
+            <!-- active state feed -->
+            <div class="feed when-active">
+              <div class="feed-item">
+                <span class="feed-ico mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></span>
+                <div class="feed-body"><div class="ft"><b>현우</b>님이 공유함에 <b>썸네일_템플릿_v2.fig</b>를 올렸어요</div><div class="fts">2시간 전</div></div>
+              </div>
+              <div class="feed-item">
+                <span class="feed-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                <div class="feed-body"><div class="ft"><b>민지</b>님이 채팅에 메시지를 남겼어요 — “자막 자동화부터 정리해볼게요”</div><div class="fts">4시간 전</div></div>
+              </div>
+              <div class="feed-item">
+                <span class="feed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 9h6M8 13h8"/></svg></span>
+                <div class="feed-body"><div class="ft"><b>지훈</b>님이 노트 <b>자막 자동화 워크플로</b>를 수정했어요</div><div class="fts">어제</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 이번 주 목표 -->
+          <div class="card only-board" hidden>
+            <div class="card-head"><h3>이번 주 목표</h3></div>
+            <div class="when-active" style="display:grid;gap:13px">
+              <div class="goal"><span class="g-num">1</span><span class="g-txt">각자 <b>쇼츠 한 편</b>씩 만들어 금요일 21시에 공유</span></div>
+              <div class="goal"><span class="g-num">2</span><span class="g-txt">자막 자동화 워크플로 <b>노트 정리</b> 마무리</span></div>
+              <div class="goal"><span class="g-num">3</span><span class="g-txt">공통 <b>썸네일 템플릿</b> 확정</span></div>
+            </div>
+            <div class="mini-empty when-new">
+              <div class="me-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <p>아직 이번 주 목표가 없어요.<br>채팅이나 노트에서 함께 정해보세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SIDE COLUMN ===== -->
+        <div class="dash-side">
+          <!-- 빠른 작업 -->
+          <div class="card only-activity">
+            <div class="card-head"><h3>빠른 작업</h3></div>
+            <div class="quick">
+              <button class="quick-btn" data-open-invite>
+                <span class="qb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+                <span><span class="qb-title">멤버 초대</span><span class="qb-sub">링크 공유</span></span>
+              </button>
+              <button class="quick-btn" data-view="files">
+                <span class="qb-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></span>
+                <span><span class="qb-title">자료 올리기</span><span class="qb-sub">공유함</span></span>
+              </button>
+              <button class="quick-btn" data-view="notes">
+                <span class="qb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+                <span><span class="qb-title">노트 작성</span><span class="qb-sub">기록 남기기</span></span>
+              </button>
+              <button class="quick-btn" data-view="settings">
+                <span class="qb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M5 12H3M21 12h-2"/></svg></span>
+                <span><span class="qb-title">크루 설정</span><span class="qb-sub">목적·공개·플랜</span></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 멤버 카드 -->
+          <div class="card">
+            <div class="card-head"><h3>멤버</h3><span class="ch-act" data-view="members">관리 →</span></div>
+            <div class="member-rail" style="margin-bottom:14px">
+              <span class="m" style="--c:#3dd8b8">지</span>
+              <span class="m" style="--c:#4d8dff">민</span>
+              <span class="m when-active" style="--c:#2fc2c2">현</span>
+              <span class="m more when-active">+3</span>
+              <span class="m invite" data-open-invite>+</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--text-3);margin:0" class="when-new">아직 둘 뿐이에요. 함께할 사람을 초대해보세요.</p>
+            <p style="font-size:12.5px;color:var(--text-3);margin:0" class="when-active">활발하게 움직이는 6명의 크루예요.</p>
+          </div>
+
+          <!-- 공지 (board only) -->
+          <div class="card only-board" hidden>
+            <div class="card-head"><h3>공지</h3><span class="k when-active">NEW</span></div>
+            <div class="tile" style="border:none;padding:0;background:none">
+              <ul style="margin:0;padding:0;list-style:none;display:grid;gap:9px">
+                <li class="when-active" style="font-size:13.5px;color:var(--text-2);display:flex;gap:10px;align-items:center"><span class="lead-ico" style="width:18px;height:18px;border-radius:5px;background:var(--mint-soft);border:1px solid var(--mint-line);flex:0 0 auto"></span>금요일 21시, 각자 만든 한 편 공유</li>
+                <li class="when-active" style="font-size:13.5px;color:var(--text-2);display:flex;gap:10px;align-items:center"><span class="lead-ico" style="width:18px;height:18px;border-radius:5px;background:var(--blue-soft);border:1px solid var(--blue-line);flex:0 0 auto"></span>썸네일 템플릿 공유함에 업로드됨</li>
+              </ul>
+              <div class="mini-empty when-new" style="padding:14px 8px">
+                <p style="margin:0">아직 공지가 없어요.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 채팅 ============ -->
+    <section class="view" data-view="chat">
+      <div class="vhead"><h1>채팅</h1><p class="vh-sub">크루의 대화가 한 곳에 쌓여요. 중요한 자료는 공유함·노트로 옮겨두세요.</p></div>
+      <div class="ws-shell">
+        <div class="chat-scroll" id="chat-scroll">
+          <div class="chat-day">오늘</div>
+          <div class="msg sys"><span class="m-sys">숏폼 제작 크루 작업실이 열렸어요. 첫 메시지를 남겨보세요.</span></div>
+          <div class="msg">
+            <span class="m-ava" style="--c:#4d8dff">민</span>
+            <div class="m-bubble"><div class="m-name">민지</div><div class="m-text">합류했어요! 잘 부탁드려요 🙌 저는 자막 자동화부터 정리해볼게요.</div></div>
+          </div>
+          <!-- active-only extra messages -->
+          <div class="msg when-active">
+            <span class="m-ava" style="--c:#2fc2c2">현</span>
+            <div class="m-bubble"><div class="m-name">현우</div><div class="m-text">썸네일 템플릿 공유함에 올려뒀어요 👇 한 번씩 봐주세요.</div></div>
+          </div>
+        </div>
+        <form class="chat-compose" id="chat-form">
+          <input type="text" placeholder="메시지를 입력하세요" id="chat-input" autocomplete="off">
+          <button type="submit" aria-label="보내기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+        </form>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 공유함 ============ -->
+    <section class="view" data-view="files">
+      <div class="vhead">
+        <div class="vh-row">
+          <div><h1>공유함</h1><p class="vh-sub">자료·사진·영상을 한 곳에 모아요. 업로드 권한은 크루장이 관리합니다.</p></div>
+          <div class="vh-actions"><button class="btn btn-primary btn-sm" id="upload-btn">자료 올리기</button></div>
+        </div>
+      </div>
+      <div class="ws-shell">
+        <!-- new: empty -->
+        <div class="when-new">
+          <div class="empty">
+            <div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div>
+            <h3>아직 공유된 자료가 없어요</h3>
+            <p>레퍼런스, 템플릿, 체크리스트를 올려두면 늦게 합류한 멤버도 흐름을 따라갈 수 있어요.</p>
+            <div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div>
+          </div>
+          <div class="dropzone" id="dropzone">
+            <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></div>
+            파일을 끌어다 놓거나 눌러서 올리기
+          </div>
+        </div>
+        <!-- active: file grid -->
+        <div class="when-active">
+          <div class="file-grid">
+            <div class="file-card"><span class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="f-meta"><div class="f-name">컷편집_체크리스트.pdf</div><div class="f-sub">지훈 · 2.1 MB</div></div></div>
+            <div class="file-card"><span class="f-ico mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg></span><div class="f-meta"><div class="f-name">썸네일_템플릿_v2.fig</div><div class="f-sub">현우 · 8.4 MB</div></div></div>
+            <div class="file-card"><span class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="f-meta"><div class="f-name">자막_자동화_가이드.md</div><div class="f-sub">민지 · 32 KB</div></div></div>
+            <div class="file-card"><span class="f-ico mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2M3 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/></svg></span><div class="f-meta"><div class="f-name">레퍼런스_모음.zip</div><div class="f-sub">지훈 · 41 MB</div></div></div>
+          </div>
+          <div class="dropzone" id="dropzone-2">
+            <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></div>
+            파일을 끌어다 놓거나 눌러서 올리기
+          </div>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 노트 ============ -->
+    <section class="view" data-view="notes">
+      <div class="vhead">
+        <div class="vh-row">
+          <div><h1>노트</h1><p class="vh-sub">크루가 함께 쌓는 문서예요. 워크플로, 회의 정리, 레퍼런스를 기록하세요.</p></div>
+          <div class="vh-actions"><button class="btn btn-primary btn-sm" data-toast="노트 편집기는 준비 중이에요">새 노트</button></div>
+        </div>
+      </div>
+      <div class="when-new">
+        <div class="ws-shell"><div class="empty">
+          <div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 9h6M8 13h8M8 17h5"/></svg></div>
+          <h3>첫 노트를 만들어보세요</h3>
+          <p>“우리 크루는 이렇게 진행합니다” 한 장이면 충분해요. 늦게 온 멤버가 가장 먼저 읽게 됩니다.</p>
+          <div class="e-actions"><button class="btn btn-primary" data-toast="노트 편집기는 준비 중이에요">노트 만들기</button></div>
+        </div></div>
+      </div>
+      <div class="when-active">
+        <div class="card" style="max-width:680px">
+          <div class="card-head"><h3>자막 자동화 워크플로</h3><span class="k">지훈 · 어제</span></div>
+          <p style="font-size:14px;color:var(--text-2);line-height:1.6;margin:0 0 14px">음성 → 자동 자막 → 검수 → 자막 스타일 적용까지의 흐름. 막혔던 지점과 해결 방법을 함께 기록합니다.</p>
+          <ul style="margin:0;padding:0;list-style:none;display:grid;gap:10px">
+            <li style="font-size:13.5px;color:var(--text-2);display:flex;gap:10px;align-items:center"><span style="width:18px;height:18px;border-radius:5px;background:var(--mint-soft);border:1px solid var(--mint-line);flex:0 0 auto"></span>1단계 — 음성 추출 후 자동 자막 생성</li>
+            <li style="font-size:13.5px;color:var(--text-2);display:flex;gap:10px;align-items:center"><span style="width:18px;height:18px;border-radius:5px;background:var(--mint-soft);border:1px solid var(--mint-line);flex:0 0 auto"></span>2단계 — 오타·줄바꿈 검수</li>
+            <li style="font-size:13.5px;color:var(--text-2);display:flex;gap:10px;align-items:center"><span style="width:18px;height:18px;border-radius:5px;background:var(--mint-soft);border:1px solid var(--mint-line);flex:0 0 auto"></span>3단계 — 크루 공통 자막 스타일 적용</li>
+          </ul>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 링크 ============ -->
+    <section class="view" data-view="links">
+      <div class="vhead">
+        <div class="vh-row">
+          <div><h1>링크</h1><p class="vh-sub">크루가 함께 쓰는 도구와 레퍼런스 링크를 모아요.</p></div>
+          <div class="vh-actions"><button class="btn btn-primary btn-sm" data-toast="링크 추가는 준비 중이에요">링크 추가</button></div>
+        </div>
+      </div>
+      <div class="when-new">
+        <div class="ws-shell"><div class="empty">
+          <div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></div>
+          <h3>자주 쓰는 링크를 모아두세요</h3>
+          <p>자막 도구, 레퍼런스 보드, 일정 캘린더처럼 크루가 반복해서 여는 링크를 한 곳에.</p>
+          <div class="e-actions"><button class="btn btn-primary" data-toast="링크 추가는 준비 중이에요">첫 링크 추가</button></div>
+        </div></div>
+      </div>
+      <div class="when-active">
+        <div class="link-list">
+          <div class="link-row"><span class="lk" style="background:var(--blue-soft);border:1px solid var(--blue-line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span><div class="meta"><b>자막 자동화 도구</b><span>크루 공통으로 쓰는 자막 생성 툴</span></div></div>
+          <div class="link-row"><span class="lk" style="background:var(--mint-soft);border:1px solid var(--mint-line)"><svg viewBox="0 0 24 24" fill="none" stroke="#3dd8b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span><div class="meta"><b>레퍼런스 보드</b><span>참고하는 쇼츠·광고 모음</span></div></div>
+          <div class="link-row"><span class="lk" style="background:var(--blue-soft);border:1px solid var(--blue-line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span><div class="meta"><b>제작 일정 캘린더</b><span>주간 발행 일정 공유</span></div></div>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 멤버 관리 ============ -->
+    <section class="view" data-view="members">
+      <div class="vhead">
+        <div class="vh-row">
+          <div><h1>멤버 관리</h1><p class="vh-sub">참여 신청을 수락하고, 멤버 역할과 업로드 권한을 관리해요.</p></div>
+          <div class="vh-actions"><button class="btn btn-primary btn-sm" data-open-invite>멤버 초대</button></div>
+        </div>
+      </div>
+
+      <!-- 신청 대기 -->
+      <div class="section-block">
+        <div class="sb-label">참여 신청 <span class="cnt" id="applicant-count">1</span></div>
+        <div id="applicant-list">
+          <div class="applicant" data-applicant>
+            <div class="ap-top">
+              <span class="ap-ava" style="--c:#56c98a">수</span>
+              <div><div class="ap-name">수민</div><div class="ap-meta">막 시작 · 5분 전 신청</div></div>
+              <span class="ap-stage">막 시작</span>
+            </div>
+            <p class="ap-msg">“쇼츠는 처음이지만 매주 한 편씩 끝까지 만들어보고 싶어서 신청해요. 편집은 배우는 중입니다!”</p>
+            <div class="ap-actions">
+              <button class="btn btn-danger-ghost btn-sm" data-applicant-reject>거절</button>
+              <button class="btn btn-primary btn-sm" data-applicant-accept>수락</button>
+            </div>
+          </div>
+        </div>
+        <div id="applicant-empty" style="display:none">
+          <div class="card"><div class="mini-empty" style="padding:20px 8px"><div class="me-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><p style="margin:0">대기 중인 신청이 없어요.</p></div></div>
+        </div>
+      </div>
+
+      <!-- 멤버 목록 -->
+      <div class="section-block">
+        <div class="sb-label">멤버 <span class="cnt"><span data-member-count>2</span> / <span data-member-max>10</span></span></div>
+        <div class="mlist" id="member-list">
+          <div class="mrow">
+            <span class="mr-ava" style="--c:#3dd8b8">지</span>
+            <div class="mr-meta"><div class="mr-name">지훈 <span class="mr-role owner">크루장</span></div><div class="mr-sub">jihoon@example.com · 나</div></div>
+            <div class="mr-act"><button class="icon-btn" disabled style="opacity:.4;cursor:default" aria-label="크루장은 멤버 관리 메뉴를 사용할 수 없어요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>
+          </div>
+          <div class="mrow" data-member-row>
+            <span class="mr-ava" style="--c:#4d8dff">민</span>
+            <div class="mr-meta"><div class="mr-name">민지 <span class="mr-role member">멤버</span></div><div class="mr-sub">방금 합류 · 영상 편집 입문</div></div>
+            <div class="mr-act">
+              <button class="icon-btn" data-row-menu aria-label="민지 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+              <div class="row-menu">
+                <button data-make-owner><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>크루장 위임</button>
+                <button data-grant><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>
+                <div class="rm-sep"></div>
+                <button class="danger" data-kick><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>
+              </div>
+            </div>
+          </div>
+          <!-- 활발한 크루에서 합류한 멤버들 -->
+          <div class="mrow when-active" data-member-row>
+            <span class="mr-ava" style="--c:#2fc2c2">현</span>
+            <div class="mr-meta"><div class="mr-name">현우 <span class="mr-role member">멤버</span></div><div class="mr-sub">합류 6일 · 디자인 · 썸네일 담당</div></div>
+            <div class="mr-act">
+              <button class="icon-btn" data-row-menu aria-label="현우 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+              <div class="row-menu">
+                <button data-make-owner><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>크루장 위임</button>
+                <button data-grant><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>
+                <div class="rm-sep"></div>
+                <button class="danger" data-kick><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>
+              </div>
+            </div>
+          </div>
+          <div class="mrow when-active" data-member-row>
+            <span class="mr-ava" style="--c:#56c98a">수</span>
+            <div class="mr-meta"><div class="mr-name">수민 <span class="mr-role member">멤버</span></div><div class="mr-sub">합류 3일 · 편집 입문 · 막 시작</div></div>
+            <div class="mr-act">
+              <button class="icon-btn" data-row-menu aria-label="수민 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+              <div class="row-menu">
+                <button data-make-owner><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>크루장 위임</button>
+                <button data-grant><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>
+                <div class="rm-sep"></div>
+                <button class="danger" data-kick><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>
+              </div>
+            </div>
+          </div>
+          <div class="mrow when-active" data-member-row>
+            <span class="mr-ava" style="--c:#f0b54d">도</span>
+            <div class="mr-meta"><div class="mr-name">도윤 <span class="mr-role member">멤버</span></div><div class="mr-sub">합류 2주 · 마케터 · 발행/배포 담당</div></div>
+            <div class="mr-act">
+              <button class="icon-btn" data-row-menu aria-label="도윤 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+              <div class="row-menu">
+                <button data-make-owner><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>크루장 위임</button>
+                <button data-grant><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>
+                <div class="rm-sep"></div>
+                <button class="danger" data-kick><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>
+              </div>
+            </div>
+          </div>
+          <div class="mrow when-active" data-member-row>
+            <span class="mr-ava" style="--c:#7c8cff">유</span>
+            <div class="mr-meta"><div class="mr-name">유진 <span class="mr-role member">멤버</span></div><div class="mr-sub">합류 3주 · 기획 · 주간 회고 정리</div></div>
+            <div class="mr-act">
+              <button class="icon-btn" data-row-menu aria-label="유진 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+              <div class="row-menu">
+                <button data-make-owner><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>크루장 위임</button>
+                <button data-grant><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>
+                <div class="rm-sep"></div>
+                <button class="danger" data-kick><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 업로드 권한 관리 (reuse perm-card) -->
+      <div class="section-block">
+        <div class="sb-label">업로드 권한</div>
+        <div class="perm-card" id="permCard">
+          <div class="perm-head">
+            <div>
+              <div class="perm-title">업로드 권한 관리</div>
+              <div class="perm-sub">자료 · 사진 · 영상별로 누가 업로드할 수 있는지 정합니다.</div>
+            </div>
+            <span class="perm-quota"><span class="q-bar" style="width:84px"><span class="q-fill" style="width:4%"></span></span>0.04 / 1 GB</span>
+          </div>
+
+          <div class="perm-block">
+            <div class="perm-block-label">모든 멤버에게 허용</div>
+            <div class="perm-all">
+              <label class="perm-chk"><input type="checkbox" data-all="doc" checked><span class="box"></span><span class="lbl">자료 업로드</span></label>
+              <label class="perm-chk"><input type="checkbox" data-all="photo" checked><span class="box"></span><span class="lbl">사진 업로드</span></label>
+              <label class="perm-chk"><input type="checkbox" data-all="video"><span class="box"></span><span class="lbl">영상 업로드</span></label>
+            </div>
+            <p class="perm-hint" id="permHint">전체 허용이 꺼진 항목은 아래에서 권한을 받은 멤버만 업로드할 수 있어요.</p>
+          </div>
+
+          <div class="perm-block">
+            <div class="perm-block-label">멤버별 권한</div>
+            <div class="perm-table" role="table">
+              <div class="perm-row perm-rowhead" role="row">
+                <span class="c-name">멤버</span><span class="c-tog">자료</span><span class="c-tog">사진</span><span class="c-tog">영상</span>
+              </div>
+              <div class="perm-row" role="row">
+                <span class="c-name"><span class="m-ava" style="--c:#3dd8b8">지</span><span class="m-meta"><b>지훈</b><span>크루장</span></span></span>
+                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
+                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
+                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
+              </div>
+              <div class="perm-row member" role="row" data-member>
+                <span class="c-name"><span class="m-ava">민</span><span class="m-meta"><b>민지</b><span>멤버</span></span></span>
+                <span class="c-tog"><button class="tog on" data-type="doc" aria-pressed="true" aria-label="민지 — 자료 업로드 허용 전환"><span class="knob"></span></button></span>
+                <span class="c-tog"><button class="tog on" data-type="photo" aria-pressed="true" aria-label="민지 — 사진 업로드 허용 전환"><span class="knob"></span></button></span>
+                <span class="c-tog"><button class="tog" data-type="video" aria-pressed="false" aria-label="민지 — 영상 업로드 허용 전환"><span class="knob"></span></button></span>
+              </div>
+            </div>
+            <p class="perm-legend">크루장은 항상 모든 업로드가 가능합니다. 전체 허용이 켜지면 해당 항목의 멤버별 토글은 모두 가능으로 처리돼요.</p>
+          </div>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+    <!-- ============ VIEW · 크루 설정 ============ -->
+    <section class="view" data-view="settings">
+      <div class="vhead"><h1>크루 설정</h1><p class="vh-sub">크루의 기본 정보와 공개 범위, 플랜을 관리해요.</p></div>
+
+      <!-- 기본 정보 -->
+      <div class="set-card">
+        <div class="sc-title">기본 정보</div>
+        <div class="sc-desc">크루 목록과 작업실에 표시되는 정보예요.</div>
+        <div class="field" style="margin-bottom:16px"><label>크루 이름</label><input type="text" value="숏폼 제작 크루"></div>
+        <div class="field" style="margin-bottom:16px">
+          <label>카테고리</label>
+          <div class="seg" id="set-cat"><span class="opt">AI 학습</span><span class="opt on">콘텐츠 제작</span><span class="opt">웹사이트 제작</span><span class="opt">자동화/부업</span><span class="opt">프로젝트</span></div>
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>크루 목적</label>
+          <textarea placeholder="무엇을, 어떤 리듬으로 함께할지 적어주세요."></textarea>
+          <span class="hint">아직 비어 있어요. 채워두면 신청률이 올라가요.</span>
+        </div>
+        <div class="field" style="margin-bottom:16px"><label>진행 방식</label><input type="text" placeholder="예: 주 1회 온라인 모임 + 공유함에 자료 정리"></div>
+        <div class="field">
+          <label>대표 색</label>
+          <div class="swatches" id="set-swatch">
+            <span class="swatch on" style="background:#3dd8b8" data-c="#3dd8b8"></span>
+            <span class="swatch" style="background:#4d8dff" data-c="#4d8dff"></span>
+            <span class="swatch" style="background:#7c8cff" data-c="#7c8cff"></span>
+            <span class="swatch" style="background:#56c98a" data-c="#56c98a"></span>
+            <span class="swatch" style="background:#f0b54d" data-c="#f0b54d"></span>
+            <span class="swatch" style="background:#f4909a" data-c="#f4909a"></span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary btn-sm" data-toast="변경 사항을 저장했어요">변경 사항 저장</button></div>
+      </div>
+
+      <!-- 공개 & 모집 -->
+      <div class="set-card">
+        <div class="sc-title">공개 & 모집</div>
+        <div class="sc-desc">크루를 어디까지 노출하고, 새 멤버를 받을지 정해요.</div>
+        <div class="set-row">
+          <div class="sr-meta"><div class="sr-title">크루 목록에 공개</div><div class="sr-sub">끄면 초대 링크를 받은 사람만 볼 수 있어요. (비공개 전환은 Plus 이상)</div></div>
+          <div class="sr-control"><button class="tog on" data-toggle aria-pressed="true" aria-label="크루 목록에 공개 전환"><span class="knob"></span></button></div>
+        </div>
+        <div class="set-row">
+          <div class="sr-meta"><div class="sr-title">모집 상태</div><div class="sr-sub">크루 카드에 표시되는 배지예요.</div></div>
+          <div class="sr-control"><div class="seg" id="set-recruit"><span class="opt on">모집중</span><span class="opt">마감 임박</span><span class="opt">모집 마감</span></div></div>
+        </div>
+        <div class="set-row">
+          <div class="sr-meta">
+            <div class="sr-title">최대 크루원 수</div>
+            <div class="sr-sub">이 인원에 도달하면 새 신청을 자동으로 닫아요. 크루장이 언제든 바꿀 수 있어요.</div>
+            <p class="cap-note">현재 <b><span data-member-count>2</span>명</b> 참여 중 · <b>Free 플랜</b>은 최대 <b><span data-plan-cap>10</span>명</b>까지 받을 수 있어요.</p>
+          </div>
+          <div class="sr-control">
+            <div class="stepper" id="max-stepper" data-max="10">
+              <button type="button" data-step="-1" aria-label="줄이기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+              <span class="step-val" data-member-max>10</span>
+              <button type="button" data-step="1" aria-label="늘리기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 플랜 & 저장공간 -->
+      <div class="set-card">
+        <div class="sc-title">플랜 & 저장공간</div>
+        <div class="sc-desc">플랜은 이 크루 작업실에 적용돼요.</div>
+        <div class="set-row">
+          <div class="sr-meta"><div class="sr-title">현재 플랜 — Free 크루</div><div class="sr-sub">멤버 10명 · 저장공간 1GB · 소개 영상 1개</div></div>
+          <div class="sr-control"><a class="btn btn-outline btn-sm" href="index.html#pricing">플랜 보기</a></div>
+        </div>
+        <div class="set-row">
+          <div class="sr-meta">
+            <div class="sr-title">저장공간</div>
+            <div class="sr-sub">0.04 / 1 GB 사용 중</div>
+            <span class="q-bar" style="margin-top:10px;max-width:340px"><span class="q-fill" style="width:4%"></span></span>
+          </div>
+          <div class="sr-control"><button class="btn btn-primary btn-sm" data-toast="결제 기능은 준비 중이에요">업그레이드</button></div>
+        </div>
+      </div>
+
+      <!-- 위험 구역 -->
+      <div class="set-card danger-zone">
+        <div class="sc-title">위험 구역</div>
+        <div class="sc-desc">아래 작업은 되돌릴 수 없거나 멤버 전체에게 영향을 줘요.</div>
+        <div class="set-row">
+          <div class="sr-meta"><div class="sr-title">크루장 양도</div><div class="sr-sub">다른 멤버에게 크루장 권한을 넘겨요.</div></div>
+          <div class="sr-control"><button class="btn btn-outline btn-sm" data-view="members">멤버에서 선택</button></div>
+        </div>
+        <div class="set-row">
+          <div class="sr-meta"><div class="sr-title">크루 해산</div><div class="sr-sub">해산 후 일정 보관 기간이 지나면 자료·영상은 삭제될 수 있어요.</div></div>
+          <div class="sr-control"><button class="btn btn-danger-ghost btn-sm" id="disband-btn">크루 해산</button></div>
+        </div>
+      </div>
+      <div class="view-pad-bottom"></div>
+    </section>
+
+  </div><!-- /.main -->
+</div><!-- /.app -->
+</div><!-- /.app-shell -->
+
+<!-- ---------- MOBILE BOTTOM TABBAR ---------- -->
+<nav class="tabbar app-shell-tab">
+  <button class="tb on" data-view="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>홈</button>
+  <button class="tb" data-view="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>채팅</button>
+  <button class="tb" data-view="files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>공유함</button>
+  <button class="tb" data-view="members"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="tb-mem">멤버</span><span class="dot when-new"></span></button>
+  <button class="tb" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M5 12H3M21 12h-2"/></svg>설정</button>
+</nav>
+
+<!-- ===================================================================
+     MODAL · 멤버 초대
+     =================================================================== -->
+<div class="modal" id="modal-invite" role="dialog" aria-modal="true">
+  <div class="modal-scrim"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="crew-thumb" style="--c:#3dd8b8"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+      <div><div class="modal-title">멤버 초대</div><div class="modal-sub">숏폼 제작 크루 · 콘텐츠 제작</div></div>
+      <button class="x-btn" data-close-modal aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>초대 링크</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="invite-link" value="https://crewup.app/join/short-lab-7QF2" readonly style="flex:1">
+          <button class="btn btn-primary btn-sm" id="copy-link" style="flex:0 0 auto;height:auto;padding:0 16px">복사</button>
+        </div>
+        <span class="hint">링크를 받은 사람은 신청 후 크루장이 수락하면 합류해요.</span>
+      </div>
+      <div class="field">
+        <label>이메일로 초대</label>
+        <input type="email" placeholder="friend@example.com">
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-outline" data-close-modal>닫기</button><button type="button" class="btn btn-primary" data-toast="초대를 보냈어요">초대 보내기</button></div>
+      <p class="modal-note">Crew Up은 크루 내부의 금전 거래를 중개·보증하지 않습니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     MODAL · 크루 만들기 (multi-step flow)
+     =================================================================== -->
+<div class="modal" id="modal-flow" role="dialog" aria-modal="true">
+  <div class="modal-scrim"></div>
+  <div class="flow-card">
+    <div class="flow-top">
+      <div class="ft-row">
+        <span class="ft-step"><span id="flow-step-num">1</span> / 5 단계</span>
+        <button class="x-btn" data-close-modal aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="flow-bar" id="flow-bar">
+        <span class="seg-bar"><i></i></span><span class="seg-bar"><i></i></span><span class="seg-bar"><i></i></span><span class="seg-bar"><i></i></span><span class="seg-bar"><i></i></span>
+      </div>
+    </div>
+
+    <div class="flow-body">
+      <!-- step 1: name -->
+      <div class="flow-step on" data-step="1">
+        <h2>어떤 크루를 만들까요?</h2>
+        <p class="fs-sub">크루 이름을 정해주세요. 나중에 설정에서 바꿀 수 있어요.</p>
+        <div class="field"><label>크루 이름</label><input type="text" id="flow-name" placeholder="예: 숏폼 제작 크루"></div>
+      </div>
+      <!-- step 2: category -->
+      <div class="flow-step" data-step="2">
+        <h2>무엇을 함께 하나요?</h2>
+        <p class="fs-sub">가장 가까운 카테고리를 골라주세요.</p>
+        <div class="cat-grid" id="flow-cat">
+          <button class="cat-opt" data-cat="AI 학습"><span class="co-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="co-name">AI 학습</span></button>
+          <button class="cat-opt on" data-cat="콘텐츠 제작"><span class="co-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5zM1 5h15v14H1z"/></svg></span><span class="co-name">콘텐츠 제작</span></button>
+          <button class="cat-opt" data-cat="웹사이트 제작"><span class="co-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg></span><span class="co-name">웹사이트 제작</span></button>
+          <button class="cat-opt" data-cat="자동화/부업"><span class="co-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg></span><span class="co-name">자동화/부업</span></button>
+          <button class="cat-opt" data-cat="프로젝트"><span class="co-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></span><span class="co-name">프로젝트</span></button>
+        </div>
+      </div>
+      <!-- step 3: purpose -->
+      <div class="flow-step" data-step="3">
+        <h2>크루의 목적을 적어주세요</h2>
+        <p class="fs-sub">무엇을 어떤 리듬으로 할지 한두 문장이면 충분해요. 신청하는 사람이 가장 먼저 봐요.</p>
+        <div class="field" style="margin-bottom:16px"><label>크루 목적</label><textarea id="flow-purpose" placeholder="예: AI로 쇼츠를 만들어 매주 한 편씩 발행해요."></textarea></div>
+        <div class="field"><label>진행 방식 <span style="color:var(--text-3);font-weight:500">(선택)</span></label><input type="text" id="flow-style" placeholder="예: 주 1회 온라인 모임 + 금요일 공유"></div>
+      </div>
+      <!-- step 4: plan -->
+      <div class="flow-step" data-step="4">
+        <h2>작업실 플랜을 골라주세요</h2>
+        <p class="fs-sub">플랜은 이 크루에만 적용돼요. 나중에 바꿀 수 있어요.</p>
+        <div class="plan-pick" id="flow-plan">
+          <label class="plan-opt on" data-plan="Free">
+            <span class="po-radio"></span>
+            <span class="po-meta"><span class="po-name">Free 크루 <span class="po-price">₩0<small>/월</small></span></span><span class="po-feat">멤버 10명 · 저장공간 1GB · 소개 영상 1개</span></span>
+          </label>
+          <label class="plan-opt" data-plan="Plus">
+            <span class="po-radio"></span>
+            <span class="po-meta"><span class="po-name">Plus 크루 <span class="po-tag">추천</span> <span class="po-price">₩9,900<small>/월</small></span></span><span class="po-feat">멤버 20명 · 저장공간 5GB · 비공개 전환 가능</span></span>
+          </label>
+          <label class="plan-opt" data-plan="Pro">
+            <span class="po-radio"></span>
+            <span class="po-meta"><span class="po-name">Pro 크루 <span class="po-price">₩19,900<small>/월</small></span></span><span class="po-feat">멤버 제한 없음 · 저장공간 10GB</span></span>
+          </label>
+        </div>
+        <p class="modal-note" style="text-align:left;margin-top:14px">결제 기능은 준비 중이에요. 지금은 Free로 시작해도 좋아요.</p>
+      </div>
+      <!-- step 5: done -->
+      <div class="flow-step" data-step="5">
+        <div class="flow-done">
+          <div class="fd-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <h2>작업실이 열렸어요!</h2>
+          <p>이제 멤버를 초대하고 목적을 다듬으면 크루가 움직이기 시작합니다.</p>
+          <div class="flow-summary" id="flow-summary">
+            <div class="sm-row"><span class="sm-k">이름</span><span class="sm-v" data-sum="name">숏폼 제작 크루</span></div>
+            <div class="sm-row"><span class="sm-k">카테고리</span><span class="sm-v" data-sum="cat">콘텐츠 제작</span></div>
+            <div class="sm-row"><span class="sm-k">플랜</span><span class="sm-v" data-sum="plan">Free 크루</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-foot">
+      <button class="btn btn-outline" id="flow-back" style="display:none">이전</button>
+      <span class="ff-spring"></span>
+      <button class="btn btn-primary" id="flow-next">다음</button>
+      <button class="btn btn-primary" id="flow-enter" style="display:none">작업실 입장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     TWEAKS PANEL
+     =================================================================== -->
+<div id="tweaks-panel">
+  <div class="tw-head">
+    <span class="tw-title">Tweaks</span>
+    <button class="tw-x" id="tw-close" aria-label="닫기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="tw-label">테마</div>
+  <div class="tw-seg" id="tw-theme"><span class="tw-opt" data-val="dark">다크</span><span class="tw-opt" data-val="blush">블러시</span></div>
+  <div class="tw-group">
+    <div class="tw-label">대시보드 레이아웃</div>
+    <div class="tw-seg" id="tw-dash"><span class="tw-opt" data-val="activity">활동형</span><span class="tw-opt" data-val="board">보드형</span></div>
+  </div>
+  <div class="tw-group">
+    <div class="tw-label">크루 상태</div>
+    <div class="tw-seg" id="tw-state"><span class="tw-opt" data-val="new">새 크루</span><span class="tw-opt" data-val="active">활발한 크루</span></div>
+    <p class="tw-note">방금 만든 크루(빈 상태)와 활발한 크루를 전환해 보세요.</p>
+  </div>
+</div>
+
+<!-- toast -->
+<div id="toast" style="position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--surface);border:1px solid var(--line-strong);color:var(--text);font-size:13.5px;font-weight:600;padding:12px 18px;border-radius:12px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;"></div>
+
+<script>
+/* ============================================================
+   Crew Up — internal app interactions
+   auth (magic link) · view routing · crew switcher · create flow
+   · members · chat · settings · permissions · tweaks
+   ============================================================ */
+(function () {
+  "use strict";
+
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const body = document.body;
+
+  /* ---------- scroll lock ---------- */
+  let lockCount = 0;
+  const lock   = () => { lockCount++; body.classList.add("locked"); };
+  const unlock = () => { lockCount = Math.max(0, lockCount - 1); if (!lockCount) body.classList.remove("locked"); };
+
+  /* ---------- toast ---------- */
+  const toastEl = $("#toast");
+  let toastT;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.style.opacity = "1";
+    toastEl.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toastT);
+    toastT = setTimeout(() => {
+      toastEl.style.opacity = "0";
+      toastEl.style.transform = "translateX(-50%) translateY(20px)";
+    }, 2200);
+  }
+  $$("[data-toast]").forEach(el => el.addEventListener("click", () => toast(el.dataset.toast)));
+
+  /* ---------- theme ---------- */
+  const setTheme = (t) => (window.__setTheme ? window.__setTheme(t) : null);
+  const currentTheme = () => (window.__tweaks && window.__tweaks.state.theme) || "dark";
+  $("#theme-toggle-m") && $("#theme-toggle-m").addEventListener("click", () => setTheme(currentTheme() === "blush" ? "dark" : "blush"));
+
+  /* ============================================================
+     AUTH (magic link)
+     ============================================================ */
+  const AUTH_KEY = "crewup-auth";
+  function setAuth(state) {
+    body.dataset.auth = state;
+    try { localStorage.setItem(AUTH_KEY, state); } catch (e) {}
+  }
+  // restore
+  try { if (localStorage.getItem(AUTH_KEY) === "in") body.dataset.auth = "in"; } catch (e) {}
+
+  // tab switch
+  function authTab(name) {
+    $$("#auth-tabs button").forEach(b => b.classList.toggle("on", b.dataset.authTab === name));
+    $$("[data-auth-pane]").forEach(p => p.classList.toggle("on", p.dataset.authPane === name));
+  }
+  $$("#auth-tabs button").forEach(b => b.addEventListener("click", () => authTab(b.dataset.authTab)));
+  $$("[data-goto-tab]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); authTab(a.dataset.gotoTab); }));
+
+  // magic-link submit -> sent view
+  $$("[data-magic]").forEach(form => form.addEventListener("submit", e => {
+    e.preventDefault();
+    const email = ($("input[type=email]", form) || {}).value || "you@example.com";
+    $("#sent-mail").textContent = email;
+    $("#auth-form").style.display = "none";
+    $("#auth-sent").style.display = "block";
+  }));
+  $("#auth-back") && $("#auth-back").addEventListener("click", e => {
+    e.preventDefault();
+    $("#auth-sent").style.display = "none";
+    $("#auth-form").style.display = "block";
+  });
+  $("#demo-enter") && $("#demo-enter").addEventListener("click", () => {
+    setAuth("in");
+    $("#auth-sent").style.display = "none";
+    $("#auth-form").style.display = "block";
+  });
+  // logout
+  $("#logout-btn") && $("#logout-btn").addEventListener("click", () => {
+    setAuth("out");
+    closeAllMenus();
+  });
+
+  /* ============================================================
+     VIEW ROUTING
+     ============================================================ */
+  function showView(name) {
+    if (!$(`.view[data-view="${name}"]`)) return;
+    const cur = $(".view.on");
+    if (cur && cur.dataset.view === name) { closeAllMenus(); return; } // already here — don't scroll
+    $$(".view").forEach(v => v.classList.toggle("on", v.dataset.view === name));
+    $$(".side-link").forEach(l => l.classList.toggle("on", l.dataset.view === name));
+    $$(".tabbar .tb").forEach(t => t.classList.toggle("on", t.dataset.view === name));
+    // scroll main column to top
+    const main = $(".main");
+    if (main) main.scrollTop = 0;
+    window.scrollTo(0, 0);
+    closeAllMenus();
+  }
+  // any element with data-view navigates (links, buttons, quick actions, checklist, ch-act)
+  // NOTE: each .view section also carries data-view as its id — exclude it, otherwise every
+  // click inside a view bubbles up to the section and triggers a (scroll-to-top) navigation.
+  document.addEventListener("click", e => {
+    const nav = e.target.closest("[data-view]");
+    if (nav && !nav.classList.contains("view")) {
+      e.preventDefault();
+      showView(nav.dataset.view);
+    }
+  });
+
+  /* ---------- crew switcher menu ---------- */
+  const crewMenu = $("#crew-menu");
+  const crewBtn = $("#crew-switch-btn");
+  function closeAllMenus() {
+    crewMenu && crewMenu.classList.remove("open");
+    $("#acct-menu") && $("#acct-menu").classList.remove("open");
+    $$(".row-menu.open").forEach(m => m.classList.remove("open"));
+  }
+  crewBtn && crewBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = crewMenu.classList.contains("open");
+    closeAllMenus();
+    if (!open) crewMenu.classList.add("open");
+  });
+  // account menu
+  const acct = $("#acct"), acctMenu = $("#acct-menu");
+  acct && acct.addEventListener("click", e => {
+    if (e.target.closest(".acct-menu")) return;
+    e.stopPropagation();
+    const open = acctMenu.classList.contains("open");
+    closeAllMenus();
+    if (!open) acctMenu.classList.add("open");
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".crew-switch") && !e.target.closest(".acct") && !e.target.closest(".mr-act")) closeAllMenus();
+  });
+
+  /* ============================================================
+     CREATE FLOW (multi-step modal)
+     ============================================================ */
+  const flowModal = $("#modal-flow");
+  const flow = {
+    step: 1, total: 5,
+    data: { name: "", cat: "콘텐츠 제작", plan: "Free" }
+  };
+  function openFlow() {
+    flow.step = 1;
+    flow.data = { name: "", cat: "콘텐츠 제작", plan: "Free" };
+    $("#flow-name").value = "";
+    $("#flow-purpose").value = "";
+    $("#flow-style").value = "";
+    $$("#flow-cat .cat-opt").forEach(o => o.classList.toggle("on", o.dataset.cat === "콘텐츠 제작"));
+    $$("#flow-plan .plan-opt").forEach(o => o.classList.toggle("on", o.dataset.plan === "Free"));
+    renderFlow();
+    closeAllMenus();
+    flowModal.classList.add("open");
+    lock();
+  }
+  function renderFlow() {
+    $$(".flow-step").forEach(s => s.classList.toggle("on", +s.dataset.step === flow.step));
+    $("#flow-step-num").textContent = flow.step;
+    // progress bars
+    $$("#flow-bar .seg-bar").forEach((b, i) => {
+      b.classList.toggle("done", i + 1 < flow.step);
+      b.classList.toggle("cur", i + 1 === flow.step);
+    });
+    // footer buttons
+    $("#flow-back").style.display = flow.step > 1 && flow.step < flow.total ? "" : "none";
+    $("#flow-next").style.display = flow.step < flow.total ? "" : "none";
+    $("#flow-enter").style.display = flow.step === flow.total ? "" : "none";
+    if (flow.step === flow.total) {
+      $("[data-sum=name]").textContent = flow.data.name || "이름 없는 크루";
+      $("[data-sum=cat]").textContent = flow.data.cat;
+      $("[data-sum=plan]").textContent = flow.data.plan + " 크루";
+    }
+  }
+  $("#flow-next").addEventListener("click", () => {
+    if (flow.step === 1) {
+      const v = $("#flow-name").value.trim();
+      if (!v) { $("#flow-name").focus(); $("#flow-name").style.borderColor = "var(--soon)"; return; }
+      flow.data.name = v;
+    }
+    if (flow.step < flow.total) { flow.step++; renderFlow(); }
+  });
+  $("#flow-back").addEventListener("click", () => { if (flow.step > 1) { flow.step--; renderFlow(); } });
+  $("#flow-cat").addEventListener("click", e => {
+    const o = e.target.closest(".cat-opt"); if (!o) return;
+    $$("#flow-cat .cat-opt").forEach(c => c.classList.toggle("on", c === o));
+    flow.data.cat = o.dataset.cat;
+  });
+  $("#flow-plan").addEventListener("click", e => {
+    const o = e.target.closest(".plan-opt"); if (!o) return;
+    $$("#flow-plan .plan-opt").forEach(c => c.classList.toggle("on", c === o));
+    flow.data.plan = o.dataset.plan;
+  });
+  $("#flow-enter").addEventListener("click", () => {
+    // apply to the app shell as the (new) current crew
+    const name = flow.data.name || "이름 없는 크루";
+    const initial = name.trim().charAt(0) || "C";
+    $$(".cs-name").forEach(el => el.textContent = name);
+    $(".ab-name").textContent = name;
+    closeFlow();
+    body.dataset.crewstate = "new";
+    syncStateUI();
+    showView("dash");
+    toast("작업실에 입장했어요");
+  });
+  function closeFlow() { flowModal.classList.remove("open"); unlock(); }
+  $$("[data-open-flow]").forEach(el => el.addEventListener("click", openFlow));
+
+  /* ============================================================
+     INVITE MODAL
+     ============================================================ */
+  const inviteModal = $("#modal-invite");
+  $$("[data-open-invite]").forEach(el => el.addEventListener("click", () => {
+    closeAllMenus();
+    inviteModal.classList.add("open"); lock();
+  }));
+  $("#copy-link") && $("#copy-link").addEventListener("click", () => {
+    const inp = $("#invite-link");
+    inp.select();
+    try { navigator.clipboard.writeText(inp.value); } catch (e) {}
+    toast("초대 링크를 복사했어요");
+  });
+
+  /* ---------- generic modal close ---------- */
+  function closeModal(m) { m.classList.remove("open"); unlock(); }
+  $$("[data-close-modal]").forEach(el => el.addEventListener("click", () => {
+    const m = el.closest(".modal"); if (m) closeModal(m);
+  }));
+  $$(".modal-scrim").forEach(s => s.addEventListener("click", () => closeModal(s.closest(".modal"))));
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { $$(".modal.open").forEach(closeModal); closeAllMenus(); }
+  });
+
+  /* ============================================================
+     CHAT compose
+     ============================================================ */
+  const chatForm = $("#chat-form");
+  chatForm && chatForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const inp = $("#chat-input");
+    const txt = inp.value.trim(); if (!txt) return;
+    const scroll = $("#chat-scroll");
+    const row = document.createElement("div");
+    row.className = "msg me";
+    row.innerHTML = `<span class="m-ava" style="--c:#3dd8b8">지</span><div class="m-bubble"><div class="m-name">지훈</div><div class="m-text"></div></div>`;
+    row.querySelector(".m-text").textContent = txt;
+    scroll.appendChild(row);
+    inp.value = "";
+    scroll.scrollTop = scroll.scrollHeight;
+  });
+
+  /* ============================================================
+     FILES — upload (demo)
+     ============================================================ */
+  $$("#upload-btn, #upload-btn-2, #dropzone, #dropzone-2").forEach(el =>
+    el && el.addEventListener("click", () => toast("파일 업로드는 준비 중이에요")));
+
+  /* ============================================================
+     MEMBERS — applicants, member count, row menus
+     ============================================================ */
+  function memberCount(n) { $$("[data-member-count]").forEach(el => el.textContent = n); if (typeof refreshStepper === "function") refreshStepper(); }
+  function currentMemberCount() { return parseInt($("[data-member-count]").textContent, 10) || 0; }
+  function applicantCount() {
+    const n = $$("#applicant-list [data-applicant]").length;
+    $("#applicant-count").textContent = n;
+    $$(".side-link[data-view=members] .count").forEach(c => { c.textContent = n; c.style.display = n ? "" : "none"; });
+    $$(".tabbar .tb[data-view=members] .dot").forEach(d => d.style.display = n ? "" : "none");
+    $("#applicant-empty").style.display = n ? "none" : "";
+  }
+  function resolveApplicant(btn, accept) {
+    const card = btn.closest("[data-applicant]");
+    if (!card) return;
+    if (accept) {
+      memberCount(currentMemberCount() + 1);
+      toast("수민님을 멤버로 수락했어요");
+    } else {
+      toast("신청을 거절했어요");
+    }
+    card.style.transition = "opacity .2s, transform .2s";
+    card.style.opacity = "0";
+    card.style.transform = "translateY(-6px)";
+    setTimeout(() => { card.remove(); applicantCount(); }, 200);
+  }
+  $$("[data-applicant-accept]").forEach(b => b.addEventListener("click", () => resolveApplicant(b, true)));
+  $$("[data-applicant-reject]").forEach(b => b.addEventListener("click", () => resolveApplicant(b, false)));
+
+  // row menus — open upward when near the bottom of the viewport so items aren't cut off
+  $$("[data-row-menu]").forEach(btn => btn.addEventListener("click", e => {
+    e.stopPropagation();
+    const menu = btn.parentElement.querySelector(".row-menu");
+    const open = menu.classList.contains("open");
+    closeAllMenus();
+    if (!open) {
+      const spaceBelow = window.innerHeight - btn.getBoundingClientRect().bottom;
+      menu.classList.toggle("up", spaceBelow < 230);
+      menu.classList.add("open");
+    }
+  }));
+  $$("[data-kick]").forEach(b => b.addEventListener("click", () => {
+    const row = b.closest("[data-member-row]");
+    if (row) { row.remove(); memberCount(Math.max(1, currentMemberCount() - 1)); toast("멤버를 내보냈어요"); }
+    closeAllMenus();
+  }));
+  $$("[data-make-owner]").forEach(b => b.addEventListener("click", () => { toast("크루장 위임은 확인 절차가 필요해요"); closeAllMenus(); }));
+  $$("[data-grant]").forEach(b => b.addEventListener("click", () => { showView("members"); toast("아래 업로드 권한에서 설정하세요"); closeAllMenus(); }));
+
+  /* ============================================================
+     PERMISSION CARD (reused logic)
+     ============================================================ */
+  const permCard = $("#permCard");
+  if (permCard) {
+    const hint = $("#permHint");
+    const labels = { doc: "자료", photo: "사진", video: "영상" };
+    function refresh() {
+      const allOn = {};
+      $$("[data-all]", permCard).forEach(cb => { allOn[cb.dataset.all] = cb.checked; });
+      $$(".tog[data-type]", permCard).forEach(tog => {
+        const type = tog.dataset.type;
+        if (allOn[type]) {
+          tog.classList.add("on", "locked");
+          tog.setAttribute("aria-pressed", "true");
+          tog.dataset.locked = "1";
+        } else {
+          tog.classList.remove("locked");
+          delete tog.dataset.locked;
+          const self = tog.dataset.self === "1";
+          tog.classList.toggle("on", self);
+          tog.setAttribute("aria-pressed", String(self));
+        }
+      });
+      const open = Object.keys(allOn).filter(k => allOn[k]).map(k => labels[k]);
+      if (open.length === 3) hint.textContent = "지금은 모든 멤버가 자료·사진·영상을 모두 업로드할 수 있어요.";
+      else if (open.length) hint.textContent = `지금은 모든 멤버가 ${open.join("·")}을(를) 업로드할 수 있어요. 나머지는 권한을 받은 멤버만 가능합니다.`;
+      else hint.textContent = "전체 허용이 꺼진 항목은 아래에서 권한을 받은 멤버만 업로드할 수 있어요.";
+    }
+    $$(".tog[data-type]", permCard).forEach(tog => {
+      tog.dataset.self = tog.classList.contains("on") ? "1" : "0";
+      tog.addEventListener("click", () => {
+        if (tog.dataset.locked === "1") return;
+        const next = !tog.classList.contains("on");
+        tog.classList.toggle("on", next);
+        tog.dataset.self = next ? "1" : "0";
+        tog.setAttribute("aria-pressed", String(next));
+      });
+    });
+    $$("[data-all]", permCard).forEach(cb => cb.addEventListener("change", refresh));
+    refresh();
+  }
+
+  /* ============================================================
+     SETTINGS — segmented controls, swatches, toggles
+     ============================================================ */
+  $$("#set-cat, #set-recruit").forEach(seg => seg && seg.addEventListener("click", e => {
+    const opt = e.target.closest(".opt"); if (!opt) return;
+    $$(".opt", seg).forEach(o => o.classList.toggle("on", o === opt));
+  }));
+  const swatchWrap = $("#set-swatch");
+  swatchWrap && swatchWrap.addEventListener("click", e => {
+    const sw = e.target.closest(".swatch"); if (!sw) return;
+    $$(".swatch", swatchWrap).forEach(s => s.classList.toggle("on", s === sw));
+    const c = sw.dataset.c;
+    // reflect on crew thumbs
+    $$(".crew-thumb").forEach(t => { if (t.closest(".crew-switch-btn") || t.closest(".appbar")) t.style.setProperty("--c", c); });
+  });
+  // standalone toggles in settings
+  $$(".set-row [data-toggle]").forEach(tog => tog.addEventListener("click", () => {
+    const next = !tog.classList.contains("on");
+    tog.classList.toggle("on", next);
+    tog.setAttribute("aria-pressed", String(next));
+  }));
+  $("#disband-btn") && $("#disband-btn").addEventListener("click", () => toast("크루 해산은 보관 기간 안내 후 진행돼요"));
+
+  /* ---------- onboarding checklist progress (visual) ---------- */
+  function refreshChecklist() {
+    const items = $$("#checklist .check-item");
+    if (!items.length) return;
+    const done = items.filter(i => i.classList.contains("done")).length;
+    const pct = Math.round((done / items.length) * 100);
+    const f = $("#cp-fill"); if (f) f.style.width = pct + "%";
+    const t = $("#cp-text"); if (t) t.textContent = `${done} / ${items.length} 완료`;
+  }
+  refreshChecklist();
+
+  /* ============================================================
+     DASHBOARD layout switch (in-view seg) + crew-state
+     ============================================================ */
+  function applyDash(val) {
+    const grid = $("#dash-grid");
+    if (grid) { grid.classList.toggle("layout-activity", val === "activity"); grid.classList.toggle("layout-board", val === "board"); }
+    $$("#dash-seg button").forEach(b => b.classList.toggle("on", b.dataset.dash === val));
+    $$("#tw-dash .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === val));
+    window.__tweaks.state.dash = val;
+  }
+  $("#dash-seg") && $("#dash-seg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    applyDash(b.dataset.dash);
+    pushKeys({ dash: b.dataset.dash });
+  });
+
+  function syncStateUI() {
+    const st = body.dataset.crewstate;
+    $$("#tw-state .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === st));
+    // member count differs by demo state (방금 만든 크루 vs 활발한 크루)
+    memberCount(st === "active" ? 6 : 2);
+    refreshStepper();
+    applicantCount();
+  }
+
+  /* ---------- max member count (크루장이 설정, 플랜 한도 내에서 변경 가능) ---------- */
+  const stepper = $("#max-stepper");
+  function planCap() { return parseInt(($("[data-plan-cap]") || {}).textContent, 10) || 10; }
+  function setMaxMembers(n) {
+    const cap = planCap();
+    const min = Math.max(1, currentMemberCount()); // 현재 인원 미만으로는 못 줄임
+    n = Math.max(min, Math.min(cap, n));
+    $$("[data-member-max]").forEach(el => el.textContent = n);
+    if (stepper) stepper.dataset.value = n;
+    refreshStepper();
+    return n;
+  }
+  function refreshStepper() {
+    if (!stepper) return;
+    const cur = parseInt(stepper.dataset.value || ($("[data-member-max]") || {}).textContent, 10) || planCap();
+    const cap = planCap();
+    const min = Math.max(1, currentMemberCount());
+    const dec = stepper.querySelector('[data-step="-1"]');
+    const inc = stepper.querySelector('[data-step="1"]');
+    if (dec) dec.disabled = cur <= min;
+    if (inc) inc.disabled = cur >= cap;
+  }
+  if (stepper) {
+    stepper.dataset.value = ($("[data-member-max]") || {}).textContent || "10";
+    stepper.addEventListener("click", e => {
+      const b = e.target.closest("[data-step]"); if (!b || b.disabled) return;
+      const cur = parseInt(stepper.dataset.value, 10) || planCap();
+      const next = setMaxMembers(cur + parseInt(b.dataset.step, 10));
+      toast(`최대 크루원 수를 ${next}명으로 설정했어요`);
+    });
+  }
+
+  // init from tweaks defaults
+  applyDash((window.__tweaks && window.__tweaks.state.dash) || "activity");
+  body.dataset.crewstate = (window.__tweaks && window.__tweaks.state.crewstate) || "new";
+  syncStateUI();
+
+  /* ============================================================
+     TWEAKS PANEL (host edit-mode protocol)
+     ============================================================ */
+  const panel = $("#tweaks-panel");
+  function pushKeys(edits) {
+    try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits }, "*"); } catch (e) {}
+  }
+  function syncTweaks() {
+    $$("#tw-theme .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === currentTheme()));
+    $$("#tw-dash .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === window.__tweaks.state.dash));
+    $$("#tw-state .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === body.dataset.crewstate));
+  }
+  $("#tw-theme").addEventListener("click", e => {
+    const o = e.target.closest(".tw-opt"); if (!o) return;
+    setTheme(o.dataset.val); syncTweaks(); pushKeys({ theme: o.dataset.val });
+  });
+  $("#tw-dash").addEventListener("click", e => {
+    const o = e.target.closest(".tw-opt"); if (!o) return;
+    applyDash(o.dataset.val); pushKeys({ dash: o.dataset.val });
+  });
+  $("#tw-state").addEventListener("click", e => {
+    const o = e.target.closest(".tw-opt"); if (!o) return;
+    body.dataset.crewstate = o.dataset.val;
+    syncStateUI(); syncTweaks(); pushKeys({ crewstate: o.dataset.val });
+  });
+  document.addEventListener("themechange", syncTweaks);
+  syncTweaks();
+
+  function showPanel() { panel.classList.add("open"); }
+  function hidePanel() { panel.classList.remove("open"); }
+  window.addEventListener("message", e => {
+    const t = e.data && e.data.type;
+    if (t === "__activate_edit_mode") showPanel();
+    else if (t === "__deactivate_edit_mode") hidePanel();
+  });
+  $("#tw-close").addEventListener("click", () => {
+    hidePanel();
+    try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {}
+  });
+  try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+
+  /* ============================================================
+     ACCESSIBILITY — name unlabeled icon / toggle controls
+     ============================================================ */
+  (function a11y() {
+    const TYPE = { doc: "자료", photo: "사진", video: "영상" };
+    // permission toggles
+    $$(".tog[data-type]").forEach(tog => {
+      if (tog.getAttribute("aria-label")) return;
+      const row = tog.closest(".perm-row, [data-member]");
+      const who = row ? (row.querySelector(".c-name b") || {}).textContent : "";
+      const t = TYPE[tog.dataset.type] || "업로드";
+      tog.setAttribute("aria-label", `${who ? who.trim() + " — " : ""}${t} 업로드 허용 전환`);
+    });
+    // generic settings toggles (공개/모집 등)
+    $$(".set-row [data-toggle]").forEach(tog => {
+      if (tog.getAttribute("aria-label")) return;
+      const title = (tog.closest(".set-row").querySelector(".sr-title") || {}).textContent || "설정";
+      tog.setAttribute("aria-label", title.trim() + " 전환");
+    });
+    // member row 3-dot menus
+    $$("[data-row-menu]").forEach(btn => {
+      if (btn.getAttribute("aria-label")) return;
+      const who = (btn.closest(".mrow").querySelector(".mr-name") || {}).textContent || "멤버";
+      btn.setAttribute("aria-label", who.trim().replace(/\s+/g, " ") + " 관리 메뉴 열기");
+      btn.setAttribute("aria-haspopup", "menu");
+    });
+    // disabled owner action button
+    $$(".mrow .icon-btn[disabled]").forEach(b => {
+      if (!b.getAttribute("aria-label")) b.setAttribute("aria-label", "크루장은 관리 메뉴를 사용할 수 없어요");
+    });
+  })();
+
+})();
+
+</script>
+</body>
+</html>
