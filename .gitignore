@@ -7,3 +7,6 @@ E0F
 
 # Local Netlify folder
 .netlify
+
+# Supabase credentials (never commit)
+crewup_official_site/config.js

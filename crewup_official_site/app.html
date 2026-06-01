@@ -1294,6 +1294,46 @@ body[data-auth="in"]  #auth-gate { display: none; }
   body[data-crewstate="new"]    .when-active { display: none !important; }
   body[data-crewstate="active"] .when-new    { display: none !important; }
 </style>
+<script>
+(function () {
+  window.__crewupConfigReady = new Promise(function (resolve) {
+    try {
+      var code = "fetch('config.js').then(function(r){return r.ok?r.text():''}).catch(function(){return ''}).then(function(text){postMessage(text)})";
+      var worker = new Worker(URL.createObjectURL(new Blob([code], { type: "text/javascript" })));
+      worker.onmessage = function (event) {
+        try {
+          if (event.data) (0, eval)(event.data);
+        } catch (e) {}
+        worker.terminate();
+        resolve();
+      };
+      worker.onerror = function () {
+        worker.terminate();
+        resolve();
+      };
+    } catch (e) {
+      resolve();
+    }
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  window.__crewupSupabaseReady = (window.__crewupConfigReady || Promise.resolve()).then(function () {
+    try {
+      var cfg = window.CREWUP_CONFIG || {};
+      var url = cfg.SUPABASE_URL || "";
+      var key = cfg.SUPABASE_ANON_KEY || "";
+      if (url && !url.includes("YOUR_PROJECT_ID") && key && !key.includes("YOUR_SUPABASE") && window.supabase) {
+        window.__sb = window.supabase.createClient(url, key);
+        try { localStorage.removeItem("crewup-auth"); } catch (_) {}
+      }
+    } catch (e) {}
+    return window.__sb || null;
+  });
+})();
+</script>
 </head>
 <body data-auth="out" data-crewstate="new">
 
@@ -2183,8 +2223,8 @@ body[data-auth="in"]  #auth-gate { display: none; }
     body.dataset.auth = state;
     try { localStorage.setItem(AUTH_KEY, state); } catch (e) {}
   }
-  // restore
-  try { if (localStorage.getItem(AUTH_KEY) === "in") body.dataset.auth = "in"; } catch (e) {}
+  // restore (only when Supabase is not active; Supabase uses onAuthStateChange instead)
+  if (!window.__sb) { try { if (localStorage.getItem(AUTH_KEY) === "in") body.dataset.auth = "in"; } catch (e) {} }
 
   // tab switch
   function authTab(name) {
@@ -2194,26 +2234,60 @@ body[data-auth="in"]  #auth-gate { display: none; }
   $$("#auth-tabs button").forEach(b => b.addEventListener("click", () => authTab(b.dataset.authTab)));
   $$("[data-goto-tab]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); authTab(a.dataset.gotoTab); }));
 
-  // magic-link submit -> sent view
+  // magic-link submit -> sent view (+ real OTP when Supabase is configured)
   $$("[data-magic]").forEach(form => form.addEventListener("submit", e => {
     e.preventDefault();
     const email = ($("input[type=email]", form) || {}).value || "you@example.com";
-    $("#sent-mail").textContent = email;
-    $("#auth-form").style.display = "none";
-    $("#auth-sent").style.display = "block";
+    const isSignup = form.dataset.magic === "signup";
+    const nickname = isSignup ? (($("input[type=text]", form) || {}).value || "").trim() : "";
+    if (window.__sb) {
+      const btn = $("button[type=submit]", form);
+      const origText = btn ? btn.textContent : "";
+      if (btn) { btn.disabled = true; btn.textContent = "전송 중…"; }
+      const options = { emailRedirectTo: location.href };
+      if (nickname) options.data = { display_name: nickname, nickname: nickname };
+      window.__sb.auth.signInWithOtp({ email, options })
+        .then(res => {
+          if (btn) { btn.disabled = false; btn.textContent = origText; }
+          if (res.error) { alert("이메일 전송 실패: " + res.error.message); return; }
+          $("#sent-mail").textContent = email;
+          $("#auth-form").style.display = "none";
+          $("#auth-sent").style.display = "block";
+        });
+    } else {
+      $("#sent-mail").textContent = email;
+      $("#auth-form").style.display = "none";
+      $("#auth-sent").style.display = "block";
+    }
   }));
   $("#auth-back") && $("#auth-back").addEventListener("click", e => {
     e.preventDefault();
     $("#auth-sent").style.display = "none";
     $("#auth-form").style.display = "block";
   });
-  $("#demo-enter") && $("#demo-enter").addEventListener("click", () => {
-    setAuth("in");
-    $("#auth-sent").style.display = "none";
-    $("#auth-form").style.display = "block";
+  if (window.__sb) {
+    // hide the demo bypass button — real auth comes from the emailed magic link
+    const demoBtn = $("#demo-enter");
+    const divider = document.querySelector(".auth-divider");
+    if (demoBtn) demoBtn.style.display = "none";
+    if (divider) divider.style.display = "none";
+  } else {
+    $("#demo-enter") && $("#demo-enter").addEventListener("click", () => {
+      setAuth("in");
+      $("#auth-sent").style.display = "none";
+      $("#auth-form").style.display = "block";
+    });
+  }
+  (window.__crewupSupabaseReady || Promise.resolve(null)).then(sb => {
+    if (!sb) return;
+    const demoBtn = $("#demo-enter");
+    const divider = document.querySelector(".auth-divider");
+    if (demoBtn) demoBtn.style.display = "none";
+    if (divider) divider.style.display = "none";
   });
   // logout
   $("#logout-btn") && $("#logout-btn").addEventListener("click", () => {
+    if (window.__sb) window.__sb.auth.signOut();
     setAuth("out");
     closeAllMenus();
   });
@@ -2657,6 +2731,176 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
 })();
 
+</script>
+<script>
+/* ── Supabase session sync + data loader ─────────────────────── */
+(function () {
+  var ready = window.__crewupSupabaseReady || Promise.resolve(window.__sb || null);
+  ready.then(function (sb) {
+  if (!sb) return;
+
+  var body = document.body;
+  var AUTH_KEY = "crewup-auth";
+  window.__currentUser = null;
+  window.__activeCrew  = null;
+
+  function setAuthAttr(state) {
+    body.dataset.auth = state;
+    try { localStorage.setItem(AUTH_KEY, state); } catch (e) {}
+  }
+
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (session) {
+      setAuthAttr("in");
+      window.__currentUser = session.user;
+      var ae = document.getElementById("acct-email");
+      if (ae) ae.textContent = session.user.email || "";
+      syncProfileName(session.user);
+      loadCrewData(session.user.id);
+    } else {
+      setAuthAttr("out");
+      window.__currentUser = null;
+      window.__activeCrew  = null;
+    }
+  });
+
+  function loadCrewData(userId) {
+    sb.from("crew_members")
+      .select("crew_id, role, crews(id, name, category)")
+      .eq("user_id", userId)
+      .then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        var crew = r.data[0].crews;
+        if (!crew) return;
+        window.__activeCrew = crew;
+        document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = crew.name; });
+        var abName = document.querySelector(".ab-name");
+        if (abName) abName.textContent = crew.name;
+        body.dataset.crewstate = "active";
+        loadMessages(crew.id);
+        loadNotes(crew.id);
+        loadLinks(crew.id);
+      });
+  }
+
+  function syncProfileName(user) {
+    var meta = user && user.user_metadata ? user.user_metadata : {};
+    var displayName = (meta.display_name || meta.nickname || "").trim();
+    if (!displayName) return;
+    sb.from("profiles")
+      .upsert({ id: user.id, display_name: displayName }, { onConflict: "id" })
+      .then(function (r) {
+        if (r.error) console.warn("프로필 닉네임 저장 실패:", r.error.message);
+      });
+  }
+
+  function loadMessages(crewId) {
+    sb.from("crew_messages")
+      .select("id, body, created_at, user_id, profiles(display_name)")
+      .eq("crew_id", crewId)
+      .order("created_at", { ascending: true })
+      .limit(60)
+      .then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        var scroll = document.getElementById("chat-scroll");
+        if (!scroll) return;
+        scroll.innerHTML = "";
+        r.data.forEach(function (msg) {
+          var name = (msg.profiles && msg.profiles.display_name) || "멤버";
+          var isMe = window.__currentUser && msg.user_id === window.__currentUser.id;
+          var wrap = document.createElement("div");
+          wrap.className = "msg" + (isMe ? " me" : "");
+          var ava = document.createElement("span");
+          ava.className = "m-ava";
+          ava.textContent = name.charAt(0);
+          var bub = document.createElement("div"); bub.className = "m-bubble";
+          var nm  = document.createElement("div"); nm.className  = "m-name";  nm.textContent  = name;
+          var txt = document.createElement("div"); txt.className = "m-text";  txt.textContent = msg.body;
+          bub.appendChild(nm); bub.appendChild(txt);
+          wrap.appendChild(ava); wrap.appendChild(bub);
+          scroll.appendChild(wrap);
+        });
+        scroll.scrollTop = scroll.scrollHeight;
+      });
+  }
+
+  /* persist outgoing messages to Supabase alongside the local DOM append */
+  var chatForm = document.getElementById("chat-form");
+  if (chatForm) {
+    chatForm.addEventListener("submit", function () {
+      if (!window.__activeCrew || !window.__currentUser) return;
+      var inp = document.getElementById("chat-input");
+      var txt = inp ? inp.value.trim() : "";
+      if (!txt) return;
+      sb.from("crew_messages").insert({
+        crew_id: window.__activeCrew.id,
+        user_id: window.__currentUser.id,
+        body: txt
+      }).then(function (r) {
+        if (r.error) console.warn("메시지 저장 실패:", r.error.message);
+      });
+    });
+  }
+
+  function loadNotes(crewId) {
+    sb.from("crew_notes")
+      .select("id, title, body, updated_at, profiles(display_name)")
+      .eq("crew_id", crewId)
+      .order("updated_at", { ascending: false })
+      .limit(20)
+      .then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        var container = document.querySelector('[data-view="notes"] .when-active');
+        if (!container) return;
+        container.innerHTML = "";
+        r.data.forEach(function (note) {
+          var card = document.createElement("div");
+          card.className = "card";
+          card.style.maxWidth = "680px";
+          var head = document.createElement("div"); head.className = "card-head";
+          var h3 = document.createElement("h3");    h3.textContent = note.title || "제목 없음";
+          var meta = document.createElement("span"); meta.className = "k";
+          var who = (note.profiles && note.profiles.display_name) || "";
+          meta.textContent = who ? who + " · 최근 수정" : "최근 수정";
+          head.appendChild(h3); head.appendChild(meta);
+          var p = document.createElement("p");
+          p.style.cssText = "font-size:14px;color:var(--text-2);line-height:1.6;margin:0";
+          p.textContent = (note.body || "").slice(0, 140) + ((note.body || "").length > 140 ? "…" : "");
+          card.appendChild(head); card.appendChild(p);
+          container.appendChild(card);
+        });
+      });
+  }
+
+  function loadLinks(crewId) {
+    sb.from("crew_links")
+      .select("id, url, label, created_at")
+      .eq("crew_id", crewId)
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        var list = document.querySelector('[data-view="links"] .when-active .link-list');
+        if (!list) return;
+        list.innerHTML = "";
+        var linkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>';
+        r.data.forEach(function (link) {
+          var row = document.createElement("div"); row.className = "link-row";
+          var lk = document.createElement("span");
+          lk.className = "lk";
+          lk.style.cssText = "background:var(--blue-soft);border:1px solid var(--blue-line)";
+          lk.innerHTML = linkSvg;
+          var meta = document.createElement("div"); meta.className = "meta";
+          var lbl = document.createElement("b");    lbl.textContent = link.label || link.url;
+          var url = document.createElement("span"); url.textContent = link.url;
+          meta.appendChild(lbl); meta.appendChild(url);
+          row.appendChild(lk); row.appendChild(meta);
+          list.appendChild(row);
+        });
+      });
+  }
+  });
+})();
 </script>
 </body>
 </html>
