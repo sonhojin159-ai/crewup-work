@@ -1,0 +1,13 @@
+[build]
+  publish = "crewup_official_site"
+  command = "test -n \"$SUPABASE_URL\" && test -n \"$SUPABASE_ANON_KEY\" && printf 'window.CREWUP_CONFIG = {\\n  SUPABASE_URL: \"%s\",\\n  SUPABASE_ANON_KEY: \"%s\"\\n};\\n' \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > crewup_official_site/config.js"
+
+[[headers]]
+  for = "/config.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[[redirects]]
+  from = "/app"
+  to = "/app.html"
+  status = 200

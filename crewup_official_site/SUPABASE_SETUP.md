@@ -11,6 +11,8 @@
 
 ## 2. config.js 만들기
 
+### 로컬 개발
+
 ```bash
 # crewup_official_site/ 디렉터리에서 실행
 cp config.example.js config.js
@@ -21,8 +23,23 @@ cp config.example.js config.js
 ```js
 window.CREWUP_CONFIG = {
   SUPABASE_URL: "https://abcdefgh.supabase.co",   // ← Project URL
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIs..."    // ← anon public key
+  SUPABASE_ANON_KEY: "eyJhbG...NiIs..."    // ← anon public key
 };
+```
+
+### Netlify 배포
+
+이 저장소의 `netlify.toml`은 빌드 시 Netlify 환경변수로 `crewup_official_site/config.js`를 생성합니다.
+Netlify 대시보드 → **Site configuration → Environment variables**에 아래 값을 추가하세요.
+
+- `SUPABASE_URL`: Supabase Project URL
+- `SUPABASE_ANON_KEY`: Supabase anon public key
+
+환경변수를 추가/수정한 뒤에는 **Deploys → Trigger deploy → Deploy site**로 재배포해야 합니다.
+배포된 사이트에서 아래 URL이 200으로 열리고 실제 값이 보이면 Supabase 초기화 준비가 된 것입니다.
+
+```text
+https://배포도메인/config.js
 ```
 
 > **주의**: `config.js` 는 `.gitignore` 에 포함되어 있어 git에 커밋되지 않습니다.  
@@ -126,8 +143,19 @@ http://localhost:4177/
 http://localhost:4177/app.html
 ```
 
+Netlify/커스텀 도메인 배포 후에는 실제 배포 주소도 반드시 추가하세요. Magic Link는 `app.html`로 돌아와야 하므로 최소 아래 형식이 필요합니다.
+
+```text
+https://배포도메인/
+https://배포도메인/app.html
+https://커스텀도메인/
+https://커스텀도메인/app.html
+```
+
 상위 폴더(`/workspace/MA`)에서 서버를 띄우는 경우에만
 `http://localhost:4177/crewup_official_site/app.html` 형식의 URL을 별도로 추가합니다.
+
+**중요**: Magic Link 발송 시 앱은 현재 페이지의 `origin + pathname`을 `emailRedirectTo`로 보냅니다. 배포 사이트에서 로그인 버튼을 누르면 보통 `https://배포도메인/app.html`이 Redirect URL로 사용됩니다. Supabase에 이 URL이 등록되어 있지 않으면 링크 클릭 후 로그인 세션이 잡히지 않거나 허용되지 않은 redirect 오류가 발생합니다.
 
 프로덕션 배포 시 실제 도메인도 추가해야 합니다.
 
@@ -158,10 +186,10 @@ python3 -m http.server 4177
 ## 8. config.js 없을 때 동작
 
 `config.js` 가 없거나 플레이스홀더 상태이면:
-- Supabase 초기화를 건너뜀
-- `index.html` 의 크루 목록은 Supabase 공개 크루 데이터로 표시
-- `app.html` 은 Magic Link 인증 후 작업실 화면으로 진입
-- 오프라인 확인용 더미 입장 버튼은 제거됨
+- Supabase 초기화를 건너뜁니다.
+- `index.html` 의 공개 크루 목록은 DB에서 불러오지 못하고 빈 상태 안내가 표시될 수 있습니다.
+- `app.html` 은 실제 Magic Link 메일을 보낼 수 없습니다.
+- 배포 환경에서 이 상태가 나오면 Netlify 환경변수와 `/config.js` 생성 여부를 먼저 확인하세요.
 
 ## 9. 문제 해결
 

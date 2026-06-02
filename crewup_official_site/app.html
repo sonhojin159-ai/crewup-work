@@ -2216,7 +2216,8 @@ body[data-auth="in"]  #auth-gate { display: none; }
       const btn = $("button[type=submit]", form);
       const origText = btn ? btn.textContent : "";
       if (btn) { btn.disabled = true; btn.textContent = "전송 중…"; }
-      const options = { emailRedirectTo: location.href };
+      const redirectUrl = location.origin + location.pathname;
+      const options = { emailRedirectTo: redirectUrl };
       if (nickname) options.data = { display_name: nickname, nickname: nickname };
       window.__sb.auth.signInWithOtp({ email, options })
         .then(res => {
@@ -2227,9 +2228,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
           $("#auth-sent").style.display = "block";
         });
     } else {
-      $("#sent-mail").textContent = email;
-      $("#auth-form").style.display = "none";
-      $("#auth-sent").style.display = "block";
+      alert("Supabase 설정이 없어 Magic Link를 보낼 수 없습니다. 배포 환경변수와 /config.js를 확인해주세요.");
     }
   }));
   $("#auth-back") && $("#auth-back").addEventListener("click", e => {
