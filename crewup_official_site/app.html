@@ -1298,19 +1298,11 @@ body[data-auth="in"]  #auth-gate { display: none; }
 (function () {
   window.__crewupConfigReady = new Promise(function (resolve) {
     try {
-      var code = "fetch('config.js').then(function(r){return r.ok?r.text():''}).catch(function(){return ''}).then(function(text){postMessage(text)})";
-      var worker = new Worker(URL.createObjectURL(new Blob([code], { type: "text/javascript" })));
-      worker.onmessage = function (event) {
-        try {
-          if (event.data) (0, eval)(event.data);
-        } catch (e) {}
-        worker.terminate();
-        resolve();
-      };
-      worker.onerror = function () {
-        worker.terminate();
-        resolve();
-      };
+      var script = document.createElement("script");
+      script.src = "config.js";
+      script.onload = function () { resolve(); };
+      script.onerror = function () { resolve(); };
+      document.head.appendChild(script);
     } catch (e) {
       resolve();
     }
