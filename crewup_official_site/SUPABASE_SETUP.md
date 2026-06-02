@@ -68,11 +68,51 @@ Supabase 대시보드 → **SQL Editor** → **New query**
 
 - `crew_files` 테이블은 파일 메타데이터만 저장합니다. 실제 파일 권한은 `storage.objects` policy에서 별도로 관리됩니다.
 - MVP 단계에서는 버킷만 먼저 만들고, 실제 파일 업로드 기능을 연결하기 전에 `storage.objects`의 업로드/조회/삭제 policy를 점검하세요.
+- 권장 경로 규칙: `crew_id/파일명` 형태로 업로드합니다. 예: `9f4c.../proposal.pdf`
 - 권장 방향:
   - 업로드: 로그인한 사용자가 자신이 속한 크루 경로에만 업로드
   - 조회: 해당 크루 멤버만 다운로드/조회
   - 삭제: 업로더 또는 크루장만 삭제
 - service_role key를 브라우저 config에 넣어 Storage 권한 문제를 우회하지 마세요.
+
+#### 참고용 `storage.objects` policy 예시
+
+아래 SQL은 `crew-files` 버킷의 파일 경로 첫 번째 폴더명을 `crew_id`로 쓰는 경우의 예시입니다. 실제 업로드 로직을 연결할 때 경로 규칙과 함께 재확인하세요.
+
+```sql
+-- crew-files bucket objects are readable only by crew members.
+DROP POLICY IF EXISTS "crew-files: members can read objects" ON storage.objects;
+CREATE POLICY "crew-files: members can read objects"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'crew-files'
+    AND public.is_crew_member((storage.foldername(name))[1]::uuid)
+  );
+
+-- Crew members can upload into their own crew folder only.
+DROP POLICY IF EXISTS "crew-files: members can upload objects" ON storage.objects;
+CREATE POLICY "crew-files: members can upload objects"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'crew-files'
+    AND auth.uid() IS NOT NULL
+    AND public.is_crew_member((storage.foldername(name))[1]::uuid)
+  );
+
+-- Uploader or crew owner can delete the object.
+DROP POLICY IF EXISTS "crew-files: uploader or owner can delete objects" ON storage.objects;
+CREATE POLICY "crew-files: uploader or owner can delete objects"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'crew-files'
+    AND (
+      owner = auth.uid()
+      OR public.is_crew_owner((storage.foldername(name))[1]::uuid)
+    )
+  );
+```
+
+> `storage.foldername(name)[1]`이 UUID로 변환되지 않는 경로가 업로드되면 policy 평가 중 오류가 날 수 있습니다. 업로드 코드에서 반드시 `crew_id/...` 경로만 만들도록 제한하세요.
 
 ## 5. Auth 설정 — Redirect URL
 
