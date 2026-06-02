@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, display_name)
   VALUES (
@@ -148,7 +150,9 @@ ALTER TABLE public.crew_files    ENABLE ROW LEVEL SECURITY;
 
 -- ── helper: is the calling user a member of a crew? ──────────────
 CREATE OR REPLACE FUNCTION public.is_crew_member(p_crew_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.crew_members
     WHERE crew_id = p_crew_id AND user_id = auth.uid()
@@ -157,7 +161,9 @@ $$;
 
 -- ── helper: is the calling user the crew owner? ──────────────────
 CREATE OR REPLACE FUNCTION public.is_crew_owner(p_crew_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.crews
     WHERE id = p_crew_id AND owner_id = auth.uid()

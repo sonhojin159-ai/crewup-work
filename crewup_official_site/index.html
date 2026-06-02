@@ -1985,7 +1985,7 @@ body.locked { overflow: hidden; }
           article.setAttribute("data-crew-id", crew.id);
           article.innerHTML =
             '<div class="crew-top">' +
-              '<span class="crew-thumb" style="--c:' + color + '">' + initial + '</span>' +
+              '<span class="crew-thumb" style="--c:' + color + '">' + escHtml(initial) + '</span>' +
               '<div><div class="crew-cat">' + escHtml(cat) + '</div><div class="crew-name">' + escHtml(name) + '</div></div>' +
               '<span class="badge open"><span class="pip"></span>모집중</span>' +
             '</div>' +

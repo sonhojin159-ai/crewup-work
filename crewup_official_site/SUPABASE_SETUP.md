@@ -62,6 +62,18 @@ Supabase 대시보드 → **SQL Editor** → **New query**
 
 > SQL로는 버킷을 만들 수 없습니다. 반드시 대시보드 또는 Management API를 사용하세요.
 
+### Storage RLS / policy 주의
+
+`crew-files`는 비공개 버킷으로 유지해야 하며, 파일 접근 권한은 공개 URL이 아니라 Supabase Storage policy로 제어해야 합니다.
+
+- `crew_files` 테이블은 파일 메타데이터만 저장합니다. 실제 파일 권한은 `storage.objects` policy에서 별도로 관리됩니다.
+- MVP 단계에서는 버킷만 먼저 만들고, 실제 파일 업로드 기능을 연결하기 전에 `storage.objects`의 업로드/조회/삭제 policy를 점검하세요.
+- 권장 방향:
+  - 업로드: 로그인한 사용자가 자신이 속한 크루 경로에만 업로드
+  - 조회: 해당 크루 멤버만 다운로드/조회
+  - 삭제: 업로더 또는 크루장만 삭제
+- service_role key를 브라우저 config에 넣어 Storage 권한 문제를 우회하지 마세요.
+
 ## 5. Auth 설정 — Redirect URL
 
 대시보드 → **Authentication → URL Configuration**
