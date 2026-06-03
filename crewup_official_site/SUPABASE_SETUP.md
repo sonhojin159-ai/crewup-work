@@ -68,68 +68,30 @@ Supabase 대시보드 → **SQL Editor** → **New query**
 | `crew_links` | 크루 공유 링크 |
 | `crew_files` | 업로드 파일 메타데이터 |
 
-## 4. Storage 버킷 만들기
+## 4. Storage 설정 실행하기
 
-대시보드 → **Storage** → **New bucket**
+파일 업로드 기능을 쓰려면 테이블 schema 외에 Storage bucket과 `storage.objects` policy를 반드시 적용해야 합니다.
 
-- **Name**: `crew-files`
+1. Supabase 대시보드 → **SQL Editor** 를 엽니다.
+2. 먼저 `supabase_schema.sql` 전체를 실행합니다.
+3. 이어서 `supabase_storage_setup.sql` 전체를 실행합니다.
+
+`supabase_storage_setup.sql`은 다음 설정을 생성/보정합니다.
+
+- **Bucket**: `crew-files`
 - **Public bucket**: OFF (비공개)
-- **File size limit**: 50 MB (권장)
-- **Allowed MIME types**: 비워두면 모든 타입 허용
-
-> SQL로는 버킷을 만들 수 없습니다. 반드시 대시보드 또는 Management API를 사용하세요.
+- **File size limit**: 50 MB
+- **Storage policies**: 크루 멤버 조회/업로드, 업로더 또는 크루장 삭제
 
 ### Storage RLS / policy 주의
 
 `crew-files`는 비공개 버킷으로 유지해야 하며, 파일 접근 권한은 공개 URL이 아니라 Supabase Storage policy로 제어해야 합니다.
 
 - `crew_files` 테이블은 파일 메타데이터만 저장합니다. 실제 파일 권한은 `storage.objects` policy에서 별도로 관리됩니다.
-- MVP 단계에서는 버킷만 먼저 만들고, 실제 파일 업로드 기능을 연결하기 전에 `storage.objects`의 업로드/조회/삭제 policy를 점검하세요.
 - 권장 경로 규칙: `crew_id/파일명` 형태로 업로드합니다. 예: `9f4c.../proposal.pdf`
-- 권장 방향:
-  - 업로드: 로그인한 사용자가 자신이 속한 크루 경로에만 업로드
-  - 조회: 해당 크루 멤버만 다운로드/조회
-  - 삭제: 업로더 또는 크루장만 삭제
 - service_role key를 브라우저 config에 넣어 Storage 권한 문제를 우회하지 마세요.
 
-#### 참고용 `storage.objects` policy 예시
-
-아래 SQL은 `crew-files` 버킷의 파일 경로 첫 번째 폴더명을 `crew_id`로 쓰는 경우의 예시입니다. 실제 업로드 로직을 연결할 때 경로 규칙과 함께 재확인하세요.
-
-```sql
--- crew-files bucket objects are readable only by crew members.
-DROP POLICY IF EXISTS "crew-files: members can read objects" ON storage.objects;
-CREATE POLICY "crew-files: members can read objects"
-  ON storage.objects FOR SELECT
-  USING (
-    bucket_id = 'crew-files'
-    AND public.is_crew_member((storage.foldername(name))[1]::uuid)
-  );
-
--- Crew members can upload into their own crew folder only.
-DROP POLICY IF EXISTS "crew-files: members can upload objects" ON storage.objects;
-CREATE POLICY "crew-files: members can upload objects"
-  ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'crew-files'
-    AND auth.uid() IS NOT NULL
-    AND public.is_crew_member((storage.foldername(name))[1]::uuid)
-  );
-
--- Uploader or crew owner can delete the object.
-DROP POLICY IF EXISTS "crew-files: uploader or owner can delete objects" ON storage.objects;
-CREATE POLICY "crew-files: uploader or owner can delete objects"
-  ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'crew-files'
-    AND (
-      owner = auth.uid()
-      OR public.is_crew_owner((storage.foldername(name))[1]::uuid)
-    )
-  );
-```
-
-> `storage.foldername(name)[1]`이 UUID로 변환되지 않는 경로가 업로드되면 policy 평가 중 오류가 날 수 있습니다. 업로드 코드에서 반드시 `crew_id/...` 경로만 만들도록 제한하세요.
+> `storage.foldername(name)[1]`이 UUID로 변환되지 않는 경로가 업로드되면 policy 평가 중 오류가 날 수 있습니다. 앱 업로드 코드는 `crew_id/...` 경로만 만들도록 제한되어 있습니다.
 
 ## 5. Auth 설정 — Redirect URL
 
@@ -198,5 +160,13 @@ python3 -m http.server 4177
 | Magic Link 메일이 안 옴 | Supabase 대시보드 → Authentication → Logs 확인 |
 | 로그인 후 리다이렉트가 안 됨 | Redirect URL 설정 확인 (5번 항목) |
 | RLS 오류 (42501) | 스키마 SQL을 다시 실행했는지 확인 |
-| Storage 업로드 실패 | `crew-files` 버킷이 존재하는지 확인 |
+| Storage 업로드 실패 | 아래 Storage 점검 순서를 확인 |
 | `config.js` 로드 실패 | 파일이 `crewup_official_site/config.js` 에 있는지 확인 |
+
+### Storage 업로드 실패 점검 순서
+
+1. Supabase Storage에 `crew-files` bucket이 존재하는지 확인합니다.
+2. `crew-files` bucket이 private인지 확인합니다.
+3. SQL Editor에서 `supabase_storage_setup.sql`을 실행했고, `storage.objects`에 `crew-files: members can read objects`, `crew-files: members can upload objects`, `crew-files: uploader or owner can delete objects` policy가 존재하는지 확인합니다.
+4. 업로드하는 사용자가 해당 크루의 `crew_members` row에 포함되어 있는지 확인합니다.
+5. 파일 종류에 따라 `crew_members.can_files`, `crew_members.can_photos`, `crew_members.can_videos` 권한이 true인지 확인합니다. 크루장(`role = owner`)은 앱에서 업로드 권한을 허용합니다.

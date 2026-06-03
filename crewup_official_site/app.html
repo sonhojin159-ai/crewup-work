@@ -3441,8 +3441,12 @@ body[data-auth="in"]  #auth-gate { display: none; }
     var crewId = window.__activeCrew && window.__activeCrew.id;
     var userId = window.__currentUser && window.__currentUser.id;
     if (!crewId || !userId || !file) return Promise.resolve(false);
-    return canUploadFile(file).then(function (allowed) {
-      if (!allowed) {
+    return canUploadFile(file).then(function (permission) {
+      if (!permission.allowed) {
+        if (permission.reason === "query") {
+          toast("업로드 권한을 확인하지 못했어요");
+          return false;
+        }
         toast("이 파일 종류를 업로드할 권한이 없어요");
         return false;
       }
@@ -3453,8 +3457,8 @@ body[data-auth="in"]  #auth-gate { display: none; }
         contentType: file.type || undefined
       }).then(function (uploadResult) {
         if (uploadResult.error) {
-          console.warn("Crew Up storage upload failed:", uploadResult.error.message || uploadResult.error);
-          toast("파일 업로드에 실패했어요");
+          console.warn("Crew Up storage upload failed:", uploadResult.error);
+          toast(storageUploadErrorMessage(uploadResult.error));
           return false;
         }
         return sb.from("crew_files").insert({
@@ -3466,24 +3470,49 @@ body[data-auth="in"]  #auth-gate { display: none; }
           size_bytes: file.size
         }).then(function (metaResult) {
           if (metaResult.error) {
-            console.warn("Crew Up file metadata insert failed:", metaResult.error.message || metaResult.error);
-            toast("자료 정보를 저장하지 못했어요");
-            return false;
+            console.warn("Crew Up file metadata insert failed:", metaResult.error);
+            return sb.storage.from("crew-files").remove([storagePath]).then(function (removeResult) {
+              if (removeResult.error) {
+                console.warn("Crew Up orphaned storage object cleanup failed:", removeResult.error);
+              }
+              toast("자료 정보를 저장하지 못했어요");
+              return false;
+            });
           }
           return true;
         });
       });
     }).catch(function (err) {
-      console.warn("Crew Up file upload failed:", err && err.message ? err.message : err);
+      console.warn("Crew Up file upload failed:", err);
       toast("파일 업로드에 실패했어요");
       return false;
     });
   }
 
+  function storageUploadErrorMessage(error) {
+    var raw = [
+      error && error.message,
+      error && error.error,
+      error && error.code,
+      error && error.statusCode,
+      error && error.status
+    ].filter(Boolean).join(" ").toLowerCase();
+    if (/bucket.*(not found|not exist|does not exist)|not found.*bucket|not exist.*bucket|does not exist.*bucket/.test(raw)) {
+      return "Storage 버킷 crew-files가 없어요. supabase_storage_setup.sql을 실행해 주세요.";
+    }
+    if (/row-level security|row level security|policy|permission|unauthorized|forbidden|403|42501/.test(raw)) {
+      return "Storage 업로드 권한 정책이 막고 있어요. storage policy를 확인해 주세요.";
+    }
+    if (/payload too large|too large|file size|size|exceeded|limit/.test(raw)) {
+      return "파일 크기가 제한을 넘었어요.";
+    }
+    return "파일 업로드에 실패했어요";
+  }
+
   function canUploadFile(file) {
     var crewId = window.__activeCrew && window.__activeCrew.id;
     var userId = window.__currentUser && window.__currentUser.id;
-    if (!crewId || !userId) return Promise.resolve(false);
+    if (!crewId || !userId) return Promise.resolve({ allowed: false, reason: "context" });
     return sb.from("crew_members")
       .select("role, can_files, can_photos, can_videos")
       .eq("crew_id", crewId)
@@ -3491,16 +3520,16 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .maybeSingle()
       .then(function (r) {
         if (r.error) {
-          console.warn("Crew Up upload permission query failed:", r.error.message || r.error);
-          return false;
+          console.warn("Crew Up upload permission query failed:", r.error);
+          return { allowed: false, reason: "query" };
         }
         var member = r.data;
-        if (!member) return false;
-        if (member.role === "owner") return true;
+        if (!member) return { allowed: false, reason: "member" };
+        if (member.role === "owner") return { allowed: true };
         var type = file && file.type ? file.type : "";
-        if (type.indexOf("image/") === 0) return member.can_photos === true;
-        if (type.indexOf("video/") === 0) return member.can_videos === true;
-        return member.can_files === true;
+        if (type.indexOf("image/") === 0) return { allowed: member.can_photos === true, reason: "can_photos" };
+        if (type.indexOf("video/") === 0) return { allowed: member.can_videos === true, reason: "can_videos" };
+        return { allowed: member.can_files === true, reason: "can_files" };
       });
   }
 

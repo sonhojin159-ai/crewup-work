@@ -307,7 +307,7 @@ CREATE POLICY "crew_files: uploader or owner can delete"
   USING (uploaded_by = auth.uid() OR is_crew_owner(crew_id));
 
 -- ════════════════════════════════════════════════════════════════
--- Storage bucket (run via Supabase dashboard or Management API)
--- Cannot be created with SQL; see SUPABASE_SETUP.md.
--- Bucket name: crew-files  (private)
+-- Storage bucket and storage.objects policies are managed separately.
+-- After this file, run crewup_official_site/supabase_storage_setup.sql.
+-- Bucket name: crew-files  (private, 50 MB limit)
 -- ════════════════════════════════════════════════════════════════

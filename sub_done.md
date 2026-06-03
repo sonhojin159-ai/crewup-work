@@ -1,26 +1,32 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
+  - 생성: `crewup_official_site/supabase_storage_setup.sql`
+  - 수정: `crewup_official_site/SUPABASE_SETUP.md`
   - 수정: `crewup_official_site/app.html`
+  - 수정: `crewup_official_site/supabase_schema.sql`
   - 수정: `sub_done.md`
 - 핵심 구현 요약:
-  - 실제 Supabase loader에서 파일/노트/링크/채팅 rows가 1개 이상 조회되면 `markRealCrewHasContent()`로 `body.dataset.crewstate`를 `active`로 전환하도록 했습니다.
-  - `window.__tweaks.state.crewstate`도 함께 동기화해 tweak 상태와 CSS 표시 상태가 어긋나지 않게 했습니다.
-  - `renderMembers()`가 멤버 1명 이하라는 이유로 콘텐츠가 있는 실제 크루를 다시 `new` 상태로 덮어쓰지 않도록 `window.__crewupRealHasContent` 플래그를 반영했습니다.
-  - 파일/노트/링크 loader가 Promise를 반환하게 하고, 저장 성공 후 전체 SELECT reload가 끝난 뒤 성공 toast를 표시하도록 조정했습니다.
-  - 파일/노트/링크 조회 limit을 20개에서 50개로 늘렸습니다.
-  - query error 시 실제 목록을 빈 상태로 덮어쓰지 않고 `console.warn` 후 기존 DOM을 유지하도록 변경했습니다.
-  - `config.js` 로딩은 fetch 후 인라인 실행 방식으로 바꿔 config가 있을 때 기존 설정을 유지합니다.
-- 기존 항목 누적 표시 보장 방식:
-  - 저장 직후 DOM append를 사용하지 않고 기존 `loadFiles`, `loadNotes`, `loadLinks`를 통해 Supabase에서 다시 SELECT한 전체 rows를 replace 렌더링합니다.
-  - rows가 있으면 즉시 active 상태로 전환하므로 `.when-active` 목록 컨테이너가 CSS에 의해 숨겨지지 않습니다.
-  - loader query 실패 시 빈 목록으로 덮지 않아 이미 보이던 누적 목록이 사라지지 않습니다.
+  - `crew-files` Storage bucket 생성/보정 SQL과 `storage.objects` 조회/업로드/삭제 policy SQL을 별도 파일로 추가했습니다.
+  - Storage 설정을 선택 예시가 아닌 필수 배포 단계로 문서화했습니다.
+  - 업로드 실패 시 bucket 없음, Storage policy/RLS 차단, 파일 크기 초과를 구분해 toast로 안내하도록 했습니다.
+  - 업로드 권한 조회 실패와 파일 종류별 권한 없음을 분리해 안내하도록 했습니다.
+  - Storage upload 성공 후 `crew_files` metadata insert가 실패하면 업로드된 object 삭제를 시도하도록 정리 로직을 추가했습니다.
+- Storage 실패 원인 진단/해결 방식:
+  - bucket 없음: “Storage 버킷 crew-files가 없어요. supabase_storage_setup.sql을 실행해 주세요.”
+  - Storage RLS/policy/permission/403/42501: “Storage 업로드 권한 정책이 막고 있어요. storage policy를 확인해 주세요.”
+  - 파일 크기 초과: “파일 크기가 제한을 넘었어요.”
+  - 그 외 Storage 실패: “파일 업로드에 실패했어요”
+  - Supabase error 객체는 `console.warn`에 남기되 service_role key나 config secret은 출력하지 않습니다.
+- 사용자가 Supabase에서 실행해야 할 SQL:
+  - 먼저 `crewup_official_site/supabase_schema.sql`
+  - 이어서 `crewup_official_site/supabase_storage_setup.sql`
 - 검증 결과:
   - inline script 추출 후 `node --check /tmp/crewup_app_inline.js` 통과.
   - `git diff --check` 통과.
-  - 로컬 정적 서버 `http://127.0.0.1:4174/app.html?workspace=1`에서 Playwright Chromium으로 console error/pageerror 없음 확인.
-  - 브라우저 검증 중 gitignored `config.js` 404를 피하기 위해 `config.example.js`를 임시 복사했고, 검증 후 제거했습니다.
+  - `crewup_official_site/supabase_storage_setup.sql`을 눈으로 점검했고, bucket upsert와 3개 policy 구문상 명백한 오타는 확인되지 않았습니다.
+  - 로컬 정적 서버 `http://127.0.0.1:4188/app.html`에서 Playwright Chromium 초기 로드를 확인했습니다. 페이지 응답은 200이었고, 로컬 개발용 `config.js`가 없어 기존 404 console error가 발생했습니다. 이번 변경으로 인한 JS pageerror는 확인되지 않았습니다.
 - 커밋:
-  - `Keep real workspace content visible`
+  - `Fix Crew Up storage upload setup`
 - 에러 및 특이사항:
-  - 실제 Supabase 인증 세션과 RLS가 연결된 운영 DB에서의 수동 업로드/저장 검증은 이 환경에서 수행하지 못했습니다.
+  - 실제 Supabase 인증 세션과 운영 DB/Storage 권한이 필요한 실파일 업로드는 이 환경에서 수행하지 못했습니다.
   - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경/커밋에 포함하지 않았습니다.
