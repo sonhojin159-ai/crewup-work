@@ -3,16 +3,23 @@
   - 수정: `crewup_official_site/app.html`
   - 수정: `sub_done.md`
 - 핵심 구현 요약:
-  - 업로드 권한 표의 정적 더미 row를 제거하고 `crew_members.can_files`, `can_photos`, `can_videos` 실제 값으로 멤버별 토글을 렌더링하도록 연결했습니다. owner는 항상 가능으로 표시하고, 일반 멤버 토글 변경은 해당 DB 컬럼 update 후 실패 시 UI를 원복합니다.
-  - 실제 Supabase 작업실에서는 채팅 submit 시 `crew_messages` insert를 먼저 수행하고 성공 후 `loadMessages`로 다시 렌더링하도록 정리했습니다. 기존 중복 persist listener를 제거했고, 빈 메시지 상태와 에러 로그 처리를 추가했습니다.
-  - 공유함/노트/링크 버튼을 각각 `crew_files`, `crew_notes`, `crew_links` metadata insert에 연결했습니다. 성공 후 각 `loadFiles`, `loadNotes`, `loadLinks`를 다시 호출하며, 데이터가 없으면 실제 빈 상태를 렌더링합니다.
-  - 실제 모드에서 전체 허용 체크박스는 DB 컬럼이 없으므로 기본 off/disabled로 두고, 개별 권한을 가짜로 켜 보이지 않게 했습니다.
+  - 공유함의 metadata-only `prompt` 흐름을 제거하고 숨김 file input 기반 실제 파일 선택을 연결했습니다.
+  - `#upload-btn`, `#upload-btn-2`, `#dropzone`, `#dropzone-2` 클릭 시 파일 선택창이 열리며, 드롭존 drag/drop 업로드와 다중 파일 업로드도 처리합니다.
+  - Storage 업로드 성공 후에만 `crew_files` metadata를 insert하고, 성공 시 `loadFiles(activeCrew.id)`로 목록을 갱신합니다.
+  - 파일 목록에서 `storage_path`, `mime_type`을 함께 select하고, 파일 카드 또는 열기 버튼 클릭 시 private bucket signed URL을 생성해 새 탭으로 엽니다.
+- 실제 Storage 업로드 구현 여부:
+  - 구현 완료. bucket은 `crew-files`, path는 `${crewId}/${Date.now()}-${safeFilename}` 형식이며 `sb.storage.from("crew-files").upload(...)`를 사용합니다.
+  - Storage upload 실패 시 metadata insert를 수행하지 않고 `console.warn` 및 toast로 실패를 안내합니다.
+- 권한 체크 구현 여부:
+  - 구현 완료. 업로드 전 현재 사용자의 `crew_members` row를 조회합니다.
+  - owner는 항상 허용하고, `image/*`는 `can_photos`, `video/*`는 `can_videos`, 그 외 파일은 `can_files` 권한이 true일 때만 Storage upload를 시작합니다.
 - 검증 결과:
-  - inline script 추출 후 `node --check /tmp/crewup_app_inline.js` 통과.
+  - inline script 추출 후 `node --check` 통과.
   - `git diff --check` 통과.
-  - Playwright Chromium으로 `file:///workspace/MA/crewup_official_site/app.html?workspace=1` 로딩 확인. 페이지 JS 런타임 에러는 없었고, 기존 로컬 누락 파일인 `crewup_official_site/config.js` 요청만 `ERR_FILE_NOT_FOUND`로 기록되었습니다.
+  - 로컬 정적 서버 `http://127.0.0.1:4187/app.html?workspace=1`에서 Playwright Chromium으로 console error/pageerror 없음 확인.
+  - 로컬 검증 중 Netlify 배포에서 생성되는 gitignored `config.js` 404를 피하기 위해 `config.example.js`를 임시 복사해 확인했고, 검증 후 제거했습니다.
 - 커밋:
-  - Connect workspace UI to Supabase state
+  - `Implement real shared file uploads`
 - 에러 및 특이사항:
-  - 실제 Supabase 세션/프로젝트 데이터로 DB insert/update 수동 검증은 수행하지 못했습니다.
-  - 작업 전부터 수정되어 있던 `sub.md`는 이번 커밋에 포함하지 않습니다.
+  - 실제 Supabase 프로젝트 인증 세션과 Storage/RLS 정책을 통한 업로드 수동 검증은 이 환경에서 수행하지 못했습니다.
+  - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경/커밋에 포함하지 않았습니다.

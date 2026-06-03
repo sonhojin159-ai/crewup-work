@@ -1050,13 +1050,17 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
 /* file grid (active state) */
 .file-grid { display: grid; gap: 12px; grid-template-columns: 1fr; padding: 18px; }
-.file-card { display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 13px 15px; }
+.file-card { display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 13px 15px; cursor: pointer; text-align: left; }
+.file-card:hover { border-color: var(--mint-line); }
 .file-card .f-ico { width: 42px; height: 42px; border-radius: 11px; flex: 0 0 auto; display: grid; place-items: center; background: var(--blue-soft); border: 1px solid var(--blue-line); color: var(--blue); }
 .file-card .f-ico.mint { background: var(--mint-soft); border-color: var(--mint-line); color: var(--mint); }
 .file-card .f-ico svg { width: 19px; height: 19px; }
 .file-card .f-meta { min-width: 0; flex: 1; }
 .file-card .f-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .file-card .f-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.file-open-btn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text-2); display: grid; place-items: center; flex: 0 0 auto; cursor: pointer; }
+.file-open-btn:hover { color: var(--mint); border-color: var(--mint-line); }
+.file-open-btn svg { width: 16px; height: 16px; }
 
 /* drop zone */
 .dropzone {
@@ -2465,12 +2469,6 @@ body[data-auth="in"]  #auth-gate { display: none; }
   });
 
   /* ============================================================
-     FILES — upload (demo)
-     ============================================================ */
-  $$("#upload-btn, #upload-btn-2, #dropzone, #dropzone-2").forEach(el =>
-    el && el.addEventListener("click", () => toast("파일 업로드는 준비 중이에요")));
-
-  /* ============================================================
      MEMBERS — applicants, member count, row menus
      ============================================================ */
   function memberCount(n) { $$("[data-member-count]").forEach(el => el.textContent = n); if (typeof refreshStepper === "function") refreshStepper(); }
@@ -2972,7 +2970,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    }
 	    var activeFiles = document.querySelector('[data-view="files"] .when-active');
 	    if (activeFiles) {
-	      activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>';
+	      activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>' + fileDropzoneMarkup();
 	    }
 	    var notes = document.querySelector('[data-view="notes"] .when-active');
 	    if (notes) {
@@ -2997,7 +2995,11 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  function renderFilesEmpty() {
 	    var activeFiles = document.querySelector('[data-view="files"] .when-active');
 	    if (!activeFiles) return;
-	    activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>';
+	    activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>' + fileDropzoneMarkup();
+	  }
+
+	  function fileDropzoneMarkup() {
+	    return '<div class="dropzone" id="dropzone-2"><div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg></div>파일을 끌어다 놓거나 눌러서 올리기</div>';
 	  }
 
 	  function renderNotesEmpty() {
@@ -3116,7 +3118,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
 	  function loadFiles(crewId) {
 	    sb.from("crew_files")
-	      .select("id, filename, size_bytes, created_at, profiles(display_name)")
+	      .select("id, storage_path, filename, mime_type, size_bytes, created_at, profiles(display_name)")
 	      .eq("crew_id", crewId)
 	      .order("created_at", { ascending: false })
 	      .limit(20)
@@ -3143,13 +3145,25 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	        files.forEach(function (file) {
 	          var card = document.createElement("div");
 	          card.className = "file-card";
-	          var size = file.size_bytes ? Math.max(1, Math.round(file.size_bytes / 1024)) + " KB" : "크기 정보 없음";
+	          card.setAttribute("role", "button");
+	          card.setAttribute("tabindex", "0");
+	          if (file.storage_path) card.setAttribute("data-storage-path", file.storage_path);
+	          var size = formatFileSize(file.size_bytes);
 	          var who = (file.profiles && file.profiles.display_name) || "멤버";
-	          card.innerHTML = '<span class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="f-meta"><div class="f-name">' + escHtml(file.filename || "파일") + '</div><div class="f-sub">' + escHtml(who + " · " + size) + '</div></div>';
+	          var icoClass = file.mime_type && (file.mime_type.indexOf("image/") === 0 || file.mime_type.indexOf("video/") === 0) ? "f-ico mint" : "f-ico";
+	          card.innerHTML = '<span class="' + icoClass + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="f-meta"><div class="f-name">' + escHtml(file.filename || "파일") + '</div><div class="f-sub">' + escHtml(who + " · " + size) + '</div></div><button class="file-open-btn" type="button" aria-label="' + escHtml((file.filename || "파일") + " 열기") + '" data-storage-path="' + escHtml(file.storage_path || "") + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></button>';
 	          grid.appendChild(card);
 	        });
 	        activeFiles.innerHTML = "";
 	        activeFiles.appendChild(grid);
+	        activeFiles.insertAdjacentHTML("beforeend", fileDropzoneMarkup());
+	  }
+
+	  function formatFileSize(bytes) {
+	    if (!bytes && bytes !== 0) return "크기 정보 없음";
+	    if (bytes < 1024) return bytes + " B";
+	    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + " KB";
+	    return (bytes / 1024 / 1024).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0) + " MB";
 	  }
 
   function syncProfileName(user) {
@@ -3305,12 +3319,22 @@ body[data-auth="in"]  #auth-gate { display: none; }
   function bindRealCreationActions() {
     if (window.__crewupRealCreationBound) return;
     window.__crewupRealCreationBound = true;
+    setupFileUploadInput();
     document.addEventListener("click", function (e) {
       var upload = e.target.closest("#upload-btn, #upload-btn-2, #dropzone, #dropzone-2");
       if (upload) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        createFileMetadata();
+        openFilePicker();
+        return;
+      }
+
+      var fileOpen = e.target.closest("[data-storage-path]");
+      var fileSection = fileOpen && fileOpen.closest('section[data-view="files"]');
+      if (fileOpen && fileSection && !upload) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        openStoredFile(fileOpen.getAttribute("data-storage-path"));
         return;
       }
 
@@ -3331,33 +3355,158 @@ body[data-auth="in"]  #auth-gate { display: none; }
         createLink();
       }
     }, true);
+    document.addEventListener("keydown", function (e) {
+      if ((e.key === "Enter" || e.key === " ") && e.target && e.target.matches(".file-card[data-storage-path]")) {
+        e.preventDefault();
+        openStoredFile(e.target.getAttribute("data-storage-path"));
+      }
+    });
+    document.addEventListener("dragover", function (e) {
+      var dz = e.target.closest("#dropzone, #dropzone-2");
+      if (!dz) return;
+      e.preventDefault();
+    });
+    document.addEventListener("drop", function (e) {
+      var dz = e.target.closest("#dropzone, #dropzone-2");
+      if (!dz) return;
+      e.preventDefault();
+      var files = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : null;
+      uploadSelectedFiles(files);
+    });
   }
 
-  function createFileMetadata() {
+  function setupFileUploadInput() {
+    if (window.__crewupFileInput) return window.__crewupFileInput;
+    var input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.hidden = true;
+    input.addEventListener("change", function () {
+      uploadSelectedFiles(input.files);
+      input.value = "";
+    });
+    document.body.appendChild(input);
+    window.__crewupFileInput = input;
+    return input;
+  }
+
+  function openFilePicker() {
     if (!requireCrewContext()) return;
-    var filename = prompt("공유함에 표시할 파일명을 입력하세요", "새_자료.pdf");
-    if (filename === null) return;
-    filename = filename.trim();
-    if (!filename) {
-      toast("파일명을 입력해 주세요");
+    if (!window.__crewupRealState || !window.__sb) {
+      toast("실제 업로드는 로그인된 작업실에서 사용할 수 있어요");
       return;
     }
-    var safeName = filename.replace(/[\\/\0]/g, "_");
-    sb.from("crew_files").insert({
-      crew_id: window.__activeCrew.id,
-      uploaded_by: window.__currentUser.id,
-      storage_path: window.__activeCrew.id + "/" + Date.now() + "-" + safeName,
-      filename: safeName,
-      mime_type: "application/octet-stream",
-      size_bytes: null
-    }).then(function (r) {
-      if (r.error) {
-        console.warn("Crew Up file metadata insert failed:", r.error.message || r.error);
-        toast("자료 정보를 저장하지 못했어요");
+    setupFileUploadInput().click();
+  }
+
+  function uploadSelectedFiles(fileList) {
+    if (!requireCrewContext()) return;
+    if (!window.__crewupRealState || !window.__sb) {
+      toast("실제 업로드는 로그인된 작업실에서 사용할 수 있어요");
+      return;
+    }
+    var files = Array.prototype.slice.call(fileList || []).filter(Boolean);
+    if (!files.length) return;
+    Promise.all(files.map(uploadCrewFile)).then(function (results) {
+      var ok = results.filter(Boolean).length;
+      if (ok) {
+        toast(ok === 1 ? "자료를 업로드했어요" : ok + "개 자료를 업로드했어요");
+        loadFiles(window.__activeCrew.id);
+      }
+    });
+  }
+
+  function uploadCrewFile(file) {
+    var crewId = window.__activeCrew && window.__activeCrew.id;
+    var userId = window.__currentUser && window.__currentUser.id;
+    if (!crewId || !userId || !file) return Promise.resolve(false);
+    return canUploadFile(file).then(function (allowed) {
+      if (!allowed) {
+        toast("이 파일 종류를 업로드할 권한이 없어요");
+        return false;
+      }
+      var safeName = safeFilename(file.name || "upload.bin");
+      var storagePath = crewId + "/" + Date.now() + "-" + safeName;
+      return sb.storage.from("crew-files").upload(storagePath, file, {
+        upsert: false,
+        contentType: file.type || undefined
+      }).then(function (uploadResult) {
+        if (uploadResult.error) {
+          console.warn("Crew Up storage upload failed:", uploadResult.error.message || uploadResult.error);
+          toast("파일 업로드에 실패했어요");
+          return false;
+        }
+        return sb.from("crew_files").insert({
+          crew_id: crewId,
+          uploaded_by: userId,
+          storage_path: storagePath,
+          filename: file.name || safeName,
+          mime_type: file.type || null,
+          size_bytes: file.size
+        }).then(function (metaResult) {
+          if (metaResult.error) {
+            console.warn("Crew Up file metadata insert failed:", metaResult.error.message || metaResult.error);
+            toast("자료 정보를 저장하지 못했어요");
+            return false;
+          }
+          return true;
+        });
+      });
+    }).catch(function (err) {
+      console.warn("Crew Up file upload failed:", err && err.message ? err.message : err);
+      toast("파일 업로드에 실패했어요");
+      return false;
+    });
+  }
+
+  function canUploadFile(file) {
+    var crewId = window.__activeCrew && window.__activeCrew.id;
+    var userId = window.__currentUser && window.__currentUser.id;
+    if (!crewId || !userId) return Promise.resolve(false);
+    return sb.from("crew_members")
+      .select("role, can_files, can_photos, can_videos")
+      .eq("crew_id", crewId)
+      .eq("user_id", userId)
+      .maybeSingle()
+      .then(function (r) {
+        if (r.error) {
+          console.warn("Crew Up upload permission query failed:", r.error.message || r.error);
+          return false;
+        }
+        var member = r.data;
+        if (!member) return false;
+        if (member.role === "owner") return true;
+        var type = file && file.type ? file.type : "";
+        if (type.indexOf("image/") === 0) return member.can_photos === true;
+        if (type.indexOf("video/") === 0) return member.can_videos === true;
+        return member.can_files === true;
+      });
+  }
+
+  function safeFilename(name) {
+    var cleaned = String(name || "upload.bin")
+      .replace(/[\\/\0<>:"|?*\x00-\x1F]+/g, "_")
+      .replace(/\s+/g, " ")
+      .trim();
+    return cleaned || "upload.bin";
+  }
+
+  function openStoredFile(storagePath) {
+    if (!storagePath) {
+      toast("파일 경로가 없습니다");
+      return;
+    }
+    if (!window.__crewupRealState || !window.__sb) {
+      toast("로그인된 작업실에서 파일을 열 수 있어요");
+      return;
+    }
+    sb.storage.from("crew-files").createSignedUrl(storagePath, 60).then(function (r) {
+      if (r.error || !r.data || !r.data.signedUrl) {
+        console.warn("Crew Up signed URL failed:", r.error ? (r.error.message || r.error) : r);
+        toast("파일 링크를 만들지 못했어요");
         return;
       }
-      toast("자료 정보를 공유함에 추가했어요");
-      loadFiles(window.__activeCrew.id);
+      window.open(r.data.signedUrl, "_blank", "noopener");
     });
   }
 
