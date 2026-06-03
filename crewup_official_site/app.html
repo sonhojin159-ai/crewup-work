@@ -609,6 +609,7 @@ body.locked { overflow: hidden; }
 .perm-hint { font-size: 12.5px; color: var(--text-3); margin: 13px 0 0; line-height: 1.5; }
 
 .perm-table { display: grid; gap: 2px; }
+.perm-rows { display: contents; }
 .perm-row { display: grid; grid-template-columns: 1fr 56px 56px 56px; align-items: center; gap: 8px; padding: 11px 4px; border-radius: 10px; }
 .perm-row.member:hover { background: var(--bg-soft); }
 .perm-rowhead { padding-top: 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
@@ -1881,18 +1882,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
               <div class="perm-row perm-rowhead" role="row">
                 <span class="c-name">멤버</span><span class="c-tog">자료</span><span class="c-tog">사진</span><span class="c-tog">영상</span>
               </div>
-              <div class="perm-row" role="row">
-                <span class="c-name"><span class="m-ava" style="--c:#3dd8b8">1</span><span class="m-meta"><b>사용자</b><span>크루장</span></span></span>
-                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
-                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
-                <span class="c-tog"><span class="owner-pill">항상 가능</span></span>
-              </div>
-              <div class="perm-row member" role="row" data-member>
-                <span class="c-name"><span class="m-ava">2</span><span class="m-meta"><b>멤버</b><span>멤버</span></span></span>
-                <span class="c-tog"><button class="tog on" data-type="doc" aria-pressed="true" aria-label="멤버 — 자료 업로드 허용 전환"><span class="knob"></span></button></span>
-                <span class="c-tog"><button class="tog on" data-type="photo" aria-pressed="true" aria-label="멤버 — 사진 업로드 허용 전환"><span class="knob"></span></button></span>
-                <span class="c-tog"><button class="tog" data-type="video" aria-pressed="false" aria-label="멤버 — 영상 업로드 허용 전환"><span class="knob"></span></button></span>
-              </div>
+              <div class="perm-rows" id="perm-member-rows" role="rowgroup"></div>
             </div>
             <p class="perm-legend">크루장은 항상 모든 업로드가 가능합니다. 전체 허용이 켜지면 해당 항목의 멤버별 토글은 모두 가능으로 처리돼요.</p>
           </div>
@@ -2180,6 +2170,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
       toastEl.style.transform = "translateX(-50%) translateY(20px)";
     }, 2200);
   }
+  window.__crewupToast = toast;
   $$("[data-toast]").forEach(el => el.addEventListener("click", () => toast(el.dataset.toast)));
 
   /* ---------- theme ---------- */
@@ -2444,6 +2435,25 @@ body[data-auth="in"]  #auth-gate { display: none; }
     e.preventDefault();
     const inp = $("#chat-input");
     const txt = inp.value.trim(); if (!txt) return;
+    if (window.__crewupRealState && window.__activeCrew && window.__currentUser && window.__sb) {
+      const btn = chatForm.querySelector("button[type=submit]");
+      if (btn) btn.disabled = true;
+      window.__sb.from("crew_messages").insert({
+        crew_id: window.__activeCrew.id,
+        user_id: window.__currentUser.id,
+        body: txt
+      }).then(r => {
+        if (btn) btn.disabled = false;
+        if (r.error) {
+          console.warn("메시지 저장 실패:", r.error.message || r.error);
+          toast("메시지를 저장하지 못했어요");
+          return;
+        }
+        inp.value = "";
+        if (window.__crewupLoadMessages) window.__crewupLoadMessages(window.__activeCrew.id);
+      });
+      return;
+    }
     const scroll = $("#chat-scroll");
     const row = document.createElement("div");
     row.className = "msg me";
@@ -2516,6 +2526,40 @@ body[data-auth="in"]  #auth-gate { display: none; }
   if (permCard) {
     const hint = $("#permHint");
     const labels = { doc: "자료", photo: "사진", video: "영상" };
+    function bindPermissionToggles(root) {
+      $$(".tog[data-type]", root || permCard).forEach(tog => {
+        if (tog.dataset.permBound === "1") return;
+        tog.dataset.permBound = "1";
+        if (typeof tog.dataset.self === "undefined") tog.dataset.self = tog.classList.contains("on") ? "1" : "0";
+        tog.addEventListener("click", () => {
+          if (tog.dataset.locked === "1") return;
+          const next = !tog.classList.contains("on");
+          tog.classList.toggle("on", next);
+          tog.dataset.self = next ? "1" : "0";
+          tog.setAttribute("aria-pressed", String(next));
+          if (window.__crewupRealState && window.__activeCrew && window.__sb && tog.dataset.column && tog.dataset.userId) {
+            tog.disabled = true;
+            const patch = {};
+            patch[tog.dataset.column] = next;
+            window.__sb.from("crew_members")
+              .update(patch)
+              .eq("crew_id", window.__activeCrew.id)
+              .eq("user_id", tog.dataset.userId)
+              .then(r => {
+                tog.disabled = false;
+                if (r.error) {
+                  console.warn("업로드 권한 저장 실패:", r.error.message || r.error);
+                  const prev = !next;
+                  tog.classList.toggle("on", prev);
+                  tog.dataset.self = prev ? "1" : "0";
+                  tog.setAttribute("aria-pressed", String(prev));
+                  toast("업로드 권한을 저장하지 못했어요");
+                }
+              });
+          }
+        });
+      });
+    }
     function refresh() {
       const allOn = {};
       $$("[data-all]", permCard).forEach(cb => { allOn[cb.dataset.all] = cb.checked; });
@@ -2534,21 +2578,15 @@ body[data-auth="in"]  #auth-gate { display: none; }
         }
       });
       const open = Object.keys(allOn).filter(k => allOn[k]).map(k => labels[k]);
-      if (open.length === 3) hint.textContent = "지금은 모든 멤버가 자료·사진·영상을 모두 업로드할 수 있어요.";
+      if (window.__crewupRealState) hint.textContent = "전체 허용 설정은 아직 DB 컬럼이 없어 사용할 수 없습니다. 아래 멤버별 권한만 실제 저장됩니다.";
+      else if (open.length === 3) hint.textContent = "지금은 모든 멤버가 자료·사진·영상을 모두 업로드할 수 있어요.";
       else if (open.length) hint.textContent = `지금은 모든 멤버가 ${open.join("·")}을(를) 업로드할 수 있어요. 나머지는 권한을 받은 멤버만 가능합니다.`;
       else hint.textContent = "전체 허용이 꺼진 항목은 아래에서 권한을 받은 멤버만 업로드할 수 있어요.";
     }
-    $$(".tog[data-type]", permCard).forEach(tog => {
-      tog.dataset.self = tog.classList.contains("on") ? "1" : "0";
-      tog.addEventListener("click", () => {
-        if (tog.dataset.locked === "1") return;
-        const next = !tog.classList.contains("on");
-        tog.classList.toggle("on", next);
-        tog.dataset.self = next ? "1" : "0";
-        tog.setAttribute("aria-pressed", String(next));
-      });
-    });
+    bindPermissionToggles(permCard);
     $$("[data-all]", permCard).forEach(cb => cb.addEventListener("change", refresh));
+    window.__crewupBindPermissionToggles = bindPermissionToggles;
+    window.__crewupRefreshPermCard = refresh;
     refresh();
   }
 
@@ -2736,6 +2774,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  window.__crewupRealState = true;
 	  window.__currentUser = null;
 	  window.__activeCrew  = null;
+	  var toast = window.__crewupToast || function (msg) { console.warn(msg); };
+	  setupRealPermissionCard();
+	  bindRealCreationActions();
 
   function setAuthAttr(state) {
     body.dataset.auth = state;
@@ -2793,7 +2834,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	            if (memberResult.error) throw memberResult.error;
 	            applyCrewShell(crew, true);
 	            renderRealEmptyState();
-	            renderMembers([{ user_id: window.__currentUser.id, role: "owner", profiles: profileFromUser(window.__currentUser) }]);
+	            renderMembers([{ user_id: window.__currentUser.id, role: "owner", can_files: true, can_photos: true, can_videos: true, profiles: profileFromUser(window.__currentUser) }]);
 	            renderApplicants([]);
 	            return crew;
 	          });
@@ -2887,6 +2928,39 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 	  }
 
+	  function renderPermissionMembers(members) {
+	    var rows = document.getElementById("perm-member-rows");
+	    if (!rows) return;
+	    rows.innerHTML = "";
+	    members = members || [];
+	    members.forEach(function (member, i) {
+	      var name = displayName(member);
+	      var isOwner = member.role === "owner";
+	      var roleLabel = isOwner ? "크루장" : "멤버";
+	      var row = document.createElement("div");
+	      row.className = "perm-row" + (isOwner ? "" : " member");
+	      row.setAttribute("role", "row");
+	      if (!isOwner) row.setAttribute("data-member", "");
+	      if (isOwner) {
+	        row.innerHTML = '<span class="c-name"><span class="m-ava" style="--c:#3dd8b8">' + escHtml(name.charAt(0) || String(i + 1)) + '</span><span class="m-meta"><b>' + escHtml(name) + '</b><span>' + roleLabel + '</span></span></span>' +
+	          '<span class="c-tog"><span class="owner-pill">항상 가능</span></span>' +
+	          '<span class="c-tog"><span class="owner-pill">항상 가능</span></span>' +
+	          '<span class="c-tog"><span class="owner-pill">항상 가능</span></span>';
+	      } else {
+	        var canFiles = member.can_files === true;
+	        var canPhotos = member.can_photos === true;
+	        var canVideos = member.can_videos === true;
+	        row.innerHTML = '<span class="c-name"><span class="m-ava">' + escHtml(name.charAt(0) || String(i + 1)) + '</span><span class="m-meta"><b>' + escHtml(name) + '</b><span>' + roleLabel + '</span></span></span>' +
+	          '<span class="c-tog"><button class="tog' + (canFiles ? ' on' : '') + '" data-type="doc" data-column="can_files" data-user-id="' + escHtml(member.user_id) + '" data-self="' + (canFiles ? '1' : '0') + '" aria-pressed="' + String(canFiles) + '" aria-label="' + escHtml(name) + ' — 자료 업로드 허용 전환"><span class="knob"></span></button></span>' +
+	          '<span class="c-tog"><button class="tog' + (canPhotos ? ' on' : '') + '" data-type="photo" data-column="can_photos" data-user-id="' + escHtml(member.user_id) + '" data-self="' + (canPhotos ? '1' : '0') + '" aria-pressed="' + String(canPhotos) + '" aria-label="' + escHtml(name) + ' — 사진 업로드 허용 전환"><span class="knob"></span></button></span>' +
+	          '<span class="c-tog"><button class="tog' + (canVideos ? ' on' : '') + '" data-type="video" data-column="can_videos" data-user-id="' + escHtml(member.user_id) + '" data-self="' + (canVideos ? '1' : '0') + '" aria-pressed="' + String(canVideos) + '" aria-label="' + escHtml(name) + ' — 영상 업로드 허용 전환"><span class="knob"></span></button></span>';
+	      }
+	      rows.appendChild(row);
+	    });
+	    if (window.__crewupBindPermissionToggles) window.__crewupBindPermissionToggles(rows);
+	    if (window.__crewupRefreshPermCard) window.__crewupRefreshPermCard();
+	  }
+
 	  function renderRealEmptyState() {
 	    var activeFeed = document.querySelector(".feed.when-active");
 	    if (activeFeed) {
@@ -2898,7 +2972,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    }
 	    var activeFiles = document.querySelector('[data-view="files"] .when-active');
 	    if (activeFiles) {
-	      activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2" data-toast="파일 업로드는 준비 중이에요">첫 자료 올리기</button></div></div>';
+	      activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>';
 	    }
 	    var notes = document.querySelector('[data-view="notes"] .when-active');
 	    if (notes) {
@@ -2914,10 +2988,40 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    if (memberTextActive) memberTextActive.textContent = "실제 멤버 현황을 표시합니다.";
 	  }
 
+	  function renderChatEmpty() {
+	    var chat = document.getElementById("chat-scroll");
+	    if (!chat) return;
+	    chat.innerHTML = '<div class="chat-day">오늘</div><div class="msg sys"><span class="m-sys">작업실이 열렸어요. 첫 메시지를 남겨보세요.</span></div>';
+	  }
+
+	  function renderFilesEmpty() {
+	    var activeFiles = document.querySelector('[data-view="files"] .when-active');
+	    if (!activeFiles) return;
+	    activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2">첫 자료 올리기</button></div></div>';
+	  }
+
+	  function renderNotesEmpty() {
+	    var notes = document.querySelector('[data-view="notes"] .when-active');
+	    if (!notes) return;
+	    notes.innerHTML = '<div class="ws-shell"><div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 9h6M8 13h8M8 17h5"/></svg></div><h3>아직 노트가 없어요</h3><p>첫 노트가 만들어지면 여기에 표시됩니다.</p></div></div>';
+	  }
+
+	  function renderLinksEmpty() {
+	    var links = document.querySelector('[data-view="links"] .when-active .link-list');
+	    if (!links) {
+	      var activeLinks = document.querySelector('[data-view="links"] .when-active');
+	      if (!activeLinks) return;
+	      activeLinks.innerHTML = '<div class="link-list"></div>';
+	      links = activeLinks.querySelector(".link-list");
+	    }
+	    links.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></div><h3>아직 링크가 없어요</h3><p>자주 쓰는 링크가 추가되면 여기에 표시됩니다.</p></div>';
+	  }
+
 	  function renderMembers(members) {
 	    members = members || [];
 	    var count = members.length;
 	    document.querySelectorAll("[data-member-count]").forEach(function (el) { el.textContent = count; });
+	    renderPermissionMembers(members);
 	    var list = document.getElementById("member-list");
 	    if (list) {
 	      list.innerHTML = "";
@@ -2960,13 +3064,13 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
 	  function loadMembers(crewId) {
 	    sb.from("crew_members")
-	      .select("user_id, role, joined_at, profiles(display_name)")
+	      .select("user_id, role, can_files, can_photos, can_videos, joined_at, profiles(display_name)")
 	      .eq("crew_id", crewId)
 	      .order("joined_at", { ascending: true })
 	      .then(function (r) {
 	        if (r.error) {
 	          console.warn("Crew Up member query failed:", r.error.message || r.error);
-	          renderMembers([{ user_id: window.__currentUser.id, role: "owner", profiles: profileFromUser(window.__currentUser) }]);
+	          renderMembers([{ user_id: window.__currentUser.id, role: "owner", can_files: true, can_photos: true, can_videos: true, profiles: profileFromUser(window.__currentUser) }]);
 	          return;
 	        }
 	        renderMembers(r.data || []);
@@ -3017,12 +3121,26 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      .order("created_at", { ascending: false })
 	      .limit(20)
 	      .then(function (r) {
-	        if (r.error || !r.data || !r.data.length) return;
+	        if (r.error) {
+	          console.warn("Crew Up file query failed:", r.error.message || r.error);
+	          renderFileList([]);
+	          return;
+	        }
+	        renderFileList(r.data || []);
+	      });
+	  }
+
+	  function renderFileList(files) {
 	        var activeFiles = document.querySelector('[data-view="files"] .when-active');
 	        if (!activeFiles) return;
+	        files = files || [];
+	        if (!files.length) {
+	          renderFilesEmpty();
+	          return;
+	        }
 	        var grid = document.createElement("div");
 	        grid.className = "file-grid";
-	        r.data.forEach(function (file) {
+	        files.forEach(function (file) {
 	          var card = document.createElement("div");
 	          card.className = "file-card";
 	          var size = file.size_bytes ? Math.max(1, Math.round(file.size_bytes / 1024)) + " KB" : "크기 정보 없음";
@@ -3032,7 +3150,6 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	        });
 	        activeFiles.innerHTML = "";
 	        activeFiles.appendChild(grid);
-	      });
 	  }
 
   function syncProfileName(user) {
@@ -3053,9 +3170,17 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .order("created_at", { ascending: true })
       .limit(60)
       .then(function (r) {
-        if (r.error || !r.data || !r.data.length) return;
+        if (r.error) {
+          console.warn("Crew Up message query failed:", r.error.message || r.error);
+          renderChatEmpty();
+          return;
+        }
         var scroll = document.getElementById("chat-scroll");
         if (!scroll) return;
+        if (!r.data || !r.data.length) {
+          renderChatEmpty();
+          return;
+        }
         scroll.innerHTML = "";
         r.data.forEach(function (msg) {
           var name = (msg.profiles && msg.profiles.display_name) || "멤버";
@@ -3075,24 +3200,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
         scroll.scrollTop = scroll.scrollHeight;
       });
   }
-
-  /* persist outgoing messages to Supabase alongside the local DOM append */
-  var chatForm = document.getElementById("chat-form");
-  if (chatForm) {
-    chatForm.addEventListener("submit", function () {
-      if (!window.__activeCrew || !window.__currentUser) return;
-      var inp = document.getElementById("chat-input");
-      var txt = inp ? inp.value.trim() : "";
-      if (!txt) return;
-      sb.from("crew_messages").insert({
-        crew_id: window.__activeCrew.id,
-        user_id: window.__currentUser.id,
-        body: txt
-      }).then(function (r) {
-        if (r.error) console.warn("메시지 저장 실패:", r.error.message);
-      });
-    });
-  }
+  window.__crewupLoadMessages = loadMessages;
 
   function loadNotes(crewId) {
     sb.from("crew_notes")
@@ -3101,9 +3209,17 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .order("updated_at", { ascending: false })
       .limit(20)
       .then(function (r) {
-        if (r.error || !r.data || !r.data.length) return;
+        if (r.error) {
+          console.warn("Crew Up note query failed:", r.error.message || r.error);
+          renderNotesEmpty();
+          return;
+        }
         var container = document.querySelector('[data-view="notes"] .when-active');
         if (!container) return;
+        if (!r.data || !r.data.length) {
+          renderNotesEmpty();
+          return;
+        }
         container.innerHTML = "";
         r.data.forEach(function (note) {
           var card = document.createElement("div");
@@ -3131,9 +3247,22 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .order("created_at", { ascending: false })
       .limit(20)
       .then(function (r) {
-        if (r.error || !r.data || !r.data.length) return;
+        if (r.error) {
+          console.warn("Crew Up link query failed:", r.error.message || r.error);
+          renderLinksEmpty();
+          return;
+        }
         var list = document.querySelector('[data-view="links"] .when-active .link-list');
-        if (!list) return;
+        if (!list) {
+          var activeLinks = document.querySelector('[data-view="links"] .when-active');
+          if (!activeLinks) return;
+          activeLinks.innerHTML = '<div class="link-list"></div>';
+          list = activeLinks.querySelector(".link-list");
+        }
+        if (!r.data || !r.data.length) {
+          renderLinksEmpty();
+          return;
+        }
         list.innerHTML = "";
         var linkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>';
         r.data.forEach(function (link) {
@@ -3150,6 +3279,147 @@ body[data-auth="in"]  #auth-gate { display: none; }
           list.appendChild(row);
         });
       });
+  }
+
+  function setupRealPermissionCard() {
+    var card = document.getElementById("permCard");
+    if (!card) return;
+    card.querySelectorAll("[data-all]").forEach(function (cb) {
+      cb.checked = false;
+      cb.disabled = true;
+      cb.setAttribute("aria-disabled", "true");
+    });
+    var hint = document.getElementById("permHint");
+    if (hint) hint.textContent = "전체 허용 설정은 아직 DB 컬럼이 없어 사용할 수 없습니다. 아래 멤버별 권한만 실제 저장됩니다.";
+    if (window.__crewupRefreshPermCard) window.__crewupRefreshPermCard();
+  }
+
+  function requireCrewContext() {
+    if (!window.__activeCrew || !window.__currentUser) {
+      toast("먼저 크루 작업실에 입장해 주세요");
+      return false;
+    }
+    return true;
+  }
+
+  function bindRealCreationActions() {
+    if (window.__crewupRealCreationBound) return;
+    window.__crewupRealCreationBound = true;
+    document.addEventListener("click", function (e) {
+      var upload = e.target.closest("#upload-btn, #upload-btn-2, #dropzone, #dropzone-2");
+      if (upload) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        createFileMetadata();
+        return;
+      }
+
+      var noteBtn = e.target.closest("button.btn-primary");
+      var noteSection = noteBtn && noteBtn.closest('section[data-view="notes"]');
+      if (noteBtn && noteSection) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        createNote();
+        return;
+      }
+
+      var linkBtn = e.target.closest("button.btn-primary");
+      var linkSection = linkBtn && linkBtn.closest('section[data-view="links"]');
+      if (linkBtn && linkSection) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        createLink();
+      }
+    }, true);
+  }
+
+  function createFileMetadata() {
+    if (!requireCrewContext()) return;
+    var filename = prompt("공유함에 표시할 파일명을 입력하세요", "새_자료.pdf");
+    if (filename === null) return;
+    filename = filename.trim();
+    if (!filename) {
+      toast("파일명을 입력해 주세요");
+      return;
+    }
+    var safeName = filename.replace(/[\\/\0]/g, "_");
+    sb.from("crew_files").insert({
+      crew_id: window.__activeCrew.id,
+      uploaded_by: window.__currentUser.id,
+      storage_path: window.__activeCrew.id + "/" + Date.now() + "-" + safeName,
+      filename: safeName,
+      mime_type: "application/octet-stream",
+      size_bytes: null
+    }).then(function (r) {
+      if (r.error) {
+        console.warn("Crew Up file metadata insert failed:", r.error.message || r.error);
+        toast("자료 정보를 저장하지 못했어요");
+        return;
+      }
+      toast("자료 정보를 공유함에 추가했어요");
+      loadFiles(window.__activeCrew.id);
+    });
+  }
+
+  function createNote() {
+    if (!requireCrewContext()) return;
+    var title = prompt("노트 제목을 입력하세요", "새 노트");
+    if (title === null) return;
+    title = title.trim();
+    if (!title) {
+      toast("노트 제목을 입력해 주세요");
+      return;
+    }
+    var body = prompt("노트 내용을 입력하세요", "");
+    if (body === null) return;
+    sb.from("crew_notes").insert({
+      crew_id: window.__activeCrew.id,
+      author_id: window.__currentUser.id,
+      title: title,
+      body: body
+    }).then(function (r) {
+      if (r.error) {
+        console.warn("Crew Up note insert failed:", r.error.message || r.error);
+        toast("노트를 저장하지 못했어요");
+        return;
+      }
+      toast("노트를 추가했어요");
+      loadNotes(window.__activeCrew.id);
+    });
+  }
+
+  function createLink() {
+    if (!requireCrewContext()) return;
+    var url = prompt("추가할 링크 URL을 입력하세요", "https://");
+    if (url === null) return;
+    url = url.trim();
+    if (!url) {
+      toast("링크 URL을 입력해 주세요");
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+    try {
+      url = new URL(url).toString();
+    } catch (e) {
+      toast("올바른 URL을 입력해 주세요");
+      return;
+    }
+    var label = prompt("링크 이름을 입력하세요", "") || "";
+    label = label.trim() || url;
+    sb.from("crew_links").insert({
+      crew_id: window.__activeCrew.id,
+      added_by: window.__currentUser.id,
+      url: url,
+      label: label
+    }).then(function (r) {
+      if (r.error) {
+        console.warn("Crew Up link insert failed:", r.error.message || r.error);
+        toast("링크를 저장하지 못했어요");
+        return;
+      }
+      toast("링크를 추가했어요");
+      loadLinks(window.__activeCrew.id);
+    });
   }
   });
 })();

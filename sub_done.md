@@ -1,19 +1,18 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
   - 수정: `crewup_official_site/app.html`
-  - 수정: `crewup_official_site/index.html`
   - 수정: `sub_done.md`
-- 핵심 수정 요약:
-  - app.html 크루 생성 DB insert 처리: `#flow-enter`에서 로그인된 Supabase 세션이 있으면 `crews`를 `is_public: true`로 생성하고, 생성된 `crew.id`로 `crew_members` owner row를 insert하도록 연결했습니다. 실패 시 성공 UI를 띄우지 않고 `console.warn` 및 토스트로 실패를 알리며 버튼을 복구합니다.
-  - index.html 랜딩 크루 생성 처리: 랜딩 `modal-create` submit을 capture phase에서 분기해 로그인 사용자는 `crews` + `crew_members(owner)`를 실제 insert하고, 비로그인 사용자는 가짜 성공 대신 `app.html?workspace=1`로 이동하게 했습니다.
-  - 작업실 redirect/Magic Link redirect 처리: `app.html` 세션 동기화에서 `?workspace=1`이 없다는 이유로 랜딩으로 강제 redirect하던 로직을 제거했습니다. Magic Link `emailRedirectTo`는 `app.html?workspace=1`로 바꿨고, 랜딩 CTA도 `app.html?workspace=1`을 유지하도록 정리했습니다.
-  - 더미 멤버/대시보드 데이터 노출 정리: Supabase 연결 상태에서는 최근 활동, 채팅 샘플, 파일/노트/링크 active 샘플을 빈 상태로 초기화하고, `crew_members`/`join_requests` 조회 결과로 멤버 수, 멤버 목록, 신청 수/목록을 렌더링하도록 했습니다. 신규 owner-only 크루는 멤버 1명과 빈 활동 상태로 보입니다.
+- 핵심 구현 요약:
+  - 업로드 권한 표의 정적 더미 row를 제거하고 `crew_members.can_files`, `can_photos`, `can_videos` 실제 값으로 멤버별 토글을 렌더링하도록 연결했습니다. owner는 항상 가능으로 표시하고, 일반 멤버 토글 변경은 해당 DB 컬럼 update 후 실패 시 UI를 원복합니다.
+  - 실제 Supabase 작업실에서는 채팅 submit 시 `crew_messages` insert를 먼저 수행하고 성공 후 `loadMessages`로 다시 렌더링하도록 정리했습니다. 기존 중복 persist listener를 제거했고, 빈 메시지 상태와 에러 로그 처리를 추가했습니다.
+  - 공유함/노트/링크 버튼을 각각 `crew_files`, `crew_notes`, `crew_links` metadata insert에 연결했습니다. 성공 후 각 `loadFiles`, `loadNotes`, `loadLinks`를 다시 호출하며, 데이터가 없으면 실제 빈 상태를 렌더링합니다.
+  - 실제 모드에서 전체 허용 체크박스는 DB 컬럼이 없으므로 기본 off/disabled로 두고, 개별 권한을 가짜로 켜 보이지 않게 했습니다.
 - 검증 결과:
-  - JS 문법/console error 확인: inline script를 `/tmp`로 추출해 `node --check /tmp/crewup_official_site_app_html.js` 및 `node --check /tmp/crewup_official_site_index_html.js` 통과. `git diff --check` 통과.
-  - config 없는 로컬 fallback 확인: 정적 문법 기준으로 config 없는 상태에서 Supabase helper가 없으면 기존 UI-only app create fallback이 유지되도록 확인했습니다. 브라우저 수동 실행은 하지 않았습니다.
-  - Supabase 실제 수동 테스트 여부 및 결과: 미수행. 이 환경에는 실제 Supabase 세션/프로젝트 접근 정보가 없어 DB insert와 RLS 동작은 배포 환경에서 확인해야 합니다.
-  - 랜딩 공개 크루 목록 표시 확인: 코드상 생성 시 `crews.is_public = true`로 insert하고 기존 공개 목록 쿼리가 `is_public = true`를 조회하므로 새로고침 후 표시 경로가 연결되어 있습니다. 실제 DB 수동 확인은 미수행.
-  - 신규 크루 대시보드 빈 상태 확인: 코드상 생성 직후 `window.__activeCrew` 갱신, crew shell 이름 갱신, owner 1명 렌더링, `body.dataset.crewstate = "new"` 및 빈 활동/자료/노트/링크 렌더링을 수행합니다. 실제 브라우저 수동 확인은 미수행.
+  - inline script 추출 후 `node --check /tmp/crewup_app_inline.js` 통과.
+  - `git diff --check` 통과.
+  - Playwright Chromium으로 `file:///workspace/MA/crewup_official_site/app.html?workspace=1` 로딩 확인. 페이지 JS 런타임 에러는 없었고, 기존 로컬 누락 파일인 `crewup_official_site/config.js` 요청만 `ERR_FILE_NOT_FOUND`로 기록되었습니다.
+- 커밋:
+  - Connect workspace UI to Supabase state
 - 에러 및 특이사항:
-  - `crewup_official_site/config.js`는 읽거나 수정하거나 커밋하지 않았습니다.
-  - root `package.json`에는 lint/test scripts가 없어 npm 기반 정적 검사는 실행할 항목이 없었습니다.
+  - 실제 Supabase 세션/프로젝트 데이터로 DB insert/update 수동 검증은 수행하지 못했습니다.
+  - 작업 전부터 수정되어 있던 `sub.md`는 이번 커밋에 포함하지 않습니다.
