@@ -192,12 +192,12 @@ CREATE POLICY "profiles: anyone can read"
 DROP POLICY IF EXISTS "crews: public crews readable by all" ON public.crews;
 CREATE POLICY "crews: public crews readable by all"
   ON public.crews FOR SELECT
-  USING (is_public = true OR is_crew_member(id));
+  USING (is_public = true OR owner_id = auth.uid() OR is_crew_member(id));
 
 DROP POLICY IF EXISTS "crews: members can read private crews" ON public.crews;
 CREATE POLICY "crews: members can read private crews"
   ON public.crews FOR SELECT
-  USING (is_crew_member(id));
+  USING (owner_id = auth.uid() OR is_crew_member(id));
 
 DROP POLICY IF EXISTS "crews: authenticated users can create" ON public.crews;
 CREATE POLICY "crews: authenticated users can create"

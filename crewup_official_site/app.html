@@ -2967,13 +2967,20 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  };
 
   function loadCrewData(userId) {
-    fetchMyCrewMemberships(userId).then(function (r) {
-      if (r.error) {
-        console.warn("Crew Up my crews query failed:", r.error.message || r.error);
+    Promise.all([fetchMyCrewMemberships(userId), fetchOwnedCrews(userId)]).then(function (results) {
+      var membershipResult = results[0];
+      var ownedResult = results[1];
+      if (membershipResult.error) {
+        console.warn("Crew Up my crews query failed:", membershipResult.error.message || membershipResult.error);
+      }
+      if (ownedResult.error) {
+        console.warn("Crew Up owned crews query failed:", ownedResult.error.message || ownedResult.error);
+      }
+      if (membershipResult.error && ownedResult.error) {
         showNoCrewState();
         return;
       }
-      var items = normalizeMyCrews(r.data || []);
+      var items = mergeMyAndOwnedCrews(normalizeMyCrews(membershipResult.data || []), ownedResult.data || []);
       window.__myCrews = items;
       renderCrewMenus();
       if (!items.length) {
@@ -2982,8 +2989,54 @@ body[data-auth="in"]  #auth-gate { display: none; }
       }
       var keepId = window.__activeCrew && window.__activeCrew.id;
       var selected = items.find(function (item) { return item.crew && item.crew.id === keepId; }) || items[0];
-      selectCrew(selected.crew.id, false);
+      repairMissingOwnerMemberships(userId, items).then(function () {
+        selectCrew(selected.crew.id, false);
+      });
     });
+  }
+
+  function fetchOwnedCrews(userId) {
+    var fullSelect = "id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at";
+    var minimalSelect = "id, name, description, category, owner_id, is_public, created_at";
+    function query(select) {
+      return sb.from("crews").select(select).eq("owner_id", userId).order("created_at", { ascending: false });
+    }
+    return query(fullSelect).then(function (r) {
+      if (!r.error) return r;
+      console.warn("Crew Up owned crews full query failed, retrying minimal columns:", r.error.message || r.error);
+      return query(minimalSelect);
+    });
+  }
+
+  function mergeMyAndOwnedCrews(memberItems, ownedCrews) {
+    var byId = {};
+    var merged = [];
+    (memberItems || []).forEach(function (item) {
+      if (!item || !item.crew || !item.crew.id || byId[item.crew.id]) return;
+      byId[item.crew.id] = true;
+      merged.push(item);
+    });
+    (ownedCrews || []).forEach(function (crew) {
+      if (!crew || !crew.id || byId[crew.id]) return;
+      byId[crew.id] = true;
+      merged.push({ crew: crew, role: "owner", needsOwnerMembershipRepair: true });
+    });
+    return merged;
+  }
+
+  function repairMissingOwnerMemberships(userId, items) {
+    var repairs = (items || []).filter(function (item) {
+      return item && item.needsOwnerMembershipRepair && item.crew && item.crew.id;
+    });
+    if (!repairs.length) return Promise.resolve();
+    var rows = repairs.map(function (item) {
+      return { crew_id: item.crew.id, user_id: userId, role: "owner" };
+    });
+    return sb.from("crew_members")
+      .upsert(rows, { onConflict: "crew_id,user_id" })
+      .then(function (r) {
+        if (r.error) console.warn("Crew Up owner membership repair failed:", r.error.message || r.error);
+      });
   }
 
   function fetchMyCrewMemberships(userId) {
