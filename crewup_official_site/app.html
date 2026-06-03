@@ -806,13 +806,26 @@ body[data-auth="in"]  #auth-gate { display: none; }
   padding: 7px; display: none;
 }
 .crew-menu.open { display: block; animation: pop .18s cubic-bezier(.34,1.4,.5,1); }
-.crew-menu-item { display: flex; align-items: center; gap: 10px; padding: 9px 9px; border-radius: 10px; cursor: pointer; }
+.crew-menu-item { display: flex; align-items: center; gap: 10px; padding: 9px 9px; border-radius: 10px; cursor: pointer; width: 100%; background: transparent; border: 0; color: inherit; text-align: left; font: inherit; }
 .crew-menu-item:hover { background: var(--surface-2); }
 .crew-menu-item .crew-thumb { width: 30px; height: 30px; border-radius: 9px; font-size: 12px; }
 .crew-menu-item .cm-name { font-size: 13.5px; font-weight: 600; }
 .crew-menu-item.add { color: var(--mint); font-weight: 700; font-size: 13.5px; border-top: 1px solid var(--line); margin-top: 5px; padding-top: 12px; }
 .crew-menu-item.add .plus { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--mint-soft); border: 1px solid var(--mint-line); }
 .crew-menu-item.add .plus svg { width: 15px; height: 15px; }
+
+.crew-menu-item.active { background: var(--mint-soft); border: 1px solid var(--mint-line); }
+.crew-menu-item .cm-meta { display:flex; flex-direction:column; min-width:0; line-height:1.25; }
+.crew-menu-item .cm-role { font-size:11px; color:var(--text-3); font-weight:600; }
+.mobile-crew-menu { display:none; }
+@media (max-width: 979px) {
+  .mobile-crew-menu {
+    position: fixed; top: 66px; left: 12px; right: 12px; z-index: 80;
+    background: var(--surface); border: 1px solid var(--line-strong); border-radius: 14px;
+    box-shadow: var(--shadow-lg); padding: 7px;
+  }
+  .mobile-crew-menu.open { display:block; animation: pop .18s cubic-bezier(.34,1.4,.5,1); }
+}
 
 .side-sec { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-3); padding: 6px 8px 4px; margin-top: 8px; }
 .side-nav { display: flex; flex-direction: column; gap: 2px; }
@@ -1512,6 +1525,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
         <span class="ab-ava" style="--c:#3dd8b8">1</span>
       </div>
     </header>
+    <div class="crew-menu mobile-crew-menu" id="mobile-crew-menu" aria-label="내 크루 목록"></div>
 
     <!-- ============ VIEW · 대시보드 ============ -->
     <section class="view on" data-view="dash">
@@ -2355,17 +2369,29 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
   /* ---------- crew switcher menu ---------- */
   const crewMenu = $("#crew-menu");
+  const mobileCrewMenu = $("#mobile-crew-menu");
   const crewBtn = $("#crew-switch-btn");
+  const appbarCrewBtn = $("#appbar-crew");
   function closeAllMenus() {
     crewMenu && crewMenu.classList.remove("open");
+    mobileCrewMenu && mobileCrewMenu.classList.remove("open");
     $("#acct-menu") && $("#acct-menu").classList.remove("open");
     $$(".row-menu.open").forEach(m => m.classList.remove("open"));
   }
+  function toggleCrewMenu(menu) {
+    if (!menu) return;
+    const open = menu.classList.contains("open");
+    closeAllMenus();
+    if (!open) menu.classList.add("open");
+  }
   crewBtn && crewBtn.addEventListener("click", e => {
     e.stopPropagation();
-    const open = crewMenu.classList.contains("open");
-    closeAllMenus();
-    if (!open) crewMenu.classList.add("open");
+    toggleCrewMenu(crewMenu);
+  });
+  appbarCrewBtn && appbarCrewBtn.addEventListener("click", e => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCrewMenu(mobileCrewMenu || crewMenu);
   });
   // account menu
   const acct = $("#acct"), acctMenu = $("#acct-menu");
@@ -2377,8 +2403,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
     if (!open) acctMenu.classList.add("open");
   });
   document.addEventListener("click", e => {
-    if (!e.target.closest(".crew-switch") && !e.target.closest(".acct") && !e.target.closest(".mr-act")) closeAllMenus();
+    if (!e.target.closest(".crew-switch") && !e.target.closest("#mobile-crew-menu") && !e.target.closest("#appbar-crew") && !e.target.closest(".acct") && !e.target.closest(".mr-act")) closeAllMenus();
   });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeAllMenus(); });
 
   /* ============================================================
      CREATE FLOW (multi-step modal)
@@ -2472,7 +2499,14 @@ body[data-auth="in"]  #auth-gate { display: none; }
     toast("작업실에 입장했어요");
   });
   function closeFlow() { flowModal.classList.remove("open"); unlock(); }
-  $$("[data-open-flow]").forEach(el => el.addEventListener("click", openFlow));
+  $$("[data-open-flow]").forEach(el => { el.dataset.flowBound = "1"; el.addEventListener("click", openFlow); });
+  document.addEventListener("click", e => {
+    const trigger = e.target.closest("[data-open-flow]");
+    if (!trigger || trigger.dataset.flowBound === "1") return;
+    e.preventDefault();
+    e.stopPropagation();
+    openFlow();
+  });
 
   /* ============================================================
      INVITE MODAL
@@ -2860,6 +2894,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  window.__currentUser = null;
 	  window.__activeCrew  = null;
 	  window.__activeCrewRole = null;
+	  window.__myCrews = [];
 	  window.__crewupRealHasContent = false;
 	  var toast = window.__crewupToast || function (msg) { console.warn(msg); };
 	  setupRealPermissionCard();
@@ -2932,31 +2967,108 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  };
 
   function loadCrewData(userId) {
-    sb.from("crew_members")
-      .select("crew_id, role, crews(id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at)")
-      .eq("user_id", userId)
-      .then(function (r) {
-        if (r.error || !r.data || !r.data.length) {
-          showNoCrewState();
-          return;
-        }
-        var crew = r.data[0].crews;
-        if (!crew) {
-          showNoCrewState();
-          return;
-	        }
-	        window.__activeCrew = crew;
-	        window.__activeCrewRole = r.data[0].role || null;
-	        applyCrewShell(crew, false);
-	        renderRealEmptyState();
-	        loadMembers(crew.id);
-	        loadApplicants(crew.id);
-	        loadFiles(crew.id);
-	        loadMessages(crew.id);
-	        loadNotes(crew.id);
-	        loadLinks(crew.id);
-	      });
-	  }
+    fetchMyCrewMemberships(userId).then(function (r) {
+      if (r.error) {
+        console.warn("Crew Up my crews query failed:", r.error.message || r.error);
+        showNoCrewState();
+        return;
+      }
+      var items = normalizeMyCrews(r.data || []);
+      window.__myCrews = items;
+      renderCrewMenus();
+      if (!items.length) {
+        showNoCrewState();
+        return;
+      }
+      var keepId = window.__activeCrew && window.__activeCrew.id;
+      var selected = items.find(function (item) { return item.crew && item.crew.id === keepId; }) || items[0];
+      selectCrew(selected.crew.id, false);
+    });
+  }
+
+  function fetchMyCrewMemberships(userId) {
+    var fullSelect = "crew_id, role, crews(id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at)";
+    var minimalSelect = "crew_id, role, crews(id, name, description, category, owner_id, is_public, created_at)";
+    function query(select) {
+      return sb.from("crew_members").select(select).eq("user_id", userId);
+    }
+    return query(fullSelect).then(function (r) {
+      if (!r.error) return r;
+      console.warn("Crew Up my crews full query failed, retrying minimal columns:", r.error.message || r.error);
+      return query(minimalSelect);
+    });
+  }
+
+  function normalizeMyCrews(rows) {
+    return (rows || []).map(function (row) {
+      return { crew: row && row.crews ? row.crews : null, role: row && row.role ? row.role : "member" };
+    }).filter(function (item) { return item.crew && item.crew.id; });
+  }
+
+  function roleLabel(role) {
+    return role === "owner" ? "크루장" : "멤버";
+  }
+
+  function renderCrewMenus() {
+    var items = window.__myCrews || [];
+    [document.getElementById("crew-menu"), document.getElementById("mobile-crew-menu")].forEach(function (menu) {
+      if (!menu) return;
+      menu.innerHTML = "";
+      if (!items.length) {
+        menu.insertAdjacentHTML("beforeend", '<div class="crew-menu-item" aria-disabled="true"><span class="crew-thumb" style="--c:#6c7b8d">C</span><span class="cm-meta"><span class="cm-name">참여한 크루 없음</span><span class="cm-role">크루를 만들거나 참여 신청해보세요</span></span></div>');
+      } else {
+        items.forEach(function (item) {
+          var crew = item.crew || {};
+          var name = crew.name || "크루";
+          var initial = name.trim().charAt(0) || "C";
+          var active = window.__activeCrew && window.__activeCrew.id === crew.id;
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "crew-menu-item" + (active ? " active" : "");
+          btn.setAttribute("data-crew-id", crew.id);
+          btn.setAttribute("aria-current", active ? "true" : "false");
+          btn.innerHTML = '<span class="crew-thumb" style="--c:#3dd8b8">' + escHtml(initial) + '</span><span class="cm-meta"><span class="cm-name">' + escHtml(name) + '</span><span class="cm-role">' + escHtml(roleLabel(item.role)) + (crew.category ? " · " + escHtml(crew.category) : "") + '</span></span>';
+          menu.appendChild(btn);
+        });
+      }
+      var add = document.createElement("button");
+      add.type = "button";
+      add.className = "crew-menu-item add";
+      add.setAttribute("data-open-flow", "");
+      add.innerHTML = '<span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>새 크루 만들기';
+      menu.appendChild(add);
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var item = e.target.closest(".crew-menu-item[data-crew-id]");
+    if (!item) return;
+    e.preventDefault();
+    e.stopPropagation();
+    selectCrew(item.getAttribute("data-crew-id"), false);
+    closeAllMenus();
+    if (typeof showView === "function") showView("dash");
+  }, true);
+
+  function selectCrew(crewId, isNew) {
+    var item = (window.__myCrews || []).find(function (entry) { return entry.crew && entry.crew.id === crewId; });
+    if (!item || !item.crew) {
+      showNoCrewState();
+      return;
+    }
+    var crew = item.crew;
+    window.__activeCrew = crew;
+    window.__activeCrewRole = item.role || null;
+    applyCrewShell(crew, !!isNew);
+    renderCrewMenus();
+    renderRealEmptyState();
+    loadMembers(crew.id);
+    loadApplicants(crew.id);
+    loadFiles(crew.id);
+    loadMessages(crew.id);
+    loadNotes(crew.id);
+    loadLinks(crew.id);
+  }
 
 	  function applyCrewShell(crew, isNew) {
 	    window.__activeCrew = crew;
@@ -2965,8 +3077,6 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    var initial = name.trim().charAt(0) || "C";
 	    document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = name; });
 	    document.querySelectorAll(".crew-switch .crew-thumb, #appbar-crew .crew-thumb").forEach(function (el) { el.textContent = initial; });
-	    var menuName = document.querySelector(".cm-name");
-	    if (menuName) menuName.textContent = name;
 	    var abName = document.querySelector(".ab-name");
 	    if (abName) abName.textContent = name;
 	    body.dataset.crewstate = isNew ? "new" : "active";
@@ -2974,6 +3084,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    if (typeof syncStateUI === "function") syncStateUI();
 	    hydrateSettingsForm(crew);
 	  }
+
 
 	  function markRealCrewHasContent() {
 	    if (!window.__crewupRealState) return;
@@ -2986,6 +3097,8 @@ body[data-auth="in"]  #auth-gate { display: none; }
   function showNoCrewState() {
     window.__activeCrew = null;
     window.__activeCrewRole = null;
+    window.__myCrews = window.__myCrews || [];
+    renderCrewMenus();
     window.__crewupRealHasContent = false;
     body.dataset.crewstate = "new";
     if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = "new";

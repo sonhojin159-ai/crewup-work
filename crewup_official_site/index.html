@@ -260,10 +260,10 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.18; letter-spacing: -0.025em; font-we
 /* ============================================================
    Crew cards
    ============================================================ */
-.cards { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.cards { display: grid; gap: 14px; grid-template-columns: 1fr; align-items: stretch; }
 .crew-card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: 18px; display: flex; flex-direction: column; gap: 14px;
+  padding: 18px; display: flex; flex-direction: column; gap: 14px; height: 100%;
   transition: border-color .18s, transform .18s, background .18s;
 }
 .crew-card:hover { border-color: var(--mint-line); transform: translateY(-2px); }
@@ -285,7 +285,8 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.18; letter-spacing: -0.025em; font-we
 .crew-leader .who { font-size: 13px; line-height: 1.35; }
 .crew-leader .who b { font-weight: 700; }
 .crew-leader .who span { color: var(--text-3); }
-.crew-actions { display: flex; gap: 8px; margin-top: 2px; }
+.crew-actions { display: flex; gap: 8px; margin-top: auto; }
+.crew-card.featured .crew-actions { margin-top: 2px; }
 .crew-actions .btn { flex: 1; }
 
 /* horizontal scroller for popular crews on mobile */
@@ -294,7 +295,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.18; letter-spacing: -0.025em; font-we
 .scroller .crew-card { scroll-snap-align: start; flex: 0 0 86%; max-width: 340px; }
 
 /* featured popular-crew layout */
-.popular { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.popular { display: grid; gap: 14px; grid-template-columns: 1fr; align-items: stretch; }
 .crew-card.featured { gap: 18px; }
 .feat-left, .feat-right { display: grid; gap: 14px; align-content: start; }
 .feat-media { display: flex; align-items: center; gap: 14px; }
@@ -1966,15 +1967,35 @@ body.locked { overflow: hidden; }
 	  }
 
 	  /* ── public crew list from Supabase ─────────────────────────── */
+  function fetchPublicCrews() {
+    var fullSelect = "id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, profiles!crews_owner_id_fkey(display_name)";
+    var noProfileSelect = "id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls";
+    var minimalSelect = "id, name, description, category, owner_id";
+    function base(select) {
+      return sb.from("crews").select(select).eq("is_public", true).order("created_at", { ascending: false }).limit(12);
+    }
+    return base(fullSelect).then(function (r) {
+      if (!r.error) return r;
+      console.warn("Crew Up public crew query failed, retrying without profile join:", r.error.message || r.error);
+      return base(noProfileSelect).then(function (r2) {
+        if (!r2.error) return r2;
+        console.warn("Crew Up public crew query failed, retrying minimal columns:", r2.error.message || r2.error);
+        return base(minimalSelect).then(function (r3) {
+          if (r3.error) console.warn("Crew Up public crew minimal query failed:", r3.error.message || r3.error);
+          return r3;
+        });
+      });
+    });
+  }
+
   if (sb) {
-    sb.from("crews")
-      .select("id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, profiles!crews_owner_id_fkey(display_name)")
-      .eq("is_public", true)
-      .order("created_at", { ascending: false })
-      .limit(12)
-      .then(function (r) {
+    fetchPublicCrews().then(function (r) {
         if (r.error) {
-          console.warn("Crew Up public crew query failed:", r.error.message || r.error);
+          var grid = document.getElementById("crewGrid");
+          var popular = document.getElementById("popularGrid");
+          [grid, popular].forEach(function (target) {
+            if (target) target.innerHTML = '<div class="mini-empty" style="grid-column:1/-1"><p>크루 목록을 불러오지 못했어요.<br>잠시 후 다시 시도해 주세요.</p></div>';
+          });
           return;
         }
         if (!r.data || !r.data.length) return;
