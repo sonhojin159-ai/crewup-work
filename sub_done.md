@@ -1,33 +1,59 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
-  - 수정: `crewup_official_site/app.html`
-  - 수정: `sub_done.md`
+  - `crewup_official_site/app.html`
+  - `crewup_official_site/index.html`
+  - `crewup_official_site/supabase_schema.sql`
+  - `sub_done.md`
 - 핵심 구현 요약:
-  - `renderApplicants(requests)`가 pending 참여 신청 카드마다 `수락`/`거절` 버튼을 렌더링하도록 변경했습니다.
-  - 각 버튼에 `data-request-id`, `data-user-id`, `data-crew-id`와 기존 `data-applicant-accept`/`data-applicant-reject` 속성을 추가했습니다.
-  - 신청 버튼 클릭 처리를 `#applicant-list` 이벤트 위임으로 변경해 동적 렌더링 이후에도 작동하게 했습니다.
-  - Supabase real mode에서는 `window.__crewupResolveApplicant()`로 DB 처리하고, non-real/demo 상태에서는 기존 `resolveApplicant()` 로컬 fallback을 유지했습니다.
-- 수락 처리 방식:
-  - `join_requests`의 해당 row를 `status = 'approved'`로 update합니다.
-  - 이어서 `crew_members`에 `crew_id`, `user_id`, `role: "member"`, `can_files: true`, `can_photos: true`, `can_videos: false`를 upsert합니다.
-  - PK `(crew_id, user_id)` 충돌 시 기존 멤버 row를 덮어쓰지 않도록 `ignoreDuplicates: true`를 사용했습니다.
-  - 성공 후 `loadApplicants(crewId)`와 `loadMembers(crewId)`를 호출하고 “참여 신청을 수락했어요” toast를 표시합니다.
-  - 실패 시 성공 toast를 표시하지 않고, 버튼을 다시 활성화하며 `console.warn`과 실패 toast를 남깁니다.
-- 거절 처리 방식:
-  - `join_requests`의 해당 row를 `status = 'rejected'`로 update합니다.
-  - 성공 후 `loadApplicants(crewId)`를 호출하고 “참여 신청을 거절했어요” toast를 표시합니다.
-  - 실패 시 성공처럼 보이지 않도록 버튼을 재활성화하고 실패 toast를 표시합니다.
-- 기존 기능 영향:
-  - 프론트에 service_role key를 추가하지 않았고, 기존 anon Supabase client와 RLS 정책을 그대로 사용합니다.
-  - 데모/로컬 fallback의 DOM 제거 및 멤버 수 증가 동작은 유지했습니다.
-  - 이미 멤버인 신청자를 수락해도 기존 `crew_members` row의 role/권한을 덮어쓰지 않습니다.
+  - 실제 Supabase 작업실의 멤버 행 관리 메뉴를 복구하고, 멤버 내보내기를 DB 삭제로 연결했다.
+  - 전체 업로드 권한 토글을 현재 일반 멤버 전체의 권한 일괄 update로 연결했다.
+  - 크루 설정 화면에 크루장용 포트폴리오 편집 카드와 저장 로직을 추가했다.
+  - 공개 크루 목록/상세 보기 모달이 DB 포트폴리오 필드를 사용하도록 연결했다.
+- 멤버 관리 버튼/메뉴 처리 방식:
+  - real-mode `renderMembers()`에서 owner/본인 행은 disabled 제한 상태를 유지한다.
+  - 일반 멤버 행에는 기존 3-dot 버튼, `.row-menu`, `data-grant`, `data-kick` 구조를 렌더링한다.
+  - 동적 row는 `#member-list` 범위의 capture-phase event delegation으로 처리한다.
+- 멤버 내보내기 처리 방식:
+  - `crew_members.delete()`에 `.eq("crew_id", activeCrew.id)`, `.eq("user_id", targetUserId)`, `.neq("role", "owner")`를 적용한다.
+  - 성공 시 `loadMembers(activeCrew.id)`를 재조회하고 “멤버를 내보냈어요” toast를 표시한다.
+  - 실패 시 버튼을 복구하고 `console.warn` 및 “멤버를 내보내지 못했어요” toast를 표시한다.
+- 전체 업로드 권한 토글 처리 방식:
+  - `data-all="doc/photo/video"`를 각각 `can_files/can_photos/can_videos`에 매핑한다.
+  - real-mode에서도 전체 토글을 disabled 하지 않는다.
+  - change 시 `crew_members.update(patch).eq("crew_id", activeCrew.id).neq("role", "owner")`로 일반 멤버 전체를 일괄 변경한다.
+  - 실패 시 체크 상태를 이전 값으로 되돌리고 성공처럼 보이지 않게 처리한다.
+- 개인 토글/전체 토글 동기화 방식:
+  - `renderPermissionMembers()`가 일반 멤버들의 `can_*` 값으로 전체 토글 checked 상태를 재계산한다.
+  - real-mode에서는 전체 토글이 개인 토글을 locked 처리하지 않고, 개인 토글의 `data-self` 상태를 그대로 보여준다.
+  - 일반 멤버가 없으면 전체 토글은 unchecked 상태이고 안내 문구를 멤버 없음 상태로 표시한다.
+- 포트폴리오 DB 스키마 변경:
+  - `public.crews`에 반복 실행 가능한 `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` 문을 추가했다.
+  - 추가 컬럼: `portfolio_message text`, `portfolio_style text`, `portfolio_tags text[]`, `portfolio_video_url text`, `portfolio_image_urls jsonb`.
+- 포트폴리오 편집 UI 위치/필드:
+  - `app.html`의 `data-view="settings"` 기본 정보 카드 아래에 “크루 포트폴리오” 카드를 추가했다.
+  - 필드: 한 줄 메시지, 진행 스타일/크루 소개, 쉼표 구분 태그, 소개 영상 URL, 대표 이미지 URL 1~3, “포트폴리오 저장” 버튼.
+- 포트폴리오 저장 처리 방식:
+  - active crew 로드/생성 select에 새 포트폴리오 컬럼을 포함했다.
+  - 크루장만 저장 가능하도록 owner check 후 `crews.update()`를 수행한다.
+  - 성공 시 `window.__activeCrew`와 설정 폼을 갱신하고 “크루 포트폴리오를 저장했어요” toast를 표시한다.
+  - 실패 시 `console.warn` 및 실패 toast를 표시한다.
+  - 기본 정보 저장 버튼도 `name`, `description`, `category` 실제 DB update로 연결했다.
+- 공개 크루 상세 보기 반영 방식:
+  - `index.html` 공개 크루 select에 새 포트폴리오 컬럼을 포함했다.
+  - public crew card의 dataset에 DB 메시지, 스타일, 태그, 영상 URL, 이미지 URL 배열을 넣는다.
+  - folio modal hydrate가 DB 값이 있으면 메시지/스타일/태그/영상 링크/대표 이미지를 표시하고, 없으면 기존 fallback을 유지한다.
+- 기존 참여신청/공유함 기능 영향:
+  - 참여신청 수락/거절 로직과 공유함 업로드/미리보기 로직은 수정하지 않았다.
+  - service_role key 또는 비밀키를 추가하지 않았다.
 - 검증 결과:
-  - inline script 추출 후 `node --check` 통과.
-  - `git diff --check` 통과.
-  - 로컬 HTTP 서버 `http://127.0.0.1:4174/app.html?workspace=1`에서 Playwright Chromium 로딩 검증 통과.
-  - 브라우저 검증 결과 console warning/error 및 pageerror 없음.
+  - inline script 추출 후 `node --check`: 통과 (`app.html` 5개, `index.html` 6개).
+  - `git diff --check`: 통과.
+  - Chromium `app.html?workspace=1`: console/pageerror 없음.
+  - Chromium `index.html#crews`: console/pageerror 없음.
+  - DOM 확인: 설정 화면 포트폴리오 카드/저장 버튼 존재, `#permCard [data-all]` 3개 disabled 아님, folio modal 영상/이미지 target 존재.
+  - 브라우저 검증은 로컬에 비밀 없는 `config.example.js`를 임시 `config.js`로 복사해 수행했고, 검증 후 삭제했다.
 - 커밋:
-  - `Wire crew join request approvals`
+  - `Restore member management and portfolio editing`
 - 에러 및 특이사항:
-  - 브라우저 검증 중 optional `config.js` 404를 피하기 위해 gitignored 로컬 placeholder `crewup_official_site/config.js`를 임시 생성했고, 검증 후 삭제했습니다.
-  - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경 범위와 무관해 건드리지 않았습니다.
+  - 실제 Supabase 데이터/RLS가 필요한 멤버 내보내기, 전체 권한 update, 포트폴리오 저장은 로컬 브라우저에서 실 DB 쓰기까지는 수행하지 않았다.
+  - 새 포트폴리오 컬럼은 운영 Supabase DB에 `supabase_schema.sql`의 ALTER 문을 적용해야 앱 select/update가 정상 동작한다.

@@ -1431,9 +1431,9 @@ body.locked { overflow: hidden; }
           <div style="font-size:13px;color:var(--text-3)" id="pf-role">크루 작업실 · 크루장</div>
         </div>
       </div>
-      <div><div class="pf-block-label">소개 영상</div><div class="ph" style="min-height:150px"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg></span>[ 소개 영상 영역 · 1개 ]</div></div>
+      <div><div class="pf-block-label">소개 영상</div><div class="ph" id="pf-video" style="min-height:150px"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg></span>[ 소개 영상 영역 · 1개 ]</div></div>
       <div><div class="pf-block-label">한 줄 메시지</div><p class="pf-msg" id="pf-msg">잘 만든 한 편보다, 매주 한 편씩 끝내는 리듬을 같이 만들고 싶어요.</p></div>
-      <div><div class="pf-block-label">대표 작업 (최대 3개)</div><div class="pf-imgs"><div class="ph">[ 이미지 1 ]</div><div class="ph">[ 이미지 2 ]</div><div class="ph">[ 이미지 3 ]</div></div></div>
+      <div><div class="pf-block-label">대표 작업 (최대 3개)</div><div class="pf-imgs" id="pf-images"><div class="ph">[ 이미지 1 ]</div><div class="ph">[ 이미지 2 ]</div><div class="ph">[ 이미지 3 ]</div></div></div>
       <div><div class="pf-block-label">진행 스타일 · 관심 분야</div><p class="pf-style" id="pf-style">매주 주제를 정해 각자 쇼츠를 만들고, 금요일에 모아 서로 피드백합니다.</p><div class="pf-tags" id="pf-tags" style="margin-top:12px"><span class="t">꾸준함</span><span class="t">영상편집</span><span class="t">자동화</span></div></div>
       <div class="modal-foot"><button type="button" class="btn btn-outline" data-close-modal>닫기</button><button type="button" class="btn btn-primary" data-open="join">참여 신청</button></div>
     </div>
@@ -1546,6 +1546,64 @@ body.locked { overflow: hidden; }
   }
   function closeModal(m) { m.classList.remove("open"); unlock(); }
 
+  function safeHttpUrl(url) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function renderFolioMedia(ctx) {
+    const video = $("#pf-video");
+    const videoUrl = safeHttpUrl(ctx.videoUrl || "");
+    if (video) {
+      if (videoUrl) {
+        video.innerHTML = "";
+        const link = document.createElement("a");
+        link.href = videoUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "btn btn-outline btn-sm";
+        link.textContent = "소개 영상 열기";
+        video.appendChild(link);
+      } else {
+        video.innerHTML = '<span class="play"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg></span>[ 소개 영상 영역 · 1개 ]';
+      }
+    }
+    const imageWrap = $("#pf-images");
+    if (imageWrap) {
+      imageWrap.innerHTML = "";
+      const urls = (ctx.imageUrls || []).map(safeHttpUrl).filter(Boolean).slice(0, 3);
+      for (let i = 0; i < 3; i++) {
+        const box = document.createElement("div");
+        box.className = "ph";
+        if (urls[i]) {
+          const img = document.createElement("img");
+          img.src = urls[i];
+          img.alt = `대표 작업 ${i + 1}`;
+          img.loading = "lazy";
+          img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit";
+          box.appendChild(img);
+        } else {
+          box.textContent = `[ 이미지 ${i + 1} ]`;
+        }
+        imageWrap.appendChild(box);
+      }
+    }
+  }
+
+  function parseJsonArray(value) {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // populate modal with the crew the user clicked
   function hydrate(name, ctx) {
     if (name === "join") {
@@ -1567,6 +1625,7 @@ body.locked { overflow: hidden; }
       (ctx.tags || ["꾸준함", "기록", "피드백"]).forEach(t => {
         const el = document.createElement("span"); el.className = "t"; el.textContent = t; tagWrap.appendChild(el);
       });
+      renderFolioMedia(ctx);
     }
   }
 
@@ -1589,6 +1648,8 @@ body.locked { overflow: hidden; }
           msg: card.dataset.msg,
           style: card.dataset.style,
           tags: card.dataset.tags ? card.dataset.tags.split(",") : null,
+          videoUrl: card.dataset.videoUrl || "",
+          imageUrls: parseJsonArray(card.dataset.imageUrls),
         };
       }
       openModal(name, ctx);
@@ -1907,7 +1968,7 @@ body.locked { overflow: hidden; }
 	  /* ── public crew list from Supabase ─────────────────────────── */
   if (sb) {
     sb.from("crews")
-      .select("id, name, description, category, owner_id, profiles!crews_owner_id_fkey(display_name)")
+      .select("id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, profiles!crews_owner_id_fkey(display_name)")
       .eq("is_public", true)
       .order("created_at", { ascending: false })
       .limit(12)
@@ -1941,6 +2002,8 @@ body.locked { overflow: hidden; }
           var ownerName = (crew.profiles && crew.profiles.display_name) || "크루장";
           var ownerInitial = ownerName.charAt(0) || "C";
           var desc = crew.description || "";
+          var tags = Array.isArray(crew.portfolio_tags) ? crew.portfolio_tags.filter(Boolean) : [];
+          var images = Array.isArray(crew.portfolio_image_urls) ? crew.portfolio_image_urls.filter(Boolean).slice(0, 3) : [];
           var article = document.createElement("article");
           article.className = featured && i === 0 ? "crew-card featured" : "crew-card";
           article.setAttribute("data-crew", "");
@@ -1951,8 +2014,11 @@ body.locked { overflow: hidden; }
           article.setAttribute("data-color", color);
           article.setAttribute("data-leader", ownerName);
           article.setAttribute("data-leader-initial", ownerInitial);
-          article.setAttribute("data-msg", desc);
-          article.setAttribute("data-style", "");
+          article.setAttribute("data-msg", crew.portfolio_message || desc);
+          article.setAttribute("data-style", crew.portfolio_style || "");
+          article.setAttribute("data-tags", tags.join(","));
+          article.setAttribute("data-video-url", crew.portfolio_video_url || "");
+          article.setAttribute("data-image-urls", JSON.stringify(images));
           article.setAttribute("data-crew-id", crew.id);
 
           if (featured && i === 0) {
@@ -2004,6 +2070,15 @@ body.locked { overflow: hidden; }
   }
 
   function reAttachCardListeners(grid) {
+    function parseJsonArray(value) {
+      if (!value) return [];
+      try {
+        var parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
     grid.querySelectorAll("[data-open]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var name = btn.dataset.open;
@@ -2013,12 +2088,83 @@ body.locked { overflow: hidden; }
           initials: card.dataset.initials, color: card.dataset.color,
           leader: card.dataset.leader, leaderInitial: card.dataset.leaderInitial,
           crewId: card.dataset.crewId,
-          crewName: card.dataset.name, msg: card.dataset.msg, style: card.dataset.style
+          crewName: card.dataset.name, msg: card.dataset.msg, style: card.dataset.style,
+          tags: card.dataset.tags ? card.dataset.tags.split(",").filter(Boolean) : null,
+          videoUrl: card.dataset.videoUrl || "",
+          imageUrls: parseJsonArray(card.dataset.imageUrls)
         } : null;
         /* dispatch a custom event so the existing modal code can pick it up */
         document.dispatchEvent(new CustomEvent("__crewup_open_modal", { detail: { name: name, ctx: ctx, card: card } }));
       });
     });
+  }
+
+  function safeHttpUrl(url) {
+    try {
+      var parsed = new URL(url, window.location.href);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function hydrateFolioModal(ctx) {
+    var ava = document.getElementById("pf-ava");
+    var name = document.getElementById("pf-name");
+    var role = document.getElementById("pf-role");
+    var msg = document.getElementById("pf-msg");
+    var style = document.getElementById("pf-style");
+    var tags = document.getElementById("pf-tags");
+    if (ava) { ava.textContent = ctx.leaderInitial || "C"; ava.style.setProperty("--c", ctx.color || "#3dd8b8"); }
+    if (name) name.textContent = ctx.leader || "크루장";
+    if (role) role.textContent = ctx.crewName ? ctx.crewName + " · 크루장" : "크루장";
+    if (msg) msg.textContent = ctx.msg || "함께 꾸준히 만들어가는 걸 가장 중요하게 생각합니다.";
+    if (style) style.textContent = ctx.style || "정해진 리듬으로 함께 진행하고, 결과보다 지속을 먼저 봅니다.";
+    if (tags) {
+      tags.innerHTML = "";
+      (ctx.tags && ctx.tags.length ? ctx.tags : ["꾸준함", "기록", "피드백"]).forEach(function (tag) {
+        var el = document.createElement("span");
+        el.className = "t";
+        el.textContent = tag;
+        tags.appendChild(el);
+      });
+    }
+    var video = document.getElementById("pf-video");
+    var videoUrl = safeHttpUrl(ctx.videoUrl || "");
+    if (video) {
+      if (videoUrl) {
+        video.innerHTML = "";
+        var link = document.createElement("a");
+        link.href = videoUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "btn btn-outline btn-sm";
+        link.textContent = "소개 영상 열기";
+        video.appendChild(link);
+      } else {
+        video.innerHTML = '<span class="play"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg></span>[ 소개 영상 영역 · 1개 ]';
+      }
+    }
+    var imageWrap = document.getElementById("pf-images");
+    if (imageWrap) {
+      imageWrap.innerHTML = "";
+      var urls = (ctx.imageUrls || []).map(safeHttpUrl).filter(Boolean).slice(0, 3);
+      for (var i = 0; i < 3; i++) {
+        var box = document.createElement("div");
+        box.className = "ph";
+        if (urls[i]) {
+          var img = document.createElement("img");
+          img.src = urls[i];
+          img.alt = "대표 작업 " + (i + 1);
+          img.loading = "lazy";
+          img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:inherit";
+          box.appendChild(img);
+        } else {
+          box.textContent = "[ 이미지 " + (i + 1) + " ]";
+        }
+        imageWrap.appendChild(box);
+      }
+    }
   }
 
   /* listen for the custom event and open the modal the same way the main IIFE does */
@@ -2043,6 +2189,7 @@ body.locked { overflow: hidden; }
       if (jc) jc.textContent = detail.ctx.cat || "";
       m.dataset.crewId = detail.ctx.crewId || "";
     }
+    if (detail.ctx && detail.name === "folio") hydrateFolioModal(detail.ctx);
     m.classList.add("open");
     document.body.classList.add("locked");
   });

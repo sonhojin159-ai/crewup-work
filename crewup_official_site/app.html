@@ -1918,14 +1918,14 @@ body[data-auth="in"]  #auth-gate { display: none; }
       <div class="set-card">
         <div class="sc-title">기본 정보</div>
         <div class="sc-desc">크루 목록과 작업실에 표시되는 정보예요.</div>
-        <div class="field" style="margin-bottom:16px"><label>크루 이름</label><input type="text" placeholder="크루 이름을 입력하세요"></div>
+        <div class="field" style="margin-bottom:16px"><label>크루 이름</label><input type="text" id="set-crew-name" placeholder="크루 이름을 입력하세요"></div>
         <div class="field" style="margin-bottom:16px">
           <label>카테고리</label>
           <div class="seg" id="set-cat"><span class="opt">AI 학습</span><span class="opt on">콘텐츠 제작</span><span class="opt">웹사이트 제작</span><span class="opt">자동화/부업</span><span class="opt">프로젝트</span></div>
         </div>
         <div class="field" style="margin-bottom:16px">
           <label>크루 목적</label>
-          <textarea placeholder="무엇을, 어떤 리듬으로 함께할지 적어주세요."></textarea>
+          <textarea id="set-crew-description" placeholder="무엇을, 어떤 리듬으로 함께할지 적어주세요."></textarea>
           <span class="hint">아직 비어 있어요. 채워두면 신청률이 올라가요.</span>
         </div>
         <div class="field" style="margin-bottom:16px"><label>진행 방식</label><input type="text" placeholder="예: 주 1회 온라인 모임 + 공유함에 자료 정리"></div>
@@ -1940,7 +1940,42 @@ body[data-auth="in"]  #auth-gate { display: none; }
             <span class="swatch" style="background:#f4909a" data-c="#f4909a"></span>
           </div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary btn-sm" data-toast="변경 사항을 저장했어요">변경 사항 저장</button></div>
+        <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary btn-sm" id="save-basic-settings">변경 사항 저장</button></div>
+      </div>
+
+      <!-- 크루 포트폴리오 -->
+      <div class="set-card" id="portfolio-settings-card">
+        <div class="sc-title">크루 포트폴리오</div>
+        <div class="sc-desc">공개 크루 상세 보기에서 보여줄 소개와 대표 작업이에요.</div>
+        <div class="field" style="margin-bottom:16px">
+          <label>한 줄 메시지</label>
+          <input type="text" id="portfolio-message" placeholder="잘 만든 한 편보다, 매주 한 편씩 끝내는 리듬을 같이 만들고 싶어요.">
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>진행 스타일/크루 소개</label>
+          <textarea id="portfolio-style" placeholder="매주 주제를 정해 각자 작업물을 만들고 금요일에 서로 피드백합니다."></textarea>
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>관심 분야/태그</label>
+          <input type="text" id="portfolio-tags" placeholder="꾸준함, 영상편집, 자동화">
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>소개 영상 URL</label>
+          <input type="url" id="portfolio-video-url" placeholder="https://example.com/crew-intro.mp4">
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>대표 이미지 URL 1</label>
+          <input type="url" id="portfolio-image-url-1" data-portfolio-image placeholder="https://example.com/work-1.jpg">
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label>대표 이미지 URL 2</label>
+          <input type="url" id="portfolio-image-url-2" data-portfolio-image placeholder="https://example.com/work-2.jpg">
+        </div>
+        <div class="field">
+          <label>대표 이미지 URL 3</label>
+          <input type="url" id="portfolio-image-url-3" data-portfolio-image placeholder="https://example.com/work-3.jpg">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary btn-sm" id="save-portfolio-settings">포트폴리오 저장</button></div>
       </div>
 
       <!-- 공개 & 모집 -->
@@ -2591,7 +2626,13 @@ body[data-auth="in"]  #auth-gate { display: none; }
       $$("[data-all]", permCard).forEach(cb => { allOn[cb.dataset.all] = cb.checked; });
       $$(".tog[data-type]", permCard).forEach(tog => {
         const type = tog.dataset.type;
-        if (allOn[type]) {
+        if (window.__crewupRealState) {
+          tog.classList.remove("locked");
+          delete tog.dataset.locked;
+          const self = tog.dataset.self === "1";
+          tog.classList.toggle("on", self);
+          tog.setAttribute("aria-pressed", String(self));
+        } else if (allOn[type]) {
           tog.classList.add("on", "locked");
           tog.setAttribute("aria-pressed", "true");
           tog.dataset.locked = "1";
@@ -2604,7 +2645,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
         }
       });
       const open = Object.keys(allOn).filter(k => allOn[k]).map(k => labels[k]);
-      if (window.__crewupRealState) hint.textContent = "전체 허용 설정은 아직 DB 컬럼이 없어 사용할 수 없습니다. 아래 멤버별 권한만 실제 저장됩니다.";
+      if (window.__crewupRealState) hint.textContent = $$(".perm-row.member", permCard).length ? "전체 토글은 현재 멤버들의 권한을 한 번에 변경합니다." : "아직 일반 멤버가 없어요. 멤버가 합류하면 전체 토글로 권한을 한 번에 변경할 수 있습니다.";
       else if (open.length === 3) hint.textContent = "지금은 모든 멤버가 자료·사진·영상을 모두 업로드할 수 있어요.";
       else if (open.length) hint.textContent = `지금은 모든 멤버가 ${open.join("·")}을(를) 업로드할 수 있어요. 나머지는 권한을 받은 멤버만 가능합니다.`;
       else hint.textContent = "전체 허용이 꺼진 항목은 아래에서 권한을 받은 멤버만 업로드할 수 있어요.";
@@ -2800,10 +2841,13 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  window.__crewupRealState = true;
 	  window.__currentUser = null;
 	  window.__activeCrew  = null;
+	  window.__activeCrewRole = null;
 	  window.__crewupRealHasContent = false;
 	  var toast = window.__crewupToast || function (msg) { console.warn(msg); };
 	  setupRealPermissionCard();
 	  bindRealCreationActions();
+	  bindRealMemberActions();
+	  bindRealSettingsActions();
 
   function setAuthAttr(state) {
     body.dataset.auth = state;
@@ -2823,6 +2867,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      setAuthAttr("out");
 	      window.__currentUser = null;
 	      window.__activeCrew  = null;
+	      window.__activeCrewRole = null;
 	    }
 	  });
 	  sb.auth.getSession().then(function (r) {
@@ -2850,7 +2895,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	        owner_id: window.__currentUser.id,
 	        is_public: true
 	      })
-	      .select("id, name, description, category, owner_id, is_public, created_at")
+	      .select("id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at")
 	      .single()
 	      .then(function (crewResult) {
 	        if (crewResult.error) throw crewResult.error;
@@ -2870,7 +2915,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
   function loadCrewData(userId) {
     sb.from("crew_members")
-      .select("crew_id, role, crews(id, name, category)")
+      .select("crew_id, role, crews(id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at)")
       .eq("user_id", userId)
       .then(function (r) {
         if (r.error || !r.data || !r.data.length) {
@@ -2883,6 +2928,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
           return;
 	        }
 	        window.__activeCrew = crew;
+	        window.__activeCrewRole = r.data[0].role || null;
 	        applyCrewShell(crew, false);
 	        renderRealEmptyState();
 	        loadMembers(crew.id);
@@ -2908,6 +2954,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    body.dataset.crewstate = isNew ? "new" : "active";
 	    if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = body.dataset.crewstate;
 	    if (typeof syncStateUI === "function") syncStateUI();
+	    hydrateSettingsForm(crew);
 	  }
 
 	  function markRealCrewHasContent() {
@@ -2920,6 +2967,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
   function showNoCrewState() {
     window.__activeCrew = null;
+    window.__activeCrewRole = null;
     window.__crewupRealHasContent = false;
     body.dataset.crewstate = "new";
     if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = "new";
@@ -2947,6 +2995,71 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    renderRealEmptyState();
 	    renderMembers([]);
 	    renderApplicants([]);
+	  }
+
+	  function isActiveCrewOwner() {
+	    return !!(window.__activeCrew && window.__currentUser && window.__activeCrew.owner_id === window.__currentUser.id);
+	  }
+
+	  function setSegmentValue(segId, value) {
+	    var seg = document.getElementById(segId);
+	    if (!seg) return;
+	    var found = false;
+	    seg.querySelectorAll(".opt").forEach(function (opt) {
+	      var on = opt.textContent.trim() === String(value || "").trim();
+	      if (on) found = true;
+	      opt.classList.toggle("on", on);
+	    });
+	    if (!found) {
+	      var first = seg.querySelector(".opt");
+	      if (first) first.classList.add("on");
+	    }
+	  }
+
+	  function normalizePortfolioTags(value) {
+	    if (Array.isArray(value)) return value.map(function (tag) { return String(tag).trim(); }).filter(Boolean);
+	    if (typeof value === "string") return value.split(",").map(function (tag) { return tag.trim(); }).filter(Boolean);
+	    return [];
+	  }
+
+	  function normalizePortfolioImages(value) {
+	    if (Array.isArray(value)) return value.map(function (url) { return String(url).trim(); }).filter(Boolean).slice(0, 3);
+	    if (typeof value === "string") {
+	      try {
+	        var parsed = JSON.parse(value);
+	        if (Array.isArray(parsed)) return normalizePortfolioImages(parsed);
+	      } catch (e) {}
+	    }
+	    return [];
+	  }
+
+	  function hydrateSettingsForm(crew) {
+	    crew = crew || {};
+	    var nameInput = document.getElementById("set-crew-name");
+	    if (nameInput) nameInput.value = crew.name || "";
+	    var descriptionInput = document.getElementById("set-crew-description");
+	    if (descriptionInput) descriptionInput.value = crew.description || "";
+	    setSegmentValue("set-cat", crew.category || "콘텐츠 제작");
+	    var messageInput = document.getElementById("portfolio-message");
+	    if (messageInput) messageInput.value = crew.portfolio_message || "";
+	    var styleInput = document.getElementById("portfolio-style");
+	    if (styleInput) styleInput.value = crew.portfolio_style || "";
+	    var tagsInput = document.getElementById("portfolio-tags");
+	    if (tagsInput) tagsInput.value = normalizePortfolioTags(crew.portfolio_tags).join(", ");
+	    var videoInput = document.getElementById("portfolio-video-url");
+	    if (videoInput) videoInput.value = crew.portfolio_video_url || "";
+	    var images = normalizePortfolioImages(crew.portfolio_image_urls);
+	    document.querySelectorAll("[data-portfolio-image]").forEach(function (input, i) {
+	      input.value = images[i] || "";
+	    });
+	    var canSave = isActiveCrewOwner();
+	    ["save-basic-settings", "save-portfolio-settings"].forEach(function (id) {
+	      var btn = document.getElementById(id);
+	      if (btn) {
+	        btn.disabled = !canSave;
+	        btn.setAttribute("aria-disabled", String(!canSave));
+	      }
+	    });
 	  }
 
 	  function profileFromUser(user) {
@@ -2996,8 +3109,27 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      }
 	      rows.appendChild(row);
 	    });
+	    syncRealAllPermissionState(members);
 	    if (window.__crewupBindPermissionToggles) window.__crewupBindPermissionToggles(rows);
 	    if (window.__crewupRefreshPermCard) window.__crewupRefreshPermCard();
+	  }
+
+	  function syncRealAllPermissionState(members) {
+	    var card = document.getElementById("permCard");
+	    if (!card || !window.__crewupRealState) return;
+	    var regular = (members || []).filter(function (member) { return member.role !== "owner"; });
+	    var map = { doc: "can_files", photo: "can_photos", video: "can_videos" };
+	    Object.keys(map).forEach(function (type) {
+	      var cb = card.querySelector('[data-all="' + type + '"]');
+	      if (!cb) return;
+	      cb.disabled = false;
+	      cb.removeAttribute("aria-disabled");
+	      cb.checked = regular.length > 0 && regular.every(function (member) { return member[map[type]] === true; });
+	    });
+	    var hint = document.getElementById("permHint");
+	    if (hint) {
+	      hint.textContent = regular.length ? "전체 토글은 현재 멤버들의 권한을 한 번에 변경합니다." : "아직 일반 멤버가 없어요. 멤버가 합류하면 전체 토글로 권한을 한 번에 변경할 수 있습니다.";
+	    }
 	  }
 
 	  function renderRealEmptyState() {
@@ -3075,11 +3207,24 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	          var name = displayName(member);
 	          var isOwner = member.role === "owner";
 	          var isMe = window.__currentUser && member.user_id === window.__currentUser.id;
+	          var canManage = !isOwner && !isMe;
 	          var row = document.createElement("div");
 	          row.className = "mrow";
+	          row.setAttribute("data-member-row", "");
+	          row.setAttribute("data-user-id", member.user_id || "");
+	          row.setAttribute("data-member-role", member.role || "member");
 	          row.innerHTML = '<span class="mr-ava" style="--c:#3dd8b8">' + escHtml(name.charAt(0) || String(i + 1)) + '</span>' +
 	            '<div class="mr-meta"><div class="mr-name">' + escHtml(name) + ' <span class="mr-role ' + (isOwner ? 'owner' : 'member') + '">' + (isOwner ? '크루장' : '멤버') + '</span></div><div class="mr-sub">' + (isMe ? '나 · ' : '') + (isOwner ? '크루장' : '멤버') + '</div></div>' +
-	            '<div class="mr-act"><button class="icon-btn" disabled style="opacity:.4;cursor:default" aria-label="멤버 관리 메뉴는 준비 중이에요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>';
+	            '<div class="mr-act">' +
+	              (canManage ?
+	                '<button class="icon-btn" data-row-menu aria-label="' + escHtml(name) + ' 관리 메뉴 열기" aria-haspopup="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>' +
+	                '<div class="row-menu" role="menu">' +
+	                  '<button type="button" data-grant role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/></svg>업로드 권한 설정</button>' +
+	                  '<div class="rm-sep"></div>' +
+	                  '<button type="button" class="danger" data-kick role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>크루에서 내보내기</button>' +
+	                '</div>' :
+	                '<button class="icon-btn" disabled style="opacity:.4;cursor:default" aria-label="' + (isOwner ? '크루장은 관리 메뉴를 사용할 수 없어요' : '내 계정은 여기서 관리할 수 없어요') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>') +
+	            '</div>';
 	          list.appendChild(row);
 	        });
 	      }
@@ -3455,12 +3600,54 @@ body[data-auth="in"]  #auth-gate { display: none; }
     if (!card) return;
     card.querySelectorAll("[data-all]").forEach(function (cb) {
       cb.checked = false;
-      cb.disabled = true;
-      cb.setAttribute("aria-disabled", "true");
+      cb.disabled = false;
+      cb.removeAttribute("aria-disabled");
     });
     var hint = document.getElementById("permHint");
-    if (hint) hint.textContent = "전체 허용 설정은 아직 DB 컬럼이 없어 사용할 수 없습니다. 아래 멤버별 권한만 실제 저장됩니다.";
+    if (hint) hint.textContent = "전체 토글은 현재 멤버들의 권한을 한 번에 변경합니다.";
+    if (!card.dataset.realAllBound) {
+      card.dataset.realAllBound = "1";
+      card.addEventListener("change", function (e) {
+        var cb = e.target && e.target.closest ? e.target.closest("[data-all]") : null;
+        if (!cb || !window.__crewupRealState) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        updateAllMemberPermission(cb);
+      }, true);
+    }
     if (window.__crewupRefreshPermCard) window.__crewupRefreshPermCard();
+  }
+
+  function updateAllMemberPermission(cb) {
+    var map = { doc: "can_files", photo: "can_photos", video: "can_videos" };
+    var column = map[cb.dataset.all];
+    var activeCrew = window.__activeCrew;
+    var prev = !cb.checked;
+    var next = cb.checked;
+    if (!column) return;
+    if (!activeCrew || !activeCrew.id) {
+      cb.checked = prev;
+      toast("먼저 크루 작업실에 입장해 주세요");
+      return;
+    }
+    cb.disabled = true;
+    var patch = {};
+    patch[column] = next;
+    sb.from("crew_members")
+      .update(patch)
+      .eq("crew_id", activeCrew.id)
+      .neq("role", "owner")
+      .then(function (r) {
+        cb.disabled = false;
+        if (r.error) {
+          cb.checked = prev;
+          console.warn("전체 업로드 권한 저장 실패:", r.error.message || r.error);
+          toast("전체 업로드 권한을 저장하지 못했어요");
+          if (window.__crewupRefreshPermCard) window.__crewupRefreshPermCard();
+          return;
+        }
+        loadMembers(activeCrew.id);
+      });
   }
 
   function requireCrewContext() {
@@ -3469,6 +3656,192 @@ body[data-auth="in"]  #auth-gate { display: none; }
       return false;
     }
     return true;
+  }
+
+  function closeRealMemberMenus() {
+    document.querySelectorAll("#member-list .row-menu.open").forEach(function (menu) {
+      menu.classList.remove("open", "up");
+    });
+  }
+
+  function bindRealMemberActions() {
+    if (window.__crewupRealMemberActionsBound) return;
+    window.__crewupRealMemberActionsBound = true;
+    document.addEventListener("click", function (e) {
+      var list = document.getElementById("member-list");
+      if (!list) return;
+      var rowMenuBtn = e.target.closest("[data-row-menu]");
+      if (rowMenuBtn && list.contains(rowMenuBtn)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var menu = rowMenuBtn.parentElement ? rowMenuBtn.parentElement.querySelector(".row-menu") : null;
+        if (!menu) return;
+        var open = menu.classList.contains("open");
+        closeRealMemberMenus();
+        if (!open) {
+          var spaceBelow = window.innerHeight - rowMenuBtn.getBoundingClientRect().bottom;
+          menu.classList.toggle("up", spaceBelow < 230);
+          menu.classList.add("open");
+        }
+        return;
+      }
+
+      var grant = e.target.closest("#member-list [data-grant]");
+      if (grant) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closeRealMemberMenus();
+        var nav = document.querySelector('[data-view="members"]');
+        if (nav) nav.click();
+        setTimeout(function () {
+          var card = document.getElementById("permCard");
+          if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 60);
+        toast("아래 업로드 권한에서 설정하세요");
+        return;
+      }
+
+      var kick = e.target.closest("#member-list [data-kick]");
+      if (kick) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        removeCrewMember(kick);
+      }
+    }, true);
+  }
+
+  function removeCrewMember(btn) {
+    var row = btn.closest("[data-member-row]");
+    var activeCrew = window.__activeCrew;
+    var userId = row ? row.getAttribute("data-user-id") : "";
+    var role = row ? row.getAttribute("data-member-role") : "";
+    if (!activeCrew || !activeCrew.id || !userId) {
+      toast("멤버를 내보내지 못했어요");
+      return;
+    }
+    if (role === "owner" || userId === (window.__currentUser && window.__currentUser.id)) {
+      toast("크루장 본인은 내보낼 수 없어요");
+      return;
+    }
+    btn.disabled = true;
+    sb.from("crew_members")
+      .delete()
+      .eq("crew_id", activeCrew.id)
+      .eq("user_id", userId)
+      .neq("role", "owner")
+      .then(function (r) {
+        btn.disabled = false;
+        closeRealMemberMenus();
+        if (r.error) {
+          console.warn("멤버 내보내기 실패:", r.error.message || r.error);
+          toast("멤버를 내보내지 못했어요");
+          return;
+        }
+        loadMembers(activeCrew.id);
+        toast("멤버를 내보냈어요");
+      });
+  }
+
+  function selectedSegmentText(segId) {
+    var seg = document.getElementById(segId);
+    var opt = seg ? seg.querySelector(".opt.on") : null;
+    return opt ? opt.textContent.trim() : "";
+  }
+
+  function mergeActiveCrew(crew) {
+    window.__activeCrew = Object.assign({}, window.__activeCrew || {}, crew || {});
+    applyCrewShell(window.__activeCrew, false);
+  }
+
+  function bindRealSettingsActions() {
+    if (window.__crewupRealSettingsBound) return;
+    window.__crewupRealSettingsBound = true;
+    var basicBtn = document.getElementById("save-basic-settings");
+    if (basicBtn) {
+      basicBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        saveBasicCrewSettings(basicBtn);
+      });
+    }
+    var portfolioBtn = document.getElementById("save-portfolio-settings");
+    if (portfolioBtn) {
+      portfolioBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        savePortfolioSettings(portfolioBtn);
+      });
+    }
+  }
+
+  function guardOwnerSave(btn) {
+    if (!requireCrewContext()) return false;
+    if (!isActiveCrewOwner()) {
+      toast("크루장만 저장할 수 있어요");
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute("aria-disabled", "true");
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function saveBasicCrewSettings(btn) {
+    if (!guardOwnerSave(btn)) return;
+    var nameInput = document.getElementById("set-crew-name");
+    var descriptionInput = document.getElementById("set-crew-description");
+    var patch = {
+      name: ((nameInput && nameInput.value) || "").trim() || "내 크루",
+      description: ((descriptionInput && descriptionInput.value) || "").trim() || null,
+      category: selectedSegmentText("set-cat") || "콘텐츠 제작"
+    };
+    btn.disabled = true;
+    sb.from("crews")
+      .update(patch)
+      .eq("id", window.__activeCrew.id)
+      .select("id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at")
+      .single()
+      .then(function (r) {
+        btn.disabled = false;
+        if (r.error) {
+          console.warn("크루 기본 정보 저장 실패:", r.error.message || r.error);
+          toast("변경 사항을 저장하지 못했어요");
+          return;
+        }
+        mergeActiveCrew(r.data);
+        toast("변경 사항을 저장했어요");
+      });
+  }
+
+  function savePortfolioSettings(btn) {
+    if (!guardOwnerSave(btn)) return;
+    var imageUrls = [];
+    document.querySelectorAll("[data-portfolio-image]").forEach(function (input) {
+      var url = (input.value || "").trim();
+      if (url && imageUrls.length < 3) imageUrls.push(url);
+    });
+    var patch = {
+      portfolio_message: ((document.getElementById("portfolio-message") || {}).value || "").trim() || null,
+      portfolio_style: ((document.getElementById("portfolio-style") || {}).value || "").trim() || null,
+      portfolio_tags: normalizePortfolioTags((document.getElementById("portfolio-tags") || {}).value || ""),
+      portfolio_video_url: ((document.getElementById("portfolio-video-url") || {}).value || "").trim() || null,
+      portfolio_image_urls: imageUrls
+    };
+    btn.disabled = true;
+    sb.from("crews")
+      .update(patch)
+      .eq("id", window.__activeCrew.id)
+      .select("id, name, description, category, owner_id, is_public, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, created_at")
+      .single()
+      .then(function (r) {
+        btn.disabled = false;
+        if (r.error) {
+          console.warn("크루 포트폴리오 저장 실패:", r.error.message || r.error);
+          toast("크루 포트폴리오를 저장하지 못했어요");
+          return;
+        }
+        mergeActiveCrew(r.data);
+        toast("크루 포트폴리오를 저장했어요");
+      });
   }
 
   function bindRealCreationActions() {

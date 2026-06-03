@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS public.crews (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.crews ADD COLUMN IF NOT EXISTS portfolio_message text;
+ALTER TABLE public.crews ADD COLUMN IF NOT EXISTS portfolio_style text;
+ALTER TABLE public.crews ADD COLUMN IF NOT EXISTS portfolio_tags text[] NOT NULL DEFAULT '{}';
+ALTER TABLE public.crews ADD COLUMN IF NOT EXISTS portfolio_video_url text;
+ALTER TABLE public.crews ADD COLUMN IF NOT EXISTS portfolio_image_urls jsonb NOT NULL DEFAULT '[]'::jsonb;
+
 -- ────────────────────────────────────────────────────────────────
 -- 3. crew_members
 -- ────────────────────────────────────────────────────────────────
