@@ -1,32 +1,29 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
-  - 생성: `crewup_official_site/supabase_storage_setup.sql`
-  - 수정: `crewup_official_site/SUPABASE_SETUP.md`
   - 수정: `crewup_official_site/app.html`
-  - 수정: `crewup_official_site/supabase_schema.sql`
   - 수정: `sub_done.md`
 - 핵심 구현 요약:
-  - `crew-files` Storage bucket 생성/보정 SQL과 `storage.objects` 조회/업로드/삭제 policy SQL을 별도 파일로 추가했습니다.
-  - Storage 설정을 선택 예시가 아닌 필수 배포 단계로 문서화했습니다.
-  - 업로드 실패 시 bucket 없음, Storage policy/RLS 차단, 파일 크기 초과를 구분해 toast로 안내하도록 했습니다.
-  - 업로드 권한 조회 실패와 파일 종류별 권한 없음을 분리해 안내하도록 했습니다.
-  - Storage upload 성공 후 `crew_files` metadata insert가 실패하면 업로드된 object 삭제를 시도하도록 정리 로직을 추가했습니다.
-- Storage 실패 원인 진단/해결 방식:
-  - bucket 없음: “Storage 버킷 crew-files가 없어요. supabase_storage_setup.sql을 실행해 주세요.”
-  - Storage RLS/policy/permission/403/42501: “Storage 업로드 권한 정책이 막고 있어요. storage policy를 확인해 주세요.”
-  - 파일 크기 초과: “파일 크기가 제한을 넘었어요.”
-  - 그 외 Storage 실패: “파일 업로드에 실패했어요”
-  - Supabase error 객체는 `console.warn`에 남기되 service_role key나 config secret은 출력하지 않습니다.
-- 사용자가 Supabase에서 실행해야 할 SQL:
-  - 먼저 `crewup_official_site/supabase_schema.sql`
-  - 이어서 `crewup_official_site/supabase_storage_setup.sql`
+  - 공유함 파일 목록을 일반 파일 행 카드에서 스마트폰 앨범형 2~3열 썸네일 그리드로 변경했습니다.
+  - 정사각형 카드, 큰 preview 영역, 하단 overlay 메타, 사진/영상 배지, 영상 재생 아이콘, 일반 파일 placeholder를 추가했습니다.
+  - 데모/초기 active 샘플 카드도 앨범형 UI와 사진/영상 중심 예시로 맞췄습니다.
+- 미디어 미리보기 구현 방식:
+  - `loadFiles()`의 SELECT 성공 이후 `attachFilePreviewUrls()`에서 `image/*`, `video/*` 파일만 Supabase Storage `crew-files` private bucket의 `createSignedUrl(storage_path, 60 * 10)`로 preview URL을 생성합니다.
+  - 이미지 파일은 `<img loading="lazy">`, 영상 파일은 `<video muted playsinline preload="metadata">`로 렌더링합니다.
+  - signed URL 생성 실패 시 `console.warn`만 남기고 사진/영상 배지와 파일 아이콘 placeholder로 fallback합니다.
+  - 카드 클릭 및 열기 버튼은 기존 `openStoredFile()` 흐름을 유지해 별도 signed URL을 만든 뒤 새 탭으로 엽니다.
+- 기존 업로드/누적 표시 유지 여부:
+  - Storage upload 및 `crew_files` metadata insert 흐름은 변경하지 않았습니다.
+  - 업로드 성공 후 `loadFiles()`로 전체 SELECT reload하는 기존 흐름을 유지했습니다.
+  - rows가 있으면 `markRealCrewHasContent()`를 호출하는 기존 active 표시를 유지했습니다.
+  - query error 시 `renderFileList()`를 호출하지 않아 기존 목록을 빈 상태로 덮어쓰지 않는 보호 로직을 유지했습니다.
 - 검증 결과:
   - inline script 추출 후 `node --check /tmp/crewup_app_inline.js` 통과.
   - `git diff --check` 통과.
-  - `crewup_official_site/supabase_storage_setup.sql`을 눈으로 점검했고, bucket upsert와 3개 policy 구문상 명백한 오타는 확인되지 않았습니다.
-  - 로컬 정적 서버 `http://127.0.0.1:4188/app.html`에서 Playwright Chromium 초기 로드를 확인했습니다. 페이지 응답은 200이었고, 로컬 개발용 `config.js`가 없어 기존 404 console error가 발생했습니다. 이번 변경으로 인한 JS pageerror는 확인되지 않았습니다.
+  - 로컬 HTTP 서버 `http://127.0.0.1:4183/app.html?workspace=1`에서 Playwright Chromium 로딩 검증 통과.
+  - 브라우저 검증 결과 console warning/error 및 pageerror 없음. 공유함 카드 4개와 `file-grid media-grid` 클래스 확인.
 - 커밋:
-  - `Fix Crew Up storage upload setup`
+  - `Improve Crew Up file gallery previews`
 - 에러 및 특이사항:
-  - 실제 Supabase 인증 세션과 운영 DB/Storage 권한이 필요한 실파일 업로드는 이 환경에서 수행하지 못했습니다.
+  - 실제 운영 Supabase 세션/Storage 파일을 사용하는 미리보기 URL 발급은 이 환경에서 수행하지 못했습니다.
+  - 브라우저 검증 중 gitignored 로컬 placeholder `crewup_official_site/config.js`를 임시 생성해 optional config 404만 제거했고, 검증 후 삭제했습니다.
   - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경/커밋에 포함하지 않았습니다.
