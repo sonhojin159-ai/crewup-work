@@ -1,23 +1,19 @@
-# sub_done — Crew Up 실연동 전 최소 보안 보강
-
 - 작업 상태: 성공적으로 완료됨
-
 - 생성/수정된 파일 목록:
+  - 수정: `crewup_official_site/app.html`
   - 수정: `crewup_official_site/index.html`
-  - 수정: `crewup_official_site/supabase_schema.sql`
-  - 수정: `crewup_official_site/SUPABASE_SETUP.md`
-
+  - 수정: `sub_done.md`
 - 핵심 수정 요약:
-  - initial escape 처리 여부: 완료. Supabase 공개 크루 렌더링 시 크루명에서 파생된 `initial` 출력에 `escHtml(initial)`을 적용함.
-  - helper function `SET search_path = public` 처리 여부: 완료. `public.handle_new_user`, `public.is_crew_member`, `public.is_crew_owner` 함수에 `SET search_path = public`을 추가함.
-  - Storage RLS/policy 문서 보강 여부: 완료. `crew-files` 비공개 버킷 유지, `storage.objects` policy 점검 필요, 업로드/조회/삭제 권한 방향, service_role key 브라우저 사용 금지 안내를 `SUPABASE_SETUP.md`에 추가함.
-
+  - app.html 크루 생성 DB insert 처리: `#flow-enter`에서 로그인된 Supabase 세션이 있으면 `crews`를 `is_public: true`로 생성하고, 생성된 `crew.id`로 `crew_members` owner row를 insert하도록 연결했습니다. 실패 시 성공 UI를 띄우지 않고 `console.warn` 및 토스트로 실패를 알리며 버튼을 복구합니다.
+  - index.html 랜딩 크루 생성 처리: 랜딩 `modal-create` submit을 capture phase에서 분기해 로그인 사용자는 `crews` + `crew_members(owner)`를 실제 insert하고, 비로그인 사용자는 가짜 성공 대신 `app.html?workspace=1`로 이동하게 했습니다.
+  - 작업실 redirect/Magic Link redirect 처리: `app.html` 세션 동기화에서 `?workspace=1`이 없다는 이유로 랜딩으로 강제 redirect하던 로직을 제거했습니다. Magic Link `emailRedirectTo`는 `app.html?workspace=1`로 바꿨고, 랜딩 CTA도 `app.html?workspace=1`을 유지하도록 정리했습니다.
+  - 더미 멤버/대시보드 데이터 노출 정리: Supabase 연결 상태에서는 최근 활동, 채팅 샘플, 파일/노트/링크 active 샘플을 빈 상태로 초기화하고, `crew_members`/`join_requests` 조회 결과로 멤버 수, 멤버 목록, 신청 수/목록을 렌더링하도록 했습니다. 신규 owner-only 크루는 멤버 1명과 빈 활동 상태로 보입니다.
 - 검증 결과:
-  - index.html console error: 없음. `http://127.0.0.1:4178/index.html?verify=directpatch`에서 확인.
-  - app.html config 없는 오프라인 확인 흐름: 정상. 이메일 입력 → 확인용 입장 → 작업실 대시보드 진입 확인.
-  - SQL 문법/구조 확인: helper function 3개 모두 `SET search_path = public` 포함 확인. SQL 파일은 Supabase Dashboard에서 최종 실행 검증 필요.
-  - Supabase 실제 연결 테스트 여부: 미수행. 아직 실제 Project URL/anon public key가 입력되지 않은 단계임.
-
+  - JS 문법/console error 확인: inline script를 `/tmp`로 추출해 `node --check /tmp/crewup_official_site_app_html.js` 및 `node --check /tmp/crewup_official_site_index_html.js` 통과. `git diff --check` 통과.
+  - config 없는 로컬 fallback 확인: 정적 문법 기준으로 config 없는 상태에서 Supabase helper가 없으면 기존 UI-only app create fallback이 유지되도록 확인했습니다. 브라우저 수동 실행은 하지 않았습니다.
+  - Supabase 실제 수동 테스트 여부 및 결과: 미수행. 이 환경에는 실제 Supabase 세션/프로젝트 접근 정보가 없어 DB insert와 RLS 동작은 배포 환경에서 확인해야 합니다.
+  - 랜딩 공개 크루 목록 표시 확인: 코드상 생성 시 `crews.is_public = true`로 insert하고 기존 공개 목록 쿼리가 `is_public = true`를 조회하므로 새로고침 후 표시 경로가 연결되어 있습니다. 실제 DB 수동 확인은 미수행.
+  - 신규 크루 대시보드 빈 상태 확인: 코드상 생성 직후 `window.__activeCrew` 갱신, crew shell 이름 갱신, owner 1명 렌더링, `body.dataset.crewstate = "new"` 및 빈 활동/자료/노트/링크 렌더링을 수행합니다. 실제 브라우저 수동 확인은 미수행.
 - 에러 및 특이사항:
-  - 기존 4177 포트는 이미 다른 프로세스가 사용 중이라, 로컬 브라우저 검증은 4178 포트에서 수행함.
-  - `crewup_official_site/config.js`는 생성하지 않았고, 비공개 키도 입력하지 않았음.
+  - `crewup_official_site/config.js`는 읽거나 수정하거나 커밋하지 않았습니다.
+  - root `package.json`에는 lint/test scripts가 없어 npm 기반 정적 검사는 실행할 항목이 없었습니다.

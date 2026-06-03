@@ -2216,7 +2216,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
       const btn = $("button[type=submit]", form);
       const origText = btn ? btn.textContent : "";
       if (btn) { btn.disabled = true; btn.textContent = "전송 중…"; }
-      const redirectUrl = location.origin + location.pathname.replace(/app\.html$/, "index.html");
+      const redirectUrl = location.origin + location.pathname + "?workspace=1";
       const options = { emailRedirectTo: redirectUrl };
       if (nickname) options.data = { display_name: nickname, nickname: nickname };
       window.__sb.auth.signInWithOtp({ email, options })
@@ -2378,7 +2378,28 @@ body[data-auth="in"]  #auth-gate { display: none; }
   $("#flow-enter").addEventListener("click", () => {
     // apply to the app shell as the (new) current crew
     const name = flow.data.name || "이름 없는 크루";
-    const initial = name.trim().charAt(0) || "C";
+    const purpose = ($("#flow-purpose") || {}).value || "";
+    const btn = $("#flow-enter");
+    if (window.__createCrewInSupabase && window.__currentUser) {
+      const origText = btn ? btn.textContent : "";
+      if (btn) { btn.disabled = true; btn.textContent = "만드는 중..."; }
+      window.__createCrewInSupabase({
+        name: name,
+        description: purpose.trim() || null,
+        category: flow.data.cat,
+        isNew: true
+      }).then(() => {
+        if (btn) { btn.disabled = false; btn.textContent = origText; }
+        closeFlow();
+        showView("dash");
+        toast("크루가 만들어졌어요");
+      }).catch(err => {
+        console.warn("Crew Up crew create failed:", err && err.message ? err.message : err);
+        if (btn) { btn.disabled = false; btn.textContent = origText; }
+        toast("크루를 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
+      });
+      return;
+    }
     $$(".cs-name").forEach(el => el.textContent = name);
     $(".ab-name").textContent = name;
     closeFlow();
@@ -2585,7 +2606,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
     const st = body.dataset.crewstate;
     $$("#tw-state .tw-opt").forEach(o => o.classList.toggle("on", o.dataset.val === st));
     // member count differs by demo state (방금 만든 크루 vs 활발한 크루)
-    memberCount(st === "active" ? 6 : 2);
+    if (!window.__crewupRealState) memberCount(st === "active" ? 6 : 2);
     refreshStepper();
     applicantCount();
   }
@@ -2710,35 +2731,74 @@ body[data-auth="in"]  #auth-gate { display: none; }
   ready.then(function (sb) {
   if (!sb) return;
 
-  var body = document.body;
-  var AUTH_KEY = "crewup-auth";
-  var isWorkspaceRequest = new URLSearchParams(location.search).get("workspace") === "1";
-  window.__currentUser = null;
-  window.__activeCrew  = null;
+	  var body = document.body;
+	  var AUTH_KEY = "crewup-auth";
+	  window.__crewupRealState = true;
+	  window.__currentUser = null;
+	  window.__activeCrew  = null;
 
   function setAuthAttr(state) {
     body.dataset.auth = state;
     try { localStorage.setItem(AUTH_KEY, state); } catch (e) {}
   }
 
-  sb.auth.onAuthStateChange(function (event, session) {
-    if (session) {
-      setAuthAttr("in");
-      window.__currentUser = session.user;
-      if (!isWorkspaceRequest) {
-        window.location.replace("index.html");
-        return;
-      }
-      var ae = document.getElementById("acct-email");
-      if (ae) ae.textContent = session.user.email || "";
-      syncProfileName(session.user);
-      loadCrewData(session.user.id);
-    } else {
-      setAuthAttr("out");
-      window.__currentUser = null;
-      window.__activeCrew  = null;
-    }
-  });
+	  sb.auth.onAuthStateChange(function (event, session) {
+	    if (session) {
+	      setAuthAttr("in");
+	      window.__currentUser = session.user;
+	      var ae = document.getElementById("acct-email");
+	      if (ae) ae.textContent = session.user.email || "";
+	      syncProfileName(session.user);
+	      renderRealEmptyState();
+	      loadCrewData(session.user.id);
+	    } else {
+	      setAuthAttr("out");
+	      window.__currentUser = null;
+	      window.__activeCrew  = null;
+	    }
+	  });
+	  sb.auth.getSession().then(function (r) {
+	    var session = r.data && r.data.session;
+	    if (!session) return;
+	    setAuthAttr("in");
+	    window.__currentUser = session.user;
+	    var ae = document.getElementById("acct-email");
+	    if (ae) ae.textContent = session.user.email || "";
+	    syncProfileName(session.user);
+	    renderRealEmptyState();
+	    loadCrewData(session.user.id);
+	  });
+
+	  window.__createCrewInSupabase = function (payload) {
+	    if (!window.__currentUser) return Promise.reject(new Error("로그인이 필요합니다."));
+	    var name = (payload && payload.name ? payload.name : "").trim() || "새 크루";
+	    var description = payload && typeof payload.description !== "undefined" ? payload.description : null;
+	    var category = (payload && payload.category) || "콘텐츠 제작";
+	    return sb.from("crews")
+	      .insert({
+	        name: name,
+	        description: description,
+	        category: category,
+	        owner_id: window.__currentUser.id,
+	        is_public: true
+	      })
+	      .select("id, name, description, category, owner_id, is_public, created_at")
+	      .single()
+	      .then(function (crewResult) {
+	        if (crewResult.error) throw crewResult.error;
+	        var crew = crewResult.data;
+	        return sb.from("crew_members")
+	          .insert({ crew_id: crew.id, user_id: window.__currentUser.id, role: "owner" })
+	          .then(function (memberResult) {
+	            if (memberResult.error) throw memberResult.error;
+	            applyCrewShell(crew, true);
+	            renderRealEmptyState();
+	            renderMembers([{ user_id: window.__currentUser.id, role: "owner", profiles: profileFromUser(window.__currentUser) }]);
+	            renderApplicants([]);
+	            return crew;
+	          });
+	      });
+	  };
 
   function loadCrewData(userId) {
     sb.from("crew_members")
@@ -2753,17 +2813,32 @@ body[data-auth="in"]  #auth-gate { display: none; }
         if (!crew) {
           showNoCrewState();
           return;
-        }
-        window.__activeCrew = crew;
-        document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = crew.name; });
-        var abName = document.querySelector(".ab-name");
-        if (abName) abName.textContent = crew.name;
-        body.dataset.crewstate = "active";
-        loadMessages(crew.id);
-        loadNotes(crew.id);
-        loadLinks(crew.id);
-      });
-  }
+	        }
+	        window.__activeCrew = crew;
+	        applyCrewShell(crew, false);
+	        renderRealEmptyState();
+	        loadMembers(crew.id);
+	        loadApplicants(crew.id);
+	        loadFiles(crew.id);
+	        loadMessages(crew.id);
+	        loadNotes(crew.id);
+	        loadLinks(crew.id);
+	      });
+	  }
+
+	  function applyCrewShell(crew, isNew) {
+	    window.__activeCrew = crew;
+	    var name = crew && crew.name ? crew.name : "내 크루";
+	    var initial = name.trim().charAt(0) || "C";
+	    document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = name; });
+	    document.querySelectorAll(".crew-switch .crew-thumb, #appbar-crew .crew-thumb").forEach(function (el) { el.textContent = initial; });
+	    var menuName = document.querySelector(".cm-name");
+	    if (menuName) menuName.textContent = name;
+	    var abName = document.querySelector(".ab-name");
+	    if (abName) abName.textContent = name;
+	    body.dataset.crewstate = isNew ? "new" : "active";
+	    if (typeof syncStateUI === "function") syncStateUI();
+	  }
 
   function showNoCrewState() {
     window.__activeCrew = null;
@@ -2788,8 +2863,177 @@ body[data-auth="in"]  #auth-gate { display: none; }
     var cpText = document.getElementById("cp-text");
     if (cpText) cpText.textContent = "크루를 선택하거나 만들어주세요";
     var cpFill = document.getElementById("cp-fill");
-    if (cpFill) cpFill.style.width = "0%";
-  }
+	    if (cpFill) cpFill.style.width = "0%";
+	    renderRealEmptyState();
+	    renderMembers([]);
+	    renderApplicants([]);
+	  }
+
+	  function profileFromUser(user) {
+	    var meta = user && user.user_metadata ? user.user_metadata : {};
+	    return {
+	      display_name: (meta.display_name || meta.nickname || user.email || "사용자").trim(),
+	      email: user && user.email ? user.email : ""
+	    };
+	  }
+
+	  function displayName(member) {
+	    return (member && member.profiles && member.profiles.display_name) ||
+	      (member && member.user_id === (window.__currentUser && window.__currentUser.id) ? profileFromUser(window.__currentUser).display_name : "") ||
+	      "멤버";
+	  }
+
+	  function escHtml(s) {
+	    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+	  }
+
+	  function renderRealEmptyState() {
+	    var activeFeed = document.querySelector(".feed.when-active");
+	    if (activeFeed) {
+	      activeFeed.innerHTML = '<div class="mini-empty" style="padding:18px 8px"><p style="margin:0">아직 최근 활동이 없어요.<br>멤버 초대, 자료 업로드, 노트 작성이 시작되면 여기에 표시됩니다.</p></div>';
+	    }
+	    var chat = document.getElementById("chat-scroll");
+	    if (chat) {
+	      chat.innerHTML = '<div class="chat-day">오늘</div><div class="msg sys"><span class="m-sys">작업실이 열렸어요. 첫 메시지를 남겨보세요.</span></div>';
+	    }
+	    var activeFiles = document.querySelector('[data-view="files"] .when-active');
+	    if (activeFiles) {
+	      activeFiles.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div><h3>아직 공유된 자료가 없어요</h3><p>첫 자료가 올라오면 여기에 표시됩니다.</p><div class="e-actions"><button class="btn btn-primary" id="upload-btn-2" data-toast="파일 업로드는 준비 중이에요">첫 자료 올리기</button></div></div>';
+	    }
+	    var notes = document.querySelector('[data-view="notes"] .when-active');
+	    if (notes) {
+	      notes.innerHTML = '<div class="ws-shell"><div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 9h6M8 13h8M8 17h5"/></svg></div><h3>아직 노트가 없어요</h3><p>첫 노트가 만들어지면 여기에 표시됩니다.</p></div></div>';
+	    }
+	    var links = document.querySelector('[data-view="links"] .when-active .link-list');
+	    if (links) {
+	      links.innerHTML = '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></div><h3>아직 링크가 없어요</h3><p>자주 쓰는 링크가 추가되면 여기에 표시됩니다.</p></div>';
+	    }
+	    var memberTextNew = document.querySelector(".dash-side .card p.when-new");
+	    if (memberTextNew) memberTextNew.textContent = "현재 크루장 1명만 참여 중이에요. 함께할 사람을 초대해보세요.";
+	    var memberTextActive = document.querySelector(".dash-side .card p.when-active");
+	    if (memberTextActive) memberTextActive.textContent = "실제 멤버 현황을 표시합니다.";
+	  }
+
+	  function renderMembers(members) {
+	    members = members || [];
+	    var count = members.length;
+	    document.querySelectorAll("[data-member-count]").forEach(function (el) { el.textContent = count; });
+	    var list = document.getElementById("member-list");
+	    if (list) {
+	      list.innerHTML = "";
+	      if (!members.length) {
+	        list.innerHTML = '<div class="card"><div class="mini-empty" style="padding:20px 8px"><p style="margin:0">아직 멤버가 없어요.</p></div></div>';
+	      } else {
+	        members.forEach(function (member, i) {
+	          var name = displayName(member);
+	          var isOwner = member.role === "owner";
+	          var isMe = window.__currentUser && member.user_id === window.__currentUser.id;
+	          var row = document.createElement("div");
+	          row.className = "mrow";
+	          row.innerHTML = '<span class="mr-ava" style="--c:#3dd8b8">' + escHtml(name.charAt(0) || String(i + 1)) + '</span>' +
+	            '<div class="mr-meta"><div class="mr-name">' + escHtml(name) + ' <span class="mr-role ' + (isOwner ? 'owner' : 'member') + '">' + (isOwner ? '크루장' : '멤버') + '</span></div><div class="mr-sub">' + (isMe ? '나 · ' : '') + (isOwner ? '크루장' : '멤버') + '</div></div>' +
+	            '<div class="mr-act"><button class="icon-btn" disabled style="opacity:.4;cursor:default" aria-label="멤버 관리 메뉴는 준비 중이에요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>';
+	          list.appendChild(row);
+	        });
+	      }
+	    }
+	    var rail = document.querySelector(".member-rail");
+	    if (rail) {
+	      rail.innerHTML = "";
+	      members.slice(0, 5).forEach(function (member, i) {
+	        var name = displayName(member);
+	        var span = document.createElement("span");
+	        span.className = "m";
+	        span.style.setProperty("--c", ["#3dd8b8", "#4d8dff", "#2fc2c2", "#56c98a", "#7c8cff"][i % 5]);
+	        span.textContent = name.charAt(0) || String(i + 1);
+	        rail.appendChild(span);
+	      });
+	      var invite = document.createElement("span");
+	      invite.className = "m invite";
+	      invite.setAttribute("data-open-invite", "");
+	      invite.textContent = "+";
+	      rail.appendChild(invite);
+	    }
+	    body.dataset.crewstate = count <= 1 ? "new" : "active";
+	    if (typeof refreshStepper === "function") refreshStepper();
+	  }
+
+	  function loadMembers(crewId) {
+	    sb.from("crew_members")
+	      .select("user_id, role, joined_at, profiles(display_name)")
+	      .eq("crew_id", crewId)
+	      .order("joined_at", { ascending: true })
+	      .then(function (r) {
+	        if (r.error) {
+	          console.warn("Crew Up member query failed:", r.error.message || r.error);
+	          renderMembers([{ user_id: window.__currentUser.id, role: "owner", profiles: profileFromUser(window.__currentUser) }]);
+	          return;
+	        }
+	        renderMembers(r.data || []);
+	      });
+	  }
+
+	  function renderApplicants(requests) {
+	    requests = requests || [];
+	    var list = document.getElementById("applicant-list");
+	    var count = document.getElementById("applicant-count");
+	    var empty = document.getElementById("applicant-empty");
+	    if (count) count.textContent = requests.length;
+	    document.querySelectorAll(".side-link[data-view=members] .count").forEach(function (c) { c.textContent = requests.length; c.style.display = requests.length ? "" : "none"; });
+	    document.querySelectorAll(".tabbar .tb[data-view=members] .dot").forEach(function (d) { d.style.display = requests.length ? "" : "none"; });
+	    if (empty) empty.style.display = requests.length ? "none" : "";
+	    if (!list) return;
+	    list.innerHTML = "";
+	    requests.forEach(function (req) {
+	      var name = (req.profiles && req.profiles.display_name) || "신청자";
+	      var card = document.createElement("div");
+	      card.className = "card";
+	      card.setAttribute("data-applicant", "");
+	      card.innerHTML = '<div class="card-head"><h3>' + escHtml(name) + '</h3><span class="k">대기 중</span></div><p style="font-size:14px;color:var(--text-2);line-height:1.6;margin:0">' + escHtml(req.message || "참여 신청 메시지가 없습니다.") + '</p>';
+	      list.appendChild(card);
+	    });
+	  }
+
+	  function loadApplicants(crewId) {
+	    sb.from("join_requests")
+	      .select("id, message, status, created_at, profiles(display_name)")
+	      .eq("crew_id", crewId)
+	      .eq("status", "pending")
+	      .order("created_at", { ascending: true })
+	      .then(function (r) {
+	        if (r.error) {
+	          console.warn("Crew Up join request query failed:", r.error.message || r.error);
+	          renderApplicants([]);
+	          return;
+	        }
+	        renderApplicants(r.data || []);
+	      });
+	  }
+
+	  function loadFiles(crewId) {
+	    sb.from("crew_files")
+	      .select("id, filename, size_bytes, created_at, profiles(display_name)")
+	      .eq("crew_id", crewId)
+	      .order("created_at", { ascending: false })
+	      .limit(20)
+	      .then(function (r) {
+	        if (r.error || !r.data || !r.data.length) return;
+	        var activeFiles = document.querySelector('[data-view="files"] .when-active');
+	        if (!activeFiles) return;
+	        var grid = document.createElement("div");
+	        grid.className = "file-grid";
+	        r.data.forEach(function (file) {
+	          var card = document.createElement("div");
+	          card.className = "file-card";
+	          var size = file.size_bytes ? Math.max(1, Math.round(file.size_bytes / 1024)) + " KB" : "크기 정보 없음";
+	          var who = (file.profiles && file.profiles.display_name) || "멤버";
+	          card.innerHTML = '<span class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="f-meta"><div class="f-name">' + escHtml(file.filename || "파일") + '</div><div class="f-sub">' + escHtml(who + " · " + size) + '</div></div>';
+	          grid.appendChild(card);
+	        });
+	        activeFiles.innerHTML = "";
+	        activeFiles.appendChild(grid);
+	      });
+	  }
 
   function syncProfileName(user) {
     var meta = user && user.user_metadata ? user.user_metadata : {};

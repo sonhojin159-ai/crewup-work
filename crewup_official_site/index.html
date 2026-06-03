@@ -1830,12 +1830,12 @@ body.locked { overflow: hidden; }
       if (login) { login.textContent = "로그아웃"; login.href = "#logout"; }
       if (workspace) { workspace.textContent = "내 크루"; workspace.href = "app.html?workspace=1"; }
       if (drawerLogin) { drawerLogin.textContent = "내 크루"; drawerLogin.href = "app.html?workspace=1"; }
-    } else {
-      if (login) { login.textContent = "로그인"; login.href = "app.html"; }
-      if (workspace) { workspace.textContent = "시작하기"; workspace.href = "app.html"; }
-      if (drawerLogin) { drawerLogin.textContent = "로그인"; drawerLogin.href = "app.html"; }
-    }
-  }
+	    } else {
+	      if (login) { login.textContent = "로그인"; login.href = "app.html?workspace=1"; }
+	      if (workspace) { workspace.textContent = "시작하기"; workspace.href = "app.html?workspace=1"; }
+	      if (drawerLogin) { drawerLogin.textContent = "로그인"; drawerLogin.href = "app.html?workspace=1"; }
+	    }
+	  }
 
   document.addEventListener("click", function (e) {
     var logout = e.target.closest("#nav-login[href='#logout']");
@@ -1844,18 +1844,67 @@ body.locked { overflow: hidden; }
     sb.auth.signOut().then(function () { updateAuthNav(null); });
   });
 
-  if (sb) {
-    sb.auth.onAuthStateChange(function (event, session) {
-      currentUser = session ? session.user : null;
-      updateAuthNav(currentUser);
+	  if (sb) {
+	    sb.auth.onAuthStateChange(function (event, session) {
+	      currentUser = session ? session.user : null;
+	      updateAuthNav(currentUser);
     });
     sb.auth.getSession().then(function (r) {
       currentUser = r.data && r.data.session ? r.data.session.user : null;
-      updateAuthNav(currentUser);
-    });
-  }
+	      updateAuthNav(currentUser);
+	    });
+	  }
 
-  /* ── public crew list from Supabase ─────────────────────────── */
+	  var createModal = document.getElementById("modal-create");
+	  if (createModal) {
+	    var createForm = createModal.querySelector("form");
+	    if (createForm) {
+	      createForm.addEventListener("submit", function (e) {
+	        e.preventDefault();
+	        e.stopImmediatePropagation();
+	        if (!currentUser) {
+	          alert("크루 만들기는 로그인이 필요해요. 로그인 후 작업실에서 이어가세요.");
+	          window.location.href = "app.html?workspace=1";
+	          return;
+	        }
+	        var submitBtn = createForm.querySelector("button[type=submit]");
+	        var origText = submitBtn ? submitBtn.textContent : "";
+	        var name = (createForm.querySelector("input[type=text]") || {}).value || "";
+	        name = name.trim() || "새 크루";
+	        var categoryEl = createForm.querySelector(".seg .opt.on");
+	        var category = categoryEl ? categoryEl.textContent.trim() : "AI 학습";
+	        var purposeEl = createForm.querySelector("textarea");
+	        var description = purposeEl ? purposeEl.value.trim() : "";
+	        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "만드는 중..."; }
+	        sb.from("crews")
+	          .insert({
+	            name: name,
+	            description: description || null,
+	            category: category,
+	            owner_id: currentUser.id,
+	            is_public: true
+	          })
+	          .select("id, name")
+	          .single()
+	          .then(function (crewResult) {
+	            if (crewResult.error) throw crewResult.error;
+	            return sb.from("crew_members")
+	              .insert({ crew_id: crewResult.data.id, user_id: currentUser.id, role: "owner" })
+	              .then(function (memberResult) {
+	                if (memberResult.error) throw memberResult.error;
+	                window.location.href = "app.html?workspace=1";
+	              });
+	          })
+	          .catch(function (err) {
+	            console.warn("Crew Up landing crew create failed:", err && err.message ? err.message : err);
+	            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
+	            alert("크루를 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
+	          });
+	      }, true);
+	    }
+	  }
+
+	  /* ── public crew list from Supabase ─────────────────────────── */
   if (sb) {
     sb.from("crews")
       .select("id, name, description, category, owner_id, profiles!crews_owner_id_fkey(display_name)")
@@ -2033,9 +2082,9 @@ body.locked { overflow: hidden; }
 
 	          if (!currentUser) {
 	            /* not logged in — redirect to app.html to log in first */
-	            if (confirm("참여 신청은 로그인이 필요해요. 로그인 페이지로 이동할까요?")) {
-	              window.location.href = "app.html";
-	            }
+		            if (confirm("참여 신청은 로그인이 필요해요. 로그인 페이지로 이동할까요?")) {
+		              window.location.href = "app.html?workspace=1";
+		            }
 	            return;
 	          }
 	          var crewId = joinModal.dataset.crewId;
