@@ -2216,7 +2216,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
       const btn = $("button[type=submit]", form);
       const origText = btn ? btn.textContent : "";
       if (btn) { btn.disabled = true; btn.textContent = "전송 중…"; }
-      const redirectUrl = location.origin + location.pathname;
+      const redirectUrl = location.origin + location.pathname.replace(/app\.html$/, "index.html");
       const options = { emailRedirectTo: redirectUrl };
       if (nickname) options.data = { display_name: nickname, nickname: nickname };
       window.__sb.auth.signInWithOtp({ email, options })
@@ -2712,6 +2712,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
   var body = document.body;
   var AUTH_KEY = "crewup-auth";
+  var isWorkspaceRequest = new URLSearchParams(location.search).get("workspace") === "1";
   window.__currentUser = null;
   window.__activeCrew  = null;
 
@@ -2724,6 +2725,10 @@ body[data-auth="in"]  #auth-gate { display: none; }
     if (session) {
       setAuthAttr("in");
       window.__currentUser = session.user;
+      if (!isWorkspaceRequest) {
+        window.location.replace("index.html");
+        return;
+      }
       var ae = document.getElementById("acct-email");
       if (ae) ae.textContent = session.user.email || "";
       syncProfileName(session.user);
@@ -2740,9 +2745,15 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .select("crew_id, role, crews(id, name, category)")
       .eq("user_id", userId)
       .then(function (r) {
-        if (r.error || !r.data || !r.data.length) return;
+        if (r.error || !r.data || !r.data.length) {
+          showNoCrewState();
+          return;
+        }
         var crew = r.data[0].crews;
-        if (!crew) return;
+        if (!crew) {
+          showNoCrewState();
+          return;
+        }
         window.__activeCrew = crew;
         document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = crew.name; });
         var abName = document.querySelector(".ab-name");
@@ -2752,6 +2763,32 @@ body[data-auth="in"]  #auth-gate { display: none; }
         loadNotes(crew.id);
         loadLinks(crew.id);
       });
+  }
+
+  function showNoCrewState() {
+    window.__activeCrew = null;
+    body.dataset.crewstate = "new";
+    document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = "참여한 크루 없음"; });
+    var abName = document.querySelector(".ab-name");
+    if (abName) abName.textContent = "참여한 크루 없음";
+    var welcomeTitle = document.querySelector(".welcome.when-new h2");
+    if (welcomeTitle) welcomeTitle.textContent = "아직 참여한 크루가 없습니다";
+    var welcomeText = document.querySelector(".welcome.when-new > p");
+    if (welcomeText) welcomeText.textContent = "크루 목록에서 관심 있는 크루를 둘러보거나, 직접 새 크루를 만들어보세요.";
+    var checklist = document.getElementById("checklist");
+    if (checklist) {
+      checklist.innerHTML = '<div class="check-item" data-browse-crews>' +
+        '<span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+        '<span class="ci-meta"><span class="ci-title">크루 둘러보기</span><span class="ci-sub">공개 크루를 보고 참여 신청하기</span></span><span class="ci-go">이동 →</span></div>' +
+        '<div class="check-item" data-open-flow><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+        '<span class="ci-meta"><span class="ci-title">새 크루 만들기</span><span class="ci-sub">내 목적에 맞는 작업실 열기</span></span><span class="ci-go">만들기 →</span></div>';
+      var browse = checklist.querySelector('[data-browse-crews]');
+      if (browse) browse.addEventListener('click', function () { location.href = 'index.html#crews'; });
+    }
+    var cpText = document.getElementById("cp-text");
+    if (cpText) cpText.textContent = "크루를 선택하거나 만들어주세요";
+    var cpFill = document.getElementById("cp-fill");
+    if (cpFill) cpFill.style.width = "0%";
   }
 
   function syncProfileName(user) {
