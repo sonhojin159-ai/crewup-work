@@ -1,6 +1,13 @@
 [build]
-  publish = "crewup_official_site"
-  command = "if [ -z \"$SUPABASE_URL\" ] || [ -z \"$SUPABASE_ANON_KEY\" ]; then echo 'Missing required Netlify env vars: SUPABASE_URL and/or SUPABASE_ANON_KEY'; exit 1; fi; printf 'window.CREWUP_CONFIG = {\\n  SUPABASE_URL: \"%s\",\\n  SUPABASE_ANON_KEY: \"%s\"\\n};\\n' \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > crewup_official_site/config.js"
+  base = "crewup_official_site"
+  publish = "."
+  command = """
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  echo 'Missing required Netlify env vars: SUPABASE_URL and/or SUPABASE_ANON_KEY'
+  exit 1
+fi
+printf 'window.CREWUP_CONFIG = {\n  SUPABASE_URL: "%s",\n  SUPABASE_ANON_KEY: "%s"\n};\n' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > config.js
+"""
 
 [[headers]]
   for = "/config.js"
