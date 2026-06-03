@@ -3,27 +3,31 @@
   - 수정: `crewup_official_site/app.html`
   - 수정: `sub_done.md`
 - 핵심 구현 요약:
-  - 공유함 파일 목록을 일반 파일 행 카드에서 스마트폰 앨범형 2~3열 썸네일 그리드로 변경했습니다.
-  - 정사각형 카드, 큰 preview 영역, 하단 overlay 메타, 사진/영상 배지, 영상 재생 아이콘, 일반 파일 placeholder를 추가했습니다.
-  - 데모/초기 active 샘플 카드도 앨범형 UI와 사진/영상 중심 예시로 맞췄습니다.
-- 미디어 미리보기 구현 방식:
-  - `loadFiles()`의 SELECT 성공 이후 `attachFilePreviewUrls()`에서 `image/*`, `video/*` 파일만 Supabase Storage `crew-files` private bucket의 `createSignedUrl(storage_path, 60 * 10)`로 preview URL을 생성합니다.
-  - 이미지 파일은 `<img loading="lazy">`, 영상 파일은 `<video muted playsinline preload="metadata">`로 렌더링합니다.
-  - signed URL 생성 실패 시 `console.warn`만 남기고 사진/영상 배지와 파일 아이콘 placeholder로 fallback합니다.
-  - 카드 클릭 및 열기 버튼은 기존 `openStoredFile()` 흐름을 유지해 별도 signed URL을 만든 뒤 새 탭으로 엽니다.
-- 기존 업로드/누적 표시 유지 여부:
-  - Storage upload 및 `crew_files` metadata insert 흐름은 변경하지 않았습니다.
-  - 업로드 성공 후 `loadFiles()`로 전체 SELECT reload하는 기존 흐름을 유지했습니다.
-  - rows가 있으면 `markRealCrewHasContent()`를 호출하는 기존 active 표시를 유지했습니다.
-  - query error 시 `renderFileList()`를 호출하지 않아 기존 목록을 빈 상태로 덮어쓰지 않는 보호 로직을 유지했습니다.
+  - `renderApplicants(requests)`가 pending 참여 신청 카드마다 `수락`/`거절` 버튼을 렌더링하도록 변경했습니다.
+  - 각 버튼에 `data-request-id`, `data-user-id`, `data-crew-id`와 기존 `data-applicant-accept`/`data-applicant-reject` 속성을 추가했습니다.
+  - 신청 버튼 클릭 처리를 `#applicant-list` 이벤트 위임으로 변경해 동적 렌더링 이후에도 작동하게 했습니다.
+  - Supabase real mode에서는 `window.__crewupResolveApplicant()`로 DB 처리하고, non-real/demo 상태에서는 기존 `resolveApplicant()` 로컬 fallback을 유지했습니다.
+- 수락 처리 방식:
+  - `join_requests`의 해당 row를 `status = 'approved'`로 update합니다.
+  - 이어서 `crew_members`에 `crew_id`, `user_id`, `role: "member"`, `can_files: true`, `can_photos: true`, `can_videos: false`를 upsert합니다.
+  - PK `(crew_id, user_id)` 충돌 시 기존 멤버 row를 덮어쓰지 않도록 `ignoreDuplicates: true`를 사용했습니다.
+  - 성공 후 `loadApplicants(crewId)`와 `loadMembers(crewId)`를 호출하고 “참여 신청을 수락했어요” toast를 표시합니다.
+  - 실패 시 성공 toast를 표시하지 않고, 버튼을 다시 활성화하며 `console.warn`과 실패 toast를 남깁니다.
+- 거절 처리 방식:
+  - `join_requests`의 해당 row를 `status = 'rejected'`로 update합니다.
+  - 성공 후 `loadApplicants(crewId)`를 호출하고 “참여 신청을 거절했어요” toast를 표시합니다.
+  - 실패 시 성공처럼 보이지 않도록 버튼을 재활성화하고 실패 toast를 표시합니다.
+- 기존 기능 영향:
+  - 프론트에 service_role key를 추가하지 않았고, 기존 anon Supabase client와 RLS 정책을 그대로 사용합니다.
+  - 데모/로컬 fallback의 DOM 제거 및 멤버 수 증가 동작은 유지했습니다.
+  - 이미 멤버인 신청자를 수락해도 기존 `crew_members` row의 role/권한을 덮어쓰지 않습니다.
 - 검증 결과:
-  - inline script 추출 후 `node --check /tmp/crewup_app_inline.js` 통과.
+  - inline script 추출 후 `node --check` 통과.
   - `git diff --check` 통과.
-  - 로컬 HTTP 서버 `http://127.0.0.1:4183/app.html?workspace=1`에서 Playwright Chromium 로딩 검증 통과.
-  - 브라우저 검증 결과 console warning/error 및 pageerror 없음. 공유함 카드 4개와 `file-grid media-grid` 클래스 확인.
+  - 로컬 HTTP 서버 `http://127.0.0.1:4174/app.html?workspace=1`에서 Playwright Chromium 로딩 검증 통과.
+  - 브라우저 검증 결과 console warning/error 및 pageerror 없음.
 - 커밋:
-  - `Improve Crew Up file gallery previews`
+  - `Wire crew join request approvals`
 - 에러 및 특이사항:
-  - 실제 운영 Supabase 세션/Storage 파일을 사용하는 미리보기 URL 발급은 이 환경에서 수행하지 못했습니다.
-  - 브라우저 검증 중 gitignored 로컬 placeholder `crewup_official_site/config.js`를 임시 생성해 optional config 404만 제거했고, 검증 후 삭제했습니다.
-  - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경/커밋에 포함하지 않았습니다.
+  - 브라우저 검증 중 optional `config.js` 404를 피하기 위해 gitignored 로컬 placeholder `crewup_official_site/config.js`를 임시 생성했고, 검증 후 삭제했습니다.
+  - 작업 전부터 수정되어 있던 `sub.md`는 이번 변경 범위와 무관해 건드리지 않았습니다.

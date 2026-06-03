@@ -2496,6 +2496,10 @@ body[data-auth="in"]  #auth-gate { display: none; }
     $("#applicant-empty").style.display = n ? "none" : "";
   }
   function resolveApplicant(btn, accept) {
+    if (window.__crewupRealState && typeof window.__crewupResolveApplicant === "function") {
+      window.__crewupResolveApplicant(btn, accept);
+      return;
+    }
     const card = btn.closest("[data-applicant]");
     if (!card) return;
     if (accept) {
@@ -2509,8 +2513,17 @@ body[data-auth="in"]  #auth-gate { display: none; }
     card.style.transform = "translateY(-6px)";
     setTimeout(() => { card.remove(); applicantCount(); }, 200);
   }
-  $$("[data-applicant-accept]").forEach(b => b.addEventListener("click", () => resolveApplicant(b, true)));
-  $$("[data-applicant-reject]").forEach(b => b.addEventListener("click", () => resolveApplicant(b, false)));
+  const applicantList = $("#applicant-list");
+  if (applicantList) {
+    applicantList.addEventListener("click", e => {
+      const acceptBtn = e.target.closest("[data-applicant-accept]");
+      const rejectBtn = e.target.closest("[data-applicant-reject]");
+      const btn = acceptBtn || rejectBtn;
+      if (!btn || !applicantList.contains(btn)) return;
+      e.preventDefault();
+      resolveApplicant(btn, !!acceptBtn);
+    });
+  }
 
   // row menus — open upward when near the bottom of the viewport so items aren't cut off
   $$("[data-row-menu]").forEach(btn => btn.addEventListener("click", e => {
@@ -3121,17 +3134,77 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    list.innerHTML = "";
 	    requests.forEach(function (req) {
 	      var name = (req.profiles && req.profiles.display_name) || "신청자";
+	      var requestId = req.id || "";
+	      var crewId = req.crew_id || (window.__activeCrew && window.__activeCrew.id) || "";
+	      var userId = req.user_id || "";
 	      var card = document.createElement("div");
 	      card.className = "card";
 	      card.setAttribute("data-applicant", "");
-	      card.innerHTML = '<div class="card-head"><h3>' + escHtml(name) + '</h3><span class="k">대기 중</span></div><p style="font-size:14px;color:var(--text-2);line-height:1.6;margin:0">' + escHtml(req.message || "참여 신청 메시지가 없습니다.") + '</p>';
+	      card.innerHTML = '<div class="card-head"><h3>' + escHtml(name) + '</h3><span class="k">대기 중</span></div>' +
+	        '<p style="font-size:14px;color:var(--text-2);line-height:1.6;margin:0 0 14px">' + escHtml(req.message || "참여 신청 메시지가 없습니다.") + '</p>' +
+	        '<div class="ap-actions">' +
+	          '<button class="btn btn-primary" type="button" data-applicant-accept data-request-id="' + escHtml(requestId) + '" data-user-id="' + escHtml(userId) + '" data-crew-id="' + escHtml(crewId) + '">수락</button>' +
+	          '<button class="btn btn-ghost" type="button" data-applicant-reject data-request-id="' + escHtml(requestId) + '" data-user-id="' + escHtml(userId) + '" data-crew-id="' + escHtml(crewId) + '">거절</button>' +
+	        '</div>';
 	      list.appendChild(card);
 	    });
 	  }
 
+	  function setApplicantButtonsDisabled(btn, disabled) {
+	    var card = btn && btn.closest("[data-applicant]");
+	    if (!card) return;
+	    card.querySelectorAll("[data-applicant-accept], [data-applicant-reject]").forEach(function (button) {
+	      button.disabled = disabled;
+	    });
+	  }
+
+	  function resolveRealApplicant(btn, accept) {
+	    if (!btn || btn.disabled) return;
+	    var requestId = btn.dataset.requestId || "";
+	    var crewId = btn.dataset.crewId || (window.__activeCrew && window.__activeCrew.id) || "";
+	    var userId = btn.dataset.userId || "";
+	    if (!requestId || !crewId || (accept && !userId)) {
+	      console.warn("Crew Up join request is missing required identifiers.");
+	      toast("참여 신청 정보를 확인하지 못했어요");
+	      return;
+	    }
+	    setApplicantButtonsDisabled(btn, true);
+	    sb.from("join_requests")
+	      .update({ status: accept ? "approved" : "rejected" })
+	      .eq("id", requestId)
+	      .eq("crew_id", crewId)
+	      .then(function (requestResult) {
+	        if (requestResult.error) throw requestResult.error;
+	        if (!accept) return null;
+	        return sb.from("crew_members")
+	          .upsert({
+	            crew_id: crewId,
+	            user_id: userId,
+	            role: "member",
+	            can_files: true,
+	            can_photos: true,
+	            can_videos: false
+	          }, { onConflict: "crew_id,user_id", ignoreDuplicates: true })
+	          .then(function (memberResult) {
+	            if (memberResult.error) throw memberResult.error;
+	          });
+	      })
+	      .then(function () {
+	        loadApplicants(crewId);
+	        if (accept) loadMembers(crewId);
+	        toast(accept ? "참여 신청을 수락했어요" : "참여 신청을 거절했어요");
+	      })
+	      .catch(function (error) {
+	        console.warn("Crew Up join request resolution failed:", error && (error.message || error));
+	        toast("참여 신청 처리에 실패했어요");
+	        setApplicantButtonsDisabled(btn, false);
+	      });
+	  }
+	  window.__crewupResolveApplicant = resolveRealApplicant;
+
 	  function loadApplicants(crewId) {
 	    sb.from("join_requests")
-	      .select("id, message, status, created_at, profiles(display_name)")
+	      .select("id, crew_id, user_id, message, status, created_at, profiles(display_name)")
 	      .eq("crew_id", crewId)
 	      .eq("status", "pending")
 	      .order("created_at", { ascending: true })
