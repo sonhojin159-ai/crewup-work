@@ -1302,15 +1302,21 @@ body[data-auth="in"]  #auth-gate { display: none; }
 <script>
 (function () {
   window.__crewupConfigReady = new Promise(function (resolve) {
-    try {
-      var script = document.createElement("script");
-      script.src = "config.js";
-      script.onload = function () { resolve(); };
-      script.onerror = function () { resolve(); };
-      document.head.appendChild(script);
-    } catch (e) {
+    if (!window.fetch) {
       resolve();
+      return;
     }
+    fetch("config.js", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : ""; })
+      .then(function (code) {
+        if (code) {
+          var script = document.createElement("script");
+          script.text = code;
+          document.head.appendChild(script);
+        }
+        resolve();
+      })
+      .catch(function () { resolve(); });
   });
 })();
 </script>
@@ -2772,6 +2778,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  window.__crewupRealState = true;
 	  window.__currentUser = null;
 	  window.__activeCrew  = null;
+	  window.__crewupRealHasContent = false;
 	  var toast = window.__crewupToast || function (msg) { console.warn(msg); };
 	  setupRealPermissionCard();
 	  bindRealCreationActions();
@@ -2867,6 +2874,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 
 	  function applyCrewShell(crew, isNew) {
 	    window.__activeCrew = crew;
+	    window.__crewupRealHasContent = false;
 	    var name = crew && crew.name ? crew.name : "내 크루";
 	    var initial = name.trim().charAt(0) || "C";
 	    document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = name; });
@@ -2876,12 +2884,23 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    var abName = document.querySelector(".ab-name");
 	    if (abName) abName.textContent = name;
 	    body.dataset.crewstate = isNew ? "new" : "active";
+	    if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = body.dataset.crewstate;
+	    if (typeof syncStateUI === "function") syncStateUI();
+	  }
+
+	  function markRealCrewHasContent() {
+	    if (!window.__crewupRealState) return;
+	    window.__crewupRealHasContent = true;
+	    body.dataset.crewstate = "active";
+	    if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = "active";
 	    if (typeof syncStateUI === "function") syncStateUI();
 	  }
 
   function showNoCrewState() {
     window.__activeCrew = null;
+    window.__crewupRealHasContent = false;
     body.dataset.crewstate = "new";
+    if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = "new";
     document.querySelectorAll(".cs-name").forEach(function (el) { el.textContent = "참여한 크루 없음"; });
     var abName = document.querySelector(".ab-name");
     if (abName) abName.textContent = "참여한 크루 없음";
@@ -3060,7 +3079,8 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      invite.textContent = "+";
 	      rail.appendChild(invite);
 	    }
-	    body.dataset.crewstate = count <= 1 ? "new" : "active";
+	    body.dataset.crewstate = count <= 1 && !window.__crewupRealHasContent ? "new" : "active";
+	    if (window.__tweaks && window.__tweaks.state) window.__tweaks.state.crewstate = body.dataset.crewstate;
 	    if (typeof refreshStepper === "function") refreshStepper();
 	  }
 
@@ -3117,15 +3137,14 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  }
 
 	  function loadFiles(crewId) {
-	    sb.from("crew_files")
+	    return sb.from("crew_files")
 	      .select("id, storage_path, filename, mime_type, size_bytes, created_at, profiles(display_name)")
 	      .eq("crew_id", crewId)
 	      .order("created_at", { ascending: false })
-	      .limit(20)
+	      .limit(50)
 	      .then(function (r) {
 	        if (r.error) {
 	          console.warn("Crew Up file query failed:", r.error.message || r.error);
-	          renderFileList([]);
 	          return;
 	        }
 	        renderFileList(r.data || []);
@@ -3140,6 +3159,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	          renderFilesEmpty();
 	          return;
 	        }
+	        markRealCrewHasContent();
 	        var grid = document.createElement("div");
 	        grid.className = "file-grid";
 	        files.forEach(function (file) {
@@ -3178,7 +3198,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
   }
 
   function loadMessages(crewId) {
-    sb.from("crew_messages")
+    return sb.from("crew_messages")
       .select("id, body, created_at, user_id, profiles(display_name)")
       .eq("crew_id", crewId)
       .order("created_at", { ascending: true })
@@ -3186,7 +3206,6 @@ body[data-auth="in"]  #auth-gate { display: none; }
       .then(function (r) {
         if (r.error) {
           console.warn("Crew Up message query failed:", r.error.message || r.error);
-          renderChatEmpty();
           return;
         }
         var scroll = document.getElementById("chat-scroll");
@@ -3195,6 +3214,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
           renderChatEmpty();
           return;
         }
+        markRealCrewHasContent();
         scroll.innerHTML = "";
         r.data.forEach(function (msg) {
           var name = (msg.profiles && msg.profiles.display_name) || "멤버";
@@ -3217,15 +3237,14 @@ body[data-auth="in"]  #auth-gate { display: none; }
   window.__crewupLoadMessages = loadMessages;
 
   function loadNotes(crewId) {
-    sb.from("crew_notes")
+    return sb.from("crew_notes")
       .select("id, title, body, updated_at, profiles(display_name)")
       .eq("crew_id", crewId)
       .order("updated_at", { ascending: false })
-      .limit(20)
+      .limit(50)
       .then(function (r) {
         if (r.error) {
           console.warn("Crew Up note query failed:", r.error.message || r.error);
-          renderNotesEmpty();
           return;
         }
         var container = document.querySelector('[data-view="notes"] .when-active');
@@ -3234,6 +3253,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
           renderNotesEmpty();
           return;
         }
+        markRealCrewHasContent();
         container.innerHTML = "";
         r.data.forEach(function (note) {
           var card = document.createElement("div");
@@ -3255,15 +3275,14 @@ body[data-auth="in"]  #auth-gate { display: none; }
   }
 
   function loadLinks(crewId) {
-    sb.from("crew_links")
+    return sb.from("crew_links")
       .select("id, url, label, created_at")
       .eq("crew_id", crewId)
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(50)
       .then(function (r) {
         if (r.error) {
           console.warn("Crew Up link query failed:", r.error.message || r.error);
-          renderLinksEmpty();
           return;
         }
         var list = document.querySelector('[data-view="links"] .when-active .link-list');
@@ -3277,6 +3296,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
           renderLinksEmpty();
           return;
         }
+        markRealCrewHasContent();
         list.innerHTML = "";
         var linkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>';
         r.data.forEach(function (link) {
@@ -3410,8 +3430,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
     Promise.all(files.map(uploadCrewFile)).then(function (results) {
       var ok = results.filter(Boolean).length;
       if (ok) {
-        toast(ok === 1 ? "자료를 업로드했어요" : ok + "개 자료를 업로드했어요");
-        loadFiles(window.__activeCrew.id);
+        loadFiles(window.__activeCrew.id).then(function () {
+          toast(ok === 1 ? "자료를 업로드했어요" : ok + "개 자료를 업로드했어요");
+        });
       }
     });
   }
@@ -3532,8 +3553,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
         toast("노트를 저장하지 못했어요");
         return;
       }
-      toast("노트를 추가했어요");
-      loadNotes(window.__activeCrew.id);
+      loadNotes(window.__activeCrew.id).then(function () {
+        toast("노트를 추가했어요");
+      });
     });
   }
 
@@ -3566,8 +3588,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
         toast("링크를 저장하지 못했어요");
         return;
       }
-      toast("링크를 추가했어요");
-      loadLinks(window.__activeCrew.id);
+      loadLinks(window.__activeCrew.id).then(function () {
+        toast("링크를 추가했어요");
+      });
     });
   }
   });
