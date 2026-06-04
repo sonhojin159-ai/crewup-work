@@ -1355,7 +1355,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
   });
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/supabase.js"></script>
 <script>
 (function () {
   window.__crewupSupabaseReady = (window.__crewupConfigReady || Promise.resolve()).then(function () {
@@ -3006,6 +3006,22 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      });
 	  };
 
+  function retryQuery(fn, label, attempts) {
+    attempts = attempts || 2;
+    function run(n) {
+      return fn().then(function (r) {
+        if (!r.error || n >= attempts) return r;
+        console.warn("Crew Up " + label + " failed, retrying (" + n + "/" + attempts + "):", r.error.message || r.error);
+        return new Promise(function (resolve) { setTimeout(resolve, 450 * n); }).then(function () { return run(n + 1); });
+      }).catch(function (err) {
+        if (n >= attempts) return { error: err, data: null };
+        console.warn("Crew Up " + label + " threw, retrying (" + n + "/" + attempts + "):", err && err.message ? err.message : err);
+        return new Promise(function (resolve) { setTimeout(resolve, 450 * n); }).then(function () { return run(n + 1); });
+      });
+    }
+    return run(1);
+  }
+
   function loadCrewData(userId) {
     Promise.all([fetchMyCrewMemberships(userId), fetchOwnedCrews(userId)]).then(function (results) {
       var membershipResult = results[0];
@@ -3041,10 +3057,10 @@ body[data-auth="in"]  #auth-gate { display: none; }
     function query(select) {
       return sb.from("crews").select(select).eq("owner_id", userId).order("created_at", { ascending: false });
     }
-    return query(fullSelect).then(function (r) {
+    return retryQuery(function () { return query(fullSelect); }, "owned crews full query", 2).then(function (r) {
       if (!r.error) return r;
       console.warn("Crew Up owned crews full query failed, retrying minimal columns:", r.error.message || r.error);
-      return query(minimalSelect);
+      return retryQuery(function () { return query(minimalSelect); }, "owned crews minimal query", 2);
     });
   }
 
@@ -3085,10 +3101,10 @@ body[data-auth="in"]  #auth-gate { display: none; }
     function query(select) {
       return sb.from("crew_members").select(select).eq("user_id", userId);
     }
-    return query(fullSelect).then(function (r) {
+    return retryQuery(function () { return query(fullSelect); }, "my crew memberships full query", 2).then(function (r) {
       if (!r.error) return r;
       console.warn("Crew Up my crews full query failed, retrying minimal columns:", r.error.message || r.error);
-      return query(minimalSelect);
+      return retryQuery(function () { return query(minimalSelect); }, "my crew memberships minimal query", 2);
     });
   }
 

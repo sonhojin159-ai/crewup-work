@@ -1,39 +1,44 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
+  - `crewup_official_site/index.html`
   - `crewup_official_site/app.html`
+  - `crewup_official_site/assets/supabase.js`
   - `sub.md`
   - `sub_done.md`
-- 핵심 구현 요약:
-  - Crew Up 작업실 인증 게이트를 magic link/OTP 방식에서 이메일+비밀번호 방식으로 전환했다.
-  - 로그인 폼에 비밀번호 입력을 추가하고 `signInWithPassword()`를 사용하도록 변경했다.
-  - 회원가입 폼에 비밀번호 입력을 추가하고 `signUp()`을 사용하도록 변경했다.
-  - 기존 Supabase session sync(`onAuthStateChange`, `getSession`)와 `loadCrewData()` 흐름은 유지했다.
-- 로그인 처리 방식:
-  - 로그인 탭은 이메일과 비밀번호를 받아 `window.__sb.auth.signInWithPassword({ email, password })`를 호출한다.
-  - 로그인 시 인증 메일/magic link/OTP 발송을 하지 않는다.
-- 회원가입 처리 방식:
-  - 회원가입 탭은 닉네임, 이메일, 비밀번호를 받아 `window.__sb.auth.signUp({ email, password, options: { data: { display_name, nickname } } })`를 호출한다.
-  - 비밀번호는 최소 6자 입력을 요구한다.
-  - Supabase email confirmation을 꺼둔 개발 환경에서 회원가입 즉시 session이 생기면 바로 로그인 상태로 진입한다.
-- magic link/OTP 제거 확인:
-  - `app.html`에서 `signInWithOtp` 제거 확인.
-  - `data-magic` 제거 확인.
-  - UI 문구의 `로그인 링크 받기`, `가입 링크 받기`, `비밀번호는 필요 없습니다` 제거 확인.
-- 이메일 confirmation 켜진 환경 처리:
-  - 회원가입 후 session이 없으면 “가입 확인이 필요합니다” 상태 화면을 보여주고, 메일 인증 후 이메일/비밀번호로 로그인하라고 안내한다.
-  - 이 경우 가입 확인 메일은 Supabase 설정에 따라 발송될 수 있지만, 일반 로그인은 더 이상 메일을 발송하지 않는다.
-- 기존 크루 기능 영향:
-  - 다중 크루 목록/전환, 모바일 크루 메뉴, 랜딩 복귀 버튼, 랜딩 카드 정렬, 공개 크루 fallback query는 건드리지 않았다.
-  - 인증 성공 후 기존 session sync가 그대로 `loadCrewData(session.user.id)`를 호출한다.
-- 검증 결과:
-  - `app.html` inline script 6개 추출 후 `node --check`: 통과.
+- 불안정 원인 가설/확인:
+  - 배포 사이트 `https://crewup-work.com/#crews`를 PC/모바일 viewport에서 반복 확인했을 때 현재 공개 크루 2개는 정상 렌더링됐다.
+  - 다만 기존 코드는 Supabase JS를 외부 CDN(`cdn.jsdelivr.net`)에서 매번 가져왔기 때문에 모바일 네트워크/CDN 로딩이 순간 실패하면 `window.supabase`가 생성되지 않고, 그 결과 크루 목록이 기본 empty 상태로 남을 수 있었다.
+  - 또한 Supabase public/my-crews query가 일시적으로 실패하면 즉시 empty/error 상태로 빠지고 재시도하지 않아 사용자가 “보이다가 안 보임”으로 느낄 수 있었다.
+- Supabase JS 로딩 안정화:
+  - `@supabase/supabase-js` UMD bundle을 `crewup_official_site/assets/supabase.js`로 vendor했다.
+  - `index.html`, `app.html` 모두 외부 CDN 대신 `assets/supabase.js`를 로드하도록 변경했다.
+  - PC/모바일 모두 같은 로컬 정적 파일을 사용하므로 CDN/모바일망 이슈에 덜 흔들린다.
+- config.js 캐시 안정화:
+  - 랜딩 `index.html`의 config loader에 `config.js?v=Date.now()` cache-busting을 추가했다.
+  - `app.html`은 기존 `fetch("config.js", { cache: "no-store" })` 방식을 유지했다.
+- public crew query 재시도:
+  - `index.html`의 `fetchPublicCrews()`에 `retryQuery()`를 추가했다.
+  - full select, no-profile fallback, minimal fallback 각각 최대 2회 시도한다.
+  - 기존 profile join/portfolio column fallback은 유지했다.
+- workspace my crews query 재시도:
+  - `app.html`의 `fetchOwnedCrews()`와 `fetchMyCrewMemberships()`에 `retryQuery()`를 추가했다.
+  - full select와 minimal fallback 각각 최대 2회 시도한다.
+  - 기존 `crew_members` + owned crews merge, owner membership repair, 모바일 `#mobile-crew-menu` 렌더링은 유지했다.
+- PC/모바일 검증 결과:
+  - `index.html` inline script 7개 `node --check`: 통과.
+  - `app.html` inline script 6개 `node --check`: 통과.
+  - `assets/supabase.js` `node --check`: 통과.
   - `git diff --check`: 통과.
-  - 로컬 정적 서버 `http://127.0.0.1:4173/app.html?workspace=1`에서 로그인 탭에 이메일+비밀번호 필드 표시 확인.
-  - 회원가입 탭에 닉네임+이메일+비밀번호 필드 표시 확인.
-  - 브라우저 DOM 검사 결과 `signInWithOtp` 없음, magic link 안내 문구 없음.
-  - 브라우저 console/pageerror 없음.
-- 커밋:
-  - `Switch auth to email password login`
+  - 로컬 정적 서버 `http://127.0.0.1:4174/#crews` 모바일 390x844: Supabase config/client 정상, local `assets/supabase.js` 사용, 공개 크루 카드 2개 렌더링, console/pageerror/requestfailed 없음.
+  - 로컬 정적 서버 `http://127.0.0.1:4174/#crews` 데스크톱 1366x900: 공개 크루 카드 2개 렌더링, console/pageerror/requestfailed 없음.
+  - 로컬 `app.html?workspace=1` 모바일/데스크톱: Supabase config/client 정상, 이메일+비밀번호 로그인 폼 표시, console/pageerror/requestfailed 없음.
+  - 배포 사이트도 패치 전 기준 PC/모바일에서 공개 크루 2개 렌더링을 반복 확인했다.
+- 배포 결과:
+  - Netlify production direct deploy 완료.
+  - Production URL: `https://crewup-work.com`
+  - Unique deploy URL: `https://6a218671a9ad705dee58952e--crewup-work.netlify.app`
+  - Build logs: `https://app.netlify.com/projects/crewup-work/deploys/6a218671a9ad705dee58952e`
+  - GitHub push는 현재 환경에 GitHub 인증이 없어 실패했지만, 로컬 git commit은 완료됐고 Netlify production에는 반영됐다.
 - 에러 및 특이사항:
-  - Supabase Dashboard에서 Email provider의 Confirm email을 끄면 개발 중 회원가입 즉시 로그인된다.
-  - Confirm email을 켜두면 회원가입 시 확인 메일은 여전히 발송된다. 다만 로그인 때마다 메일을 보내던 magic link 한도 문제는 제거된다.
+  - 작업실 “내 크루” 목록은 로그인 session과 해당 계정의 `crew_members`/`crews.owner_id` 데이터에 의존한다. 모바일에서 다른 계정/로그아웃 상태면 공개 랜딩 크루는 보여도 작업실 내 크루는 보이지 않는 것이 정상이다.
+  - 이번 패치는 CDN/캐시/일시적 query 실패에 대한 안정화이며, 실제 특정 계정의 모바일 작업실 누락은 해당 계정 user id와 DB membership row를 Supabase에서 대조해야 최종 확정할 수 있다.

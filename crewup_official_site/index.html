@@ -738,7 +738,7 @@ body.locked { overflow: hidden; }
   window.__crewupConfigReady = new Promise(function (resolve) {
     try {
       var script = document.createElement("script");
-      script.src = "config.js";
+      script.src = "config.js?v=" + Date.now();
       script.onload = function () { resolve(); };
       script.onerror = function () { resolve(); };
       document.head.appendChild(script);
@@ -748,7 +748,7 @@ body.locked { overflow: hidden; }
   });
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/supabase.js"></script>
 <script>
 (function () {
   window.__crewupSupabaseReady = (window.__crewupConfigReady || Promise.resolve()).then(function () {
@@ -1967,6 +1967,22 @@ body.locked { overflow: hidden; }
 	  }
 
 	  /* ── public crew list from Supabase ─────────────────────────── */
+  function retryQuery(fn, label, attempts) {
+    attempts = attempts || 2;
+    function run(n) {
+      return fn().then(function (r) {
+        if (!r.error || n >= attempts) return r;
+        console.warn("Crew Up " + label + " failed, retrying (" + n + "/" + attempts + "):", r.error.message || r.error);
+        return new Promise(function (resolve) { setTimeout(resolve, 450 * n); }).then(function () { return run(n + 1); });
+      }).catch(function (err) {
+        if (n >= attempts) return { error: err, data: null };
+        console.warn("Crew Up " + label + " threw, retrying (" + n + "/" + attempts + "):", err && err.message ? err.message : err);
+        return new Promise(function (resolve) { setTimeout(resolve, 450 * n); }).then(function () { return run(n + 1); });
+      });
+    }
+    return run(1);
+  }
+
   function fetchPublicCrews() {
     var fullSelect = "id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls, profiles!crews_owner_id_fkey(display_name)";
     var noProfileSelect = "id, name, description, category, owner_id, portfolio_message, portfolio_style, portfolio_tags, portfolio_video_url, portfolio_image_urls";
@@ -1974,13 +1990,13 @@ body.locked { overflow: hidden; }
     function base(select) {
       return sb.from("crews").select(select).eq("is_public", true).order("created_at", { ascending: false }).limit(12);
     }
-    return base(fullSelect).then(function (r) {
+    return retryQuery(function () { return base(fullSelect); }, "public crew full query", 2).then(function (r) {
       if (!r.error) return r;
       console.warn("Crew Up public crew query failed, retrying without profile join:", r.error.message || r.error);
-      return base(noProfileSelect).then(function (r2) {
+      return retryQuery(function () { return base(noProfileSelect); }, "public crew no-profile query", 2).then(function (r2) {
         if (!r2.error) return r2;
         console.warn("Crew Up public crew query failed, retrying minimal columns:", r2.error.message || r2.error);
-        return base(minimalSelect).then(function (r3) {
+        return retryQuery(function () { return base(minimalSelect); }, "public crew minimal query", 2).then(function (r3) {
           if (r3.error) console.warn("Crew Up public crew minimal query failed:", r3.error.message || r3.error);
           return r3;
         });
