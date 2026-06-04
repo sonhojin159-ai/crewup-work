@@ -710,7 +710,7 @@ body.locked { overflow: hidden; }
 /* ============================================================
    Crew Up — internal app (logged-in)
    App shell · sidebar · bottom tabbar · dashboard · members ·
-   settings · auth (magic-link) · multi-step create flow
+   settings · auth (email/password) · multi-step create flow
    Reuses tokens + components from styles.css
    ============================================================ */
 
@@ -760,7 +760,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 .auth-foot-note { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 22px; line-height: 1.55; }
 .auth-foot-note a { color: var(--text-2); text-decoration: underline; text-underline-offset: 2px; }
 
-/* sent (magic link) confirmation */
+/* auth status confirmation */
 .auth-sent { text-align: center; padding: 8px 0 2px; }
 .auth-sent .env {
   width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center;
@@ -1376,7 +1376,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 <body data-auth="out" data-crewstate="new">
 
 <!-- ===================================================================
-     AUTH GATE — login / signup (magic link)
+     AUTH GATE — login / signup (email/password)
      =================================================================== -->
 <div id="auth-gate">
   <div class="auth-stage">
@@ -1393,11 +1393,13 @@ body[data-auth="in"]  #auth-gate { display: none; }
         <!-- LOGIN -->
         <div class="auth-pane on" data-auth-pane="login">
           <h1 class="auth-h">다시 오셨네요</h1>
-          <p class="auth-sub">이메일로 로그인 링크를 보내드려요. 비밀번호는 필요 없습니다.</p>
-          <form data-magic="login">
-            <div class="field"><label>이메일</label><input type="email" placeholder="you@example.com" required></div>
+          <p class="auth-sub">이메일과 비밀번호로 바로 로그인합니다. 메일 링크를 기다릴 필요가 없어요.</p>
+          <form data-auth-form="login">
+            <div class="field"><label>이메일</label><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+            <div style="height:14px"></div>
+            <div class="field"><label>비밀번호</label><input name="password" type="password" autocomplete="current-password" placeholder="비밀번호" minlength="6" required></div>
             <div style="height:16px"></div>
-            <button type="submit" class="btn btn-primary btn-block">로그인 링크 받기</button>
+            <button type="submit" class="btn btn-primary btn-block">로그인</button>
           </form>
           <p class="auth-foot-note">계정이 없으신가요? <a href="#" data-goto-tab="signup">회원가입</a></p>
         </div>
@@ -1405,27 +1407,29 @@ body[data-auth="in"]  #auth-gate { display: none; }
         <!-- SIGNUP -->
         <div class="auth-pane" data-auth-pane="signup">
           <h1 class="auth-h">크루를 시작해볼까요</h1>
-          <p class="auth-sub">이메일만 있으면 바로 시작할 수 있어요. 가입 링크를 보내드립니다.</p>
-          <form data-magic="signup">
-            <div class="field"><label>닉네임</label><input type="text" placeholder="크루에서 불릴 이름" required></div>
+          <p class="auth-sub">이메일과 비밀번호로 계정을 만들고 바로 작업실을 시작합니다.</p>
+          <form data-auth-form="signup">
+            <div class="field"><label>닉네임</label><input name="nickname" type="text" autocomplete="nickname" placeholder="크루에서 불릴 이름" required></div>
             <div style="height:14px"></div>
-            <div class="field"><label>이메일</label><input type="email" placeholder="you@example.com" required></div>
+            <div class="field"><label>이메일</label><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+            <div style="height:14px"></div>
+            <div class="field"><label>비밀번호</label><input name="password" type="password" autocomplete="new-password" placeholder="6자 이상 비밀번호" minlength="6" required></div>
             <div style="height:16px"></div>
-            <button type="submit" class="btn btn-primary btn-block">가입 링크 받기</button>
+            <button type="submit" class="btn btn-primary btn-block">회원가입</button>
           </form>
           <p class="auth-foot-note">가입 시 <a href="#">운영 정책</a>과 금전 거래 비중개 원칙에 동의하게 됩니다.</p>
         </div>
       </div>
 
-      <!-- magic-link sent view -->
+      <!-- auth status view -->
       <div id="auth-sent" class="auth-sent" style="display:none">
         <div class="env">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
         </div>
-        <h3>메일함을 확인하세요</h3>
-        <p>로그인 링크를 보냈어요. 메일의 버튼을 누르면 바로 들어옵니다.</p>
+        <h3 id="auth-status-title">확인이 필요합니다</h3>
+        <p id="auth-status-message">가입 확인 메일을 보냈어요. 확인 후 이메일/비밀번호로 로그인해주세요.</p>
         <span class="mail-pill" id="sent-mail">you@example.com</span>
-        <p class="auth-foot-note"><a href="#" id="auth-back">다른 이메일로 다시 시도</a></p>
+        <p class="auth-foot-note"><a href="#" id="auth-back">로그인 화면으로 돌아가기</a></p>
       </div>
     </div>
 
@@ -2228,7 +2232,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 <script>
 /* ============================================================
    Crew Up — internal app interactions
-   auth (magic link) · view routing · crew switcher · create flow
+   auth (email/password) · view routing · crew switcher · create flow
    · members · chat · settings · permissions · tweaks
    ============================================================ */
 (function () {
@@ -2265,7 +2269,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
   $("#theme-toggle-m") && $("#theme-toggle-m").addEventListener("click", () => setTheme(currentTheme() === "blush" ? "dark" : "blush"));
 
   /* ============================================================
-     AUTH (magic link)
+     AUTH (email/password)
      ============================================================ */
   const AUTH_KEY = "crewup-auth";
   function setAuth(state) {
@@ -2283,38 +2287,75 @@ body[data-auth="in"]  #auth-gate { display: none; }
   $$("#auth-tabs button").forEach(b => b.addEventListener("click", () => authTab(b.dataset.authTab)));
   $$("[data-goto-tab]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); authTab(a.dataset.gotoTab); }));
 
-  // magic-link submit -> sent view (+ real OTP when Supabase is configured)
-  $$("[data-magic]").forEach(form => form.addEventListener("submit", e => {
+  function showAuthStatus(title, message, email) {
+    const titleEl = $("#auth-status-title");
+    const msgEl = $("#auth-status-message");
+    const mailEl = $("#sent-mail");
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    if (mailEl) mailEl.textContent = email || "you@example.com";
+    if ($("#auth-form")) $("#auth-form").style.display = "none";
+    if ($("#auth-sent")) $("#auth-sent").style.display = "block";
+  }
+  function resetAuthFormView(tab) {
+    if ($("#auth-sent")) $("#auth-sent").style.display = "none";
+    if ($("#auth-form")) $("#auth-form").style.display = "block";
+    if (tab) authTab(tab);
+  }
+
+  // email/password login + signup. No magic-link/OTP send on normal login.
+  $$("[data-auth-form]").forEach(form => form.addEventListener("submit", e => {
     e.preventDefault();
-    const email = ($("input[type=email]", form) || {}).value || "you@example.com";
-    const isSignup = form.dataset.magic === "signup";
-    const nickname = isSignup ? (($("input[type=text]", form) || {}).value || "").trim() : "";
-    if (window.__sb) {
-      const btn = $("button[type=submit]", form);
-      const origText = btn ? btn.textContent : "";
-      if (btn) { btn.disabled = true; btn.textContent = "전송 중…"; }
-      const redirectUrl = location.origin + location.pathname + "?workspace=1";
-      const options = { emailRedirectTo: redirectUrl };
-      if (nickname) options.data = { display_name: nickname, nickname: nickname };
-      window.__sb.auth.signInWithOtp({ email, options })
-        .then(res => {
-          if (btn) { btn.disabled = false; btn.textContent = origText; }
-          if (res.error) { alert("이메일 전송 실패: " + res.error.message); return; }
-          $("#sent-mail").textContent = email;
-          $("#auth-form").style.display = "none";
-          $("#auth-sent").style.display = "block";
-        });
-    } else {
-      alert("Supabase 설정이 없어 Magic Link를 보낼 수 없습니다. 배포 환경변수와 /config.js를 확인해주세요.");
+    const mode = form.dataset.authForm;
+    const emailInput = form.elements.email || $("input[type=email]", form);
+    const passwordInput = form.elements.password || $("input[type=password]", form);
+    const email = ((emailInput && emailInput.value) || "").trim();
+    const password = (passwordInput && passwordInput.value) || "";
+    const nicknameInput = form.elements.nickname || $("input[type=text]", form);
+    const nickname = ((nicknameInput && nicknameInput.value) || "").trim();
+    if (!email || !password) { alert("이메일과 비밀번호를 입력해주세요."); return; }
+    if (password.length < 6) { alert("비밀번호는 6자 이상 입력해주세요."); return; }
+    if (!window.__sb) {
+      alert("Supabase 설정이 없어 로그인할 수 없습니다. 배포 환경변수와 /config.js를 확인해주세요.");
+      return;
     }
+    const btn = $("button[type=submit]", form);
+    const origText = btn ? btn.textContent : "";
+    if (btn) { btn.disabled = true; btn.textContent = mode === "signup" ? "가입 중…" : "로그인 중…"; }
+    const request = mode === "signup"
+      ? window.__sb.auth.signUp({
+          email,
+          password,
+          options: { data: { display_name: nickname || email.split("@")[0], nickname: nickname || email.split("@")[0] } }
+        })
+      : window.__sb.auth.signInWithPassword({ email, password });
+    request.then(res => {
+      if (btn) { btn.disabled = false; btn.textContent = origText; }
+      if (res.error) {
+        const prefix = mode === "signup" ? "회원가입 실패: " : "로그인 실패: ";
+        alert(prefix + res.error.message);
+        return;
+      }
+      if (mode === "signup" && !(res.data && res.data.session)) {
+        showAuthStatus(
+          "가입 확인이 필요합니다",
+          "확인 메일을 보냈어요. 메일 인증을 마친 뒤 이 화면에서 이메일/비밀번호로 로그인해주세요.",
+          email
+        );
+        return;
+      }
+      setAuth("in");
+    }).catch(err => {
+      if (btn) { btn.disabled = false; btn.textContent = origText; }
+      alert((mode === "signup" ? "회원가입 실패: " : "로그인 실패: ") + (err && err.message ? err.message : err));
+    });
   }));
   $("#auth-back") && $("#auth-back").addEventListener("click", e => {
     e.preventDefault();
-    $("#auth-sent").style.display = "none";
-    $("#auth-form").style.display = "block";
+    resetAuthFormView("login");
   });
   if (window.__sb) {
-    // hide the demo bypass button — real auth comes from the emailed magic link
+    // hide the demo bypass button — real auth uses email/password.
     const demoBtn = $("#demo-enter");
     const divider = document.querySelector(".auth-divider");
     if (demoBtn) demoBtn.style.display = "none";
@@ -2322,8 +2363,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
   } else {
     $("#demo-enter") && $("#demo-enter").addEventListener("click", () => {
       setAuth("in");
-      $("#auth-sent").style.display = "none";
-      $("#auth-form").style.display = "block";
+      resetAuthFormView("login");
     });
   }
   (window.__crewupSupabaseReady || Promise.resolve(null)).then(sb => {

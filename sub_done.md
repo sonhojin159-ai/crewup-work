@@ -1,54 +1,39 @@
 - 작업 상태: 성공적으로 완료됨
 - 생성/수정된 파일 목록:
   - `crewup_official_site/app.html`
-  - `crewup_official_site/index.html`
   - `sub.md`
   - `sub_done.md`
 - 핵심 구현 요약:
-  - Codex CLI를 먼저 실행했지만 사용량 제한으로 중단되어 Hermes가 직접 긴급 패치를 수행했다.
-  - 작업실에서 한 사용자에게 연결된 여러 크루를 `window.__myCrews`로 보관하고, 데스크톱/모바일 크루 메뉴에 전체 목록을 렌더링하도록 변경했다.
-  - 랜딩 공개 크루 카드의 하단 버튼 영역이 카드 하단에 고정되도록 카드/grid CSS를 조정했다.
-  - 모바일에서 크루가 안 뜰 수 있는 Supabase query 실패 케이스를 줄이기 위해 공개 크루 목록과 내 크루 목록에 fallback query를 추가했다.
-- 내 크루 전체 목록 조회/저장 방식:
-  - `app.html`의 `loadCrewData(userId)`가 더 이상 `r.data[0]`만 사용하지 않는다.
-  - `crew_members` 전체 조회 결과를 `normalizeMyCrews()`로 `{ crew, role }` 배열로 정규화해 `window.__myCrews`에 저장한다.
-  - 포트폴리오 컬럼이 운영 DB에 아직 적용되지 않은 경우를 대비해 full select 실패 시 minimal select로 재시도한다.
-- 크루 전환 처리 방식:
-  - `renderCrewMenus()`가 데스크톱 `#crew-menu`와 모바일 `#mobile-crew-menu`를 동일한 데이터로 렌더링한다.
-  - 메뉴 항목 클릭 시 `selectCrew(crewId)`가 `window.__activeCrew`, `window.__activeCrewRole`을 갱신하고 멤버/신청/파일/채팅/노트/링크/설정 폼을 해당 크루 기준으로 다시 로드한다.
-- 모바일 크루 전환 UI 처리 방식:
-  - `#appbar-crew` 클릭 시 fixed 위치의 `#mobile-crew-menu`가 열린다.
-  - 모바일 메뉴에도 전체 내 크루 목록, 역할 표시(크루장/멤버), 카테고리, 현재 active 표시, 새 크루 만들기 항목이 표시된다.
-  - 바깥 클릭/ESC로 메뉴를 닫도록 처리했다.
-- 랜딩 카드 버튼 하단 고정 처리 방식:
-  - `index.html`의 `.cards`, `.popular`에 `align-items: stretch`를 추가했다.
-  - `.crew-card`에 `height: 100%`를 추가했다.
-  - `.crew-actions`에 `margin-top: auto`를 적용해 일반 카드 버튼들이 하단에 붙도록 했다.
-  - featured 카드는 기존 레이아웃을 유지하도록 별도 margin을 유지했다.
-- 모바일에서 크루가 안 뜨던 원인:
-  - 작업실 쪽은 기존 코드가 사용자의 전체 membership 중 첫 번째 row만 active crew로 사용했고, 모바일 appbar에는 사이드바 내부 `#crew-menu`에 접근할 수 있는 별도 모바일 목록 UI가 없었다.
-  - 또한 공개 목록/작업실 조회 모두 포트폴리오 컬럼 또는 profile join이 운영 DB/배포 환경에서 실패하면 조용히 비어 보일 수 있어 fallback query를 추가했다.
-- public crew query fallback 처리 여부:
-  - `index.html` 공개 크루 목록은 full select 실패 시 profile join 없는 select로 재시도한다.
-  - 다시 실패하면 포트폴리오 컬럼 없는 minimal select로 재시도한다.
-  - 최종 실패 시 empty와 구분되는 “크루 목록을 불러오지 못했어요” 안내를 렌더링하고 console.warn을 남긴다.
-- 랜딩 복귀 버튼 확인 결과:
-  - 데스크톱 `.side-foot .home-link`가 존재한다.
-  - 모바일 appbar `.home-link`가 존재한다.
-  - 기존 링크는 유지했고 누락분은 없었다.
-- 기존 참여신청/공유함/멤버관리/포트폴리오 기능 영향:
-  - 기존 Supabase insert/update/storage 로직과 service_role/비밀키는 건드리지 않았다.
-  - active crew 전환 시 기존 load 함수들을 해당 crew id로 다시 호출하도록 연결했다.
+  - Crew Up 작업실 인증 게이트를 magic link/OTP 방식에서 이메일+비밀번호 방식으로 전환했다.
+  - 로그인 폼에 비밀번호 입력을 추가하고 `signInWithPassword()`를 사용하도록 변경했다.
+  - 회원가입 폼에 비밀번호 입력을 추가하고 `signUp()`을 사용하도록 변경했다.
+  - 기존 Supabase session sync(`onAuthStateChange`, `getSession`)와 `loadCrewData()` 흐름은 유지했다.
+- 로그인 처리 방식:
+  - 로그인 탭은 이메일과 비밀번호를 받아 `window.__sb.auth.signInWithPassword({ email, password })`를 호출한다.
+  - 로그인 시 인증 메일/magic link/OTP 발송을 하지 않는다.
+- 회원가입 처리 방식:
+  - 회원가입 탭은 닉네임, 이메일, 비밀번호를 받아 `window.__sb.auth.signUp({ email, password, options: { data: { display_name, nickname } } })`를 호출한다.
+  - 비밀번호는 최소 6자 입력을 요구한다.
+  - Supabase email confirmation을 꺼둔 개발 환경에서 회원가입 즉시 session이 생기면 바로 로그인 상태로 진입한다.
+- magic link/OTP 제거 확인:
+  - `app.html`에서 `signInWithOtp` 제거 확인.
+  - `data-magic` 제거 확인.
+  - UI 문구의 `로그인 링크 받기`, `가입 링크 받기`, `비밀번호는 필요 없습니다` 제거 확인.
+- 이메일 confirmation 켜진 환경 처리:
+  - 회원가입 후 session이 없으면 “가입 확인이 필요합니다” 상태 화면을 보여주고, 메일 인증 후 이메일/비밀번호로 로그인하라고 안내한다.
+  - 이 경우 가입 확인 메일은 Supabase 설정에 따라 발송될 수 있지만, 일반 로그인은 더 이상 메일을 발송하지 않는다.
+- 기존 크루 기능 영향:
+  - 다중 크루 목록/전환, 모바일 크루 메뉴, 랜딩 복귀 버튼, 랜딩 카드 정렬, 공개 크루 fallback query는 건드리지 않았다.
+  - 인증 성공 후 기존 session sync가 그대로 `loadCrewData(session.user.id)`를 호출한다.
 - 검증 결과:
-  - `index.html` inline script 6개 추출 후 `node --check`: 통과.
-  - `app.html` inline script 5개 추출 후 `node --check`: 통과.
+  - `app.html` inline script 6개 추출 후 `node --check`: 통과.
   - `git diff --check`: 통과.
-  - Playwright 모바일 390x844 `index.html#crews`: console/pageerror 없음.
-  - Playwright 모바일/데스크톱 `app.html?workspace=1`: console/pageerror 없음.
-  - demo auth flag 주입 후 모바일 `#appbar-crew`는 visible 상태에서 클릭 가능했고 `#mobile-crew-menu.open` 상태가 되는 것 확인.
-  - 실제 Supabase 데이터가 없는 로컬 stub 환경이라 실제 DB row 기반 다중 크루 전환은 코드 경로/문법 검증까지 수행했다.
+  - 로컬 정적 서버 `http://127.0.0.1:4173/app.html?workspace=1`에서 로그인 탭에 이메일+비밀번호 필드 표시 확인.
+  - 회원가입 탭에 닉네임+이메일+비밀번호 필드 표시 확인.
+  - 브라우저 DOM 검사 결과 `signInWithOtp` 없음, magic link 안내 문구 없음.
+  - 브라우저 console/pageerror 없음.
 - 커밋:
-  - 생성 예정: `Fix mobile crew lists and crew cards`
+  - `Switch auth to email password login`
 - 에러 및 특이사항:
-  - Codex CLI 실행 시 사용량 제한 오류 발생: “You've hit your usage limit … try again at 3:21 AM.”
-  - 로컬 검증은 비밀 없는 `/config.js` stub으로 수행했다.
+  - Supabase Dashboard에서 Email provider의 Confirm email을 끄면 개발 중 회원가입 즉시 로그인된다.
+  - Confirm email을 켜두면 회원가입 시 확인 메일은 여전히 발송된다. 다만 로그인 때마다 메일을 보내던 magic link 한도 문제는 제거된다.
