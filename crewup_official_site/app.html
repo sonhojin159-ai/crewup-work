@@ -3680,7 +3680,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	          var who = (file.profiles && file.profiles.display_name) || "멤버";
 	          var canDelete = canDeleteOwnItem(file.uploaded_by);
 	          var deleteBtn = canDelete ? deleteButtonMarkup("file", file.id, file.filename || "파일", file.storage_path || "") : "";
-	          card.innerHTML = filePreviewMarkup(file) + deleteBtn + '<div class="f-meta"><div class="f-name">' + escHtml(file.filename || "파일") + '</div><div class="f-sub">' + escHtml(who + " · " + size) + '</div></div><button class="file-open-btn" type="button" aria-label="' + escHtml((file.filename || "파일") + " 열기") + '" data-storage-path="' + escHtml(file.storage_path || "") + '">' + fileOpenSvg() + '</button>';
+	          card.innerHTML = filePreviewMarkup(file) + deleteBtn + '<div class="f-meta"><div class="f-name">' + escHtml(file.filename || "파일") + '</div><div class="f-sub">' + escHtml(who + " · " + size) + '</div></div><button class="file-open-btn" type="button" aria-label="' + escHtml((file.filename || "파일") + " 다운로드") + '" data-file-open="1" data-storage-path="' + escHtml(file.storage_path || "") + '">' + fileOpenSvg() + '</button>';
 	          grid.appendChild(card);
 	        });
 	        activeFiles.innerHTML = "";
@@ -3726,7 +3726,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	  }
 
 	  function deleteButtonMarkup(kind, id, name, storagePath) {
-	    return '<button class="item-delete-btn" type="button" data-delete-kind="' + escHtml(kind || "") + '" data-delete-id="' + escHtml(id || "") + '" data-delete-name="' + escHtml(name || "항목") + '" data-storage-path="' + escHtml(storagePath || "") + '" aria-label="' + escHtml((name || "항목") + " 삭제") + '">' + trashSvg() + '</button>';
+	    return '<button class="item-delete-btn" type="button" data-delete-kind="' + escHtml(kind || "") + '" data-delete-id="' + escHtml(id || "") + '" data-delete-name="' + escHtml(name || "항목") + '" data-delete-storage-path="' + escHtml(storagePath || "") + '" aria-label="' + escHtml((name || "항목") + " 삭제") + '">' + trashSvg() + '</button>';
 	  }
 
 	  function makeDeleteButton(kind, id, name, storagePath) {
@@ -3736,7 +3736,7 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	    btn.dataset.deleteKind = kind || "";
 	    btn.dataset.deleteId = id || "";
 	    btn.dataset.deleteName = name || "항목";
-	    btn.dataset.storagePath = storagePath || "";
+	    btn.dataset.deleteStoragePath = storagePath || "";
 	    btn.setAttribute("aria-label", (name || "항목") + " 삭제");
 	    btn.innerHTML = trashSvg();
 	    return btn;
@@ -3778,15 +3778,22 @@ body[data-auth="in"]  #auth-gate { display: none; }
 	      toast("삭제하지 못했어요");
 	    };
 	    if (kind === "file") {
-	      var storagePath = btn.dataset.storagePath || "";
-	      var removeStorage = storagePath
-	        ? sb.storage.from("crew-files").remove([storagePath]).then(function (r) { if (r.error) throw r.error; })
-	        : Promise.resolve();
-	      removeStorage
-	        .then(function () {
-	          return sb.from("crew_files").delete().eq("id", id).eq("crew_id", window.__activeCrew.id);
+	      var storagePath = btn.dataset.deleteStoragePath || "";
+	      sb.from("crew_files")
+	        .delete()
+	        .eq("id", id)
+	        .eq("crew_id", window.__activeCrew.id)
+	        .then(function (r) {
+	          if (r.error) throw r.error;
+	          if (!storagePath) return null;
+	          return sb.storage.from("crew-files").remove([storagePath]).then(function (storageResult) {
+	            if (storageResult.error) {
+	              console.warn("Crew Up file storage cleanup failed after metadata delete:", storageResult.error.message || storageResult.error);
+	            }
+	            return null;
+	          });
 	        })
-	        .then(function (r) { if (r.error) throw r.error; done(); })
+	        .then(function () { done(); })
 	        .catch(function (error) { fail("Crew Up file delete failed:", error); });
 	      return;
 	    }
@@ -4199,9 +4206,9 @@ body[data-auth="in"]  #auth-gate { display: none; }
         return;
       }
 
-      var fileOpen = e.target.closest("[data-storage-path]");
+      var fileOpen = e.target.closest("[data-file-open], .file-card[data-storage-path]");
       var fileSection = fileOpen && fileOpen.closest('section[data-view="files"]');
-      if (fileOpen && fileSection && !upload) {
+      if (fileOpen && fileSection && !upload && !fileOpen.closest("[data-delete-kind]")) {
         e.preventDefault();
         e.stopImmediatePropagation();
         openStoredFile(fileOpen.getAttribute("data-storage-path"));
@@ -4400,13 +4407,38 @@ body[data-auth="in"]  #auth-gate { display: none; }
       toast("로그인된 작업실에서 파일을 열 수 있어요");
       return;
     }
+    var popup = null;
+    try {
+      popup = window.open("about:blank", "_blank", "noopener");
+      if (popup && popup.document) {
+        popup.document.write("<p style='font-family:sans-serif;padding:20px'>파일 링크를 준비하고 있어요...</p>");
+      }
+    } catch (e) {
+      popup = null;
+    }
     sb.storage.from("crew-files").createSignedUrl(storagePath, 60).then(function (r) {
       if (r.error || !r.data || !r.data.signedUrl) {
         console.warn("Crew Up signed URL failed:", r.error ? (r.error.message || r.error) : r);
+        if (popup && !popup.closed) popup.close();
         toast("파일 링크를 만들지 못했어요");
         return;
       }
-      window.open(r.data.signedUrl, "_blank", "noopener");
+      if (popup && !popup.closed) {
+        popup.location.href = r.data.signedUrl;
+        return;
+      }
+      var link = document.createElement("a");
+      link.href = r.data.signedUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.download = "";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }).catch(function (error) {
+      console.warn("Crew Up signed URL request threw:", error && (error.message || error));
+      if (popup && !popup.closed) popup.close();
+      toast("파일 링크를 만들지 못했어요");
     });
   }
 
