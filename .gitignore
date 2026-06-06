@@ -15,3 +15,5 @@ E0F
 
 # Supabase credentials (never commit)
 crewup_official_site/config.js
+.env
+.npmrc
