@@ -1,0 +1,36 @@
+{
+  "name": "CrewUp Remote Workspace",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode-remote.remote-ssh",
+        "yzhang.markdown-all-in-one"
+      ],
+      "settings": {
+        "files.eol": "\n",
+        "editor.formatOnSave": false,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postCreateCommand": "chmod +x scripts/bootstrap_remote_dev.sh && ./scripts/bootstrap_remote_dev.sh || true",
+  "forwardPorts": [4177],
+  "portsAttributes": {
+    "4177": {
+      "label": "CrewUp local preview",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteEnv": {
+    "OBSIDIAN_VAULT_PATH": "${containerWorkspaceFolder}/Obsidian_Vault"
+  }
+}
