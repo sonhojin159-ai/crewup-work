@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>소상공인 모바일 홍보페이지 편집기 MVP</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f4f0eb;
+      --panel: #fffaf4;
+      --ink: #211915;
+      --muted: #87766d;
+      --line: #eadfd5;
+      --accent: #ff6b8b;
+      --accent2: #6b4eff;
+      --dark: #14110f;
+      --phone: #ffffff;
+      --shadow: 0 24px 80px rgba(57, 36, 26, .16);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 139, 166, .28), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(107, 78, 255, .18), transparent 25%),
+        linear-gradient(135deg, #fff8f1 0%, #f3eee7 45%, #f8f2fa 100%);
+    }
+    button, input, textarea { font: inherit; }
+    .app-shell { max-width: 1440px; margin: 0 auto; padding: 22px; }
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 16px 18px; margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,.75);
+      background: rgba(255, 250, 244, .82);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      box-shadow: 0 12px 36px rgba(72, 47, 36, .08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 280px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 15px;
+      background: linear-gradient(145deg, #ff6b8b, #7b61ff);
+      display: grid; place-items: center; color: white; font-weight: 900;
+      box-shadow: 0 12px 22px rgba(255, 107, 139, .32);
+    }
+    .brand h1 { margin: 0; font-size: 17px; letter-spacing: -.04em; }
+    .brand p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+    .template-tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .tab {
+      border: 1px solid var(--line); background: #fff; color: #5e514b;
+      padding: 10px 13px; border-radius: 999px; cursor: pointer;
+      transition: .18s ease; font-weight: 800; font-size: 13px;
+    }
+    .tab:hover { transform: translateY(-1px); border-color: #ffb0c2; }
+    .tab.active { color: white; border-color: transparent; background: linear-gradient(135deg, #17110f, #4a3530); box-shadow: 0 12px 24px rgba(26, 17, 15, .18); }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; min-width: 260px; }
+    .btn {
+      border: 0; border-radius: 14px; padding: 11px 14px; cursor: pointer;
+      font-weight: 900; letter-spacing: -.02em;
+      background: #221916; color: white;
+      box-shadow: 0 12px 24px rgba(34, 25, 22, .18);
+    }
+    .btn.secondary { background: white; color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+    .workspace { display: grid; grid-template-columns: minmax(360px, 460px) 1fr; gap: 22px; align-items: start; }
+    .editor-panel, .preview-stage {
+      border: 1px solid rgba(255,255,255,.72);
+      background: rgba(255, 250, 244, .74);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+    .editor-panel { padding: 18px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: end; gap: 14px; margin-bottom: 15px; }
+    .panel-header h2 { margin: 0; font-size: 19px; letter-spacing: -.05em; }
+    .panel-header small { color: var(--muted); font-weight: 700; }
+    .field-grid { display: grid; gap: 13px; }
+    .section-card { background: rgba(255,255,255,.72); border: 1px solid var(--line); border-radius: 22px; padding: 15px; }
+    .section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; font-size: 13px; font-weight: 950; color: #5a433a; letter-spacing: -.02em; }
+    label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 900; color: #6a5952; }
+    input, textarea {
+      width: 100%; border: 1px solid #eaded4; background: #fff; color: var(--ink);
+      border-radius: 14px; padding: 11px 12px; outline: none;
+      transition: border .14s ease, box-shadow .14s ease;
+    }
+    textarea { min-height: 76px; resize: vertical; line-height: 1.55; }
+    input:focus, textarea:focus { border-color: #ff7e9b; box-shadow: 0 0 0 4px rgba(255, 107, 139, .12); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .hint { margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .preview-stage { min-height: 760px; padding: 24px; display: grid; grid-template-columns: minmax(360px, 420px) minmax(260px, 1fr); gap: 26px; }
+    .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .phone-label { display:flex; align-items:center; justify-content:space-between; width:390px; color:#6d5b53; font-weight:900; font-size:12px; }
+    .phone {
+      width: 390px; height: 720px; overflow: hidden; position: relative;
+      background: var(--phone); border: 10px solid #181310; border-radius: 42px;
+      box-shadow: 0 30px 70px rgba(0,0,0,.32);
+    }
+    .phone::before { content:""; position:absolute; z-index: 20; top:8px; left:50%; transform:translateX(-50%); width:90px; height:25px; border-radius: 0 0 16px 16px; background:#181310; }
+    .mobile-page { height:100%; overflow:auto; scrollbar-width:none; background:#fff; }
+    .mobile-page::-webkit-scrollbar { display:none; }
+    .watermark {
+      position:absolute; z-index:30; right:20px; bottom:18px; padding:7px 10px;
+      border-radius:999px; background:rgba(17,13,11,.72); color:#fff; font-size:10px; font-weight:900;
+      letter-spacing:.04em; backdrop-filter: blur(6px);
+    }
+    .sales-notes { padding: 8px 8px 8px 0; }
+    .sales-notes h3 { margin: 4px 0 10px; font-size: 22px; letter-spacing: -.06em; }
+    .sales-notes p { color: #6f5d55; line-height: 1.65; font-size: 14px; }
+    .note-list { display:grid; gap:10px; margin-top:18px; }
+    .note-item { background: rgba(255,255,255,.68); border:1px solid var(--line); border-radius:18px; padding:13px; }
+    .note-item b { display:block; margin-bottom:4px; font-size:13px; }
+    .note-item span { color:var(--muted); font-size:12px; line-height:1.5; }
+
+    /* Shared mobile components */
+    .m-section { padding: 22px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; font-size:11px; font-weight:900; }
+    .price-card { border-radius: 20px; padding: 15px; margin-top: 10px; }
+    .price-card h4 { margin:0 0 5px; font-size:16px; letter-spacing:-.04em; }
+    .price-card p { margin:0; font-size:12px; line-height:1.45; }
+    .price-card strong { display:block; margin-top:8px; font-size:19px; letter-spacing:-.04em; }
+    .cta { display:block; text-align:center; text-decoration:none; border-radius:17px; padding:14px; font-weight:950; }
+    .main-img { background-size: cover; background-position:center; }
+
+    /* Lookbook */
+    .lookbook { background:#fff9f4; color:#241912; }
+    .lookbook .hero { padding:48px 22px 20px; }
+    .lookbook .hero-img { height:295px; border-radius:32px; margin-top:20px; box-shadow: 0 18px 36px rgba(80, 47, 35, .18); }
+    .lookbook h2 { margin:13px 0 0; font-size:42px; line-height:.96; letter-spacing:-.08em; }
+    .lookbook .sub { color:#7d655b; line-height:1.6; font-size:14px; }
+    .lookbook .event { margin:0 22px; padding:17px; border-radius:24px; background:#251815; color:#fff; }
+    .lookbook .event small { color:#ffc9d5; font-weight:900; }
+    .lookbook .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding: 18px 22px; }
+    .lookbook .thumb { height:118px; border-radius:22px; background-size:cover; background-position:center; }
+    .lookbook .price-card { background:white; border:1px solid #f0ded3; }
+    .lookbook .cta { background:#ff6f91; color:#fff; }
+
+    /* Poster */
+    .poster { background:#ff4774; color:#101010; }
+    .poster .hero { padding:52px 20px 20px; min-height:420px; display:flex; flex-direction:column; justify-content:space-between; }
+    .poster .hero-img { position:absolute; inset:86px 25px auto auto; width:145px; height:190px; border-radius:24px; border:5px solid #111; transform:rotate(5deg); }
+    .poster h2 { margin:12px 0; font-size:54px; line-height:.86; letter-spacing:-.09em; text-transform:uppercase; max-width:270px; }
+    .poster .sub { background:#111; color:#fff; padding:12px; border-radius:16px; font-weight:800; line-height:1.45; }
+    .poster .event { margin:0 18px; background:#fff200; border:4px solid #111; border-radius:26px; padding:18px; box-shadow:8px 8px 0 #111; }
+    .poster .event h3 { margin:3px 0 5px; font-size:28px; letter-spacing:-.07em; }
+    .poster .price-card { background:#fff; border:3px solid #111; box-shadow:5px 5px 0 #111; }
+    .poster .cta { background:#111; color:#fff; }
+
+    /* Instagram */
+    .instagram { background:#f8f8f8; color:#171717; }
+    .instagram .profile { padding:48px 18px 12px; display:flex; align-items:center; gap:14px; }
+    .instagram .avatar { width:86px; height:86px; border-radius:50%; padding:4px; background:linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5); }
+    .instagram .avatar div { width:100%; height:100%; border-radius:50%; border:4px solid #fff; background-size:cover; background-position:center; }
+    .instagram h2 { margin:0; font-size:24px; letter-spacing:-.05em; }
+    .instagram .bio { padding: 0 18px 16px; font-size:13px; line-height:1.55; }
+    .instagram .stories { display:flex; gap:11px; overflow:hidden; padding: 0 18px 16px; }
+    .instagram .story { min-width:72px; text-align:center; font-size:10px; font-weight:800; color:#5f5f5f; }
+    .instagram .circle { width:64px; height:64px; border-radius:50%; margin:0 auto 5px; background-size:cover; background-position:center; border:3px solid #ddd; }
+    .instagram .feed { display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; }
+    .instagram .feed div { aspect-ratio:1; background-size:cover; background-position:center; }
+    .instagram .price-card { background:white; border:1px solid #e9e9e9; margin:10px 18px; }
+    .instagram .event { margin:14px 18px; padding:14px; border-radius:18px; background:#111; color:#fff; }
+    .instagram .cta { background:linear-gradient(135deg,#d62976,#4f5bd5); color:#fff; margin: 14px 18px 24px; }
+
+    /* Calendar */
+    .calendar { background:#f4f7ff; color:#141b2d; }
+    .calendar .hero { padding:50px 22px 18px; background:linear-gradient(180deg,#dae5ff,#f4f7ff); }
+    .calendar h2 { margin:10px 0; font-size:38px; line-height:1; letter-spacing:-.07em; }
+    .calendar .hero-img { height:180px; border-radius:30px; margin-top:18px; box-shadow: 0 16px 36px rgba(59, 89, 152, .18); }
+    .calendar .month { margin: 4px 22px 0; padding:16px; border-radius:24px; background:#fff; border:1px solid #dfe6f8; }
+    .calendar .days { display:grid; grid-template-columns:repeat(7,1fr); gap:7px; margin-top:12px; }
+    .calendar .day { aspect-ratio:1; display:grid; place-items:center; border-radius:12px; background:#f1f4fc; font-size:11px; font-weight:900; color:#64708b; }
+    .calendar .day.on { background:#365cff; color:#fff; box-shadow:0 8px 16px rgba(54,92,255,.24); }
+    .calendar .event { margin:16px 22px 0; padding:16px; border-radius:22px; background:#14213d; color:#fff; }
+    .calendar .price-card { background:#fff; border:1px solid #dfe6f8; }
+    .calendar .cta { background:#365cff; color:#fff; }
+
+    @media (max-width: 1050px) {
+      .topbar { align-items: stretch; flex-direction: column; }
+      .brand, .actions { min-width: 0; width: 100%; }
+      .actions { justify-content: stretch; }
+      .actions button { flex: 1; }
+      .workspace { grid-template-columns: 1fr; }
+      .preview-stage { grid-template-columns: 1fr; place-items:center; }
+      .sales-notes { max-width: 390px; }
+    }
+    @media (max-width: 520px) {
+      .app-shell { padding: 10px; }
+      .row-2 { grid-template-columns: 1fr; }
+      .phone, .phone-label { width: 100%; max-width: 390px; }
+      .phone { height: 680px; }
+      .preview-stage, .editor-panel { padding: 12px; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <h1>모바일 홍보페이지 양식 편집기</h1>
+          <p>사진·가격표·이벤트 입력 → 양식 전환 → 모바일 미리보기</p>
+        </div>
+      </div>
+      <nav class="template-tabs" aria-label="양식 선택">
+        <button class="tab active" data-template="lookbook">lookbook</button>
+        <button class="tab" data-template="poster">poster</button>
+        <button class="tab" data-template="instagram">instagram</button>
+        <button class="tab" data-template="calendar">calendar</button>
+      </nav>
+      <div class="actions">
+        <button class="btn secondary" id="resetBtn">샘플 복원</button>
+        <button class="btn" id="downloadBtn">HTML 다운로드</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="editor-panel">
+        <div class="panel-header">
+          <div>
+            <h2>입력 패널</h2>
+            <small>왼쪽을 고치면 오른쪽 모바일 화면에 바로 반영됩니다.</small>
+          </div>
+        </div>
+        <div class="field-grid">
+          <section class="section-card">
+            <div class="section-title">01 기본 문구 <span>필수</span></div>
+            <label for="shopName">매장명</label>
+            <input id="shopName" value="온네일 성수" />
+            <div class="row-2" style="margin-top:10px">
+              <div>
+                <label for="mainTitle">메인 제목</label>
+                <input id="mainTitle" value="손끝에 남는 여름의 결" />
+              </div>
+              <div>
+                <label for="eyebrow">상단 짧은 문구</label>
+                <input id="eyebrow" value="6월 무드북 오픈" />
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <label for="description">설명문</label>
+              <textarea id="description">가격표·이달의 아트·예약 전 안내를 한 화면에 확인하세요. 인스타 프로필 링크에 걸기 좋은 모바일 안내페이지입니다.</textarea>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-title">02 품목/가격 <span>가격표</span></div>
+            <div class="row-2">
+              <div>
+                <label for="itemName">품목명</label>
+                <input id="itemName" value="원컬러 젤네일" />
+              </div>
+              <div>
+                <label for="itemPrice">가격</label>
+                <input id="itemPrice" value="55,000원" />
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <label for="itemDesc">품목 설명</label>
+              <textarea id="itemDesc">케어 포함 / 컬러 2개까지 선택 가능 / 유지력 중심 베이스 작업</textarea>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-title">03 이벤트 <span>혜택</span></div>
+            <div class="row-2">
+              <div>
+                <label for="eventName">이벤트명</label>
+                <input id="eventName" value="첫 방문 케어 무료" />
+              </div>
+              <div>
+                <label for="eventBenefit">혜택</label>
+                <input id="eventBenefit" value="케어 무료 + 아트 10%" />
+              </div>
+            </div>
+            <p class="hint">크몽 상품에서는 이벤트 기간/조건을 옵션으로 추가 입력받으면 좋습니다.</p>
+          </section>
+
+          <section class="section-card">
+            <div class="section-title">04 이미지 URL <span>사진</span></div>
+            <label for="imageUrl">대표 이미지 URL</label>
+            <input id="imageUrl" value="https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=80" />
+            <p class="hint">Unsplash/인스타 CDN/업로드 이미지 URL을 넣는 구조. MVP에서는 URL 입력만 지원합니다.</p>
+          </section>
+        </div>
+      </aside>
+
+      <section class="preview-stage">
+        <div class="phone-wrap">
+          <div class="phone-label"><span>실시간 모바일 미리보기</span><span id="templateLabel">LOOKBOOK</span></div>
+          <div class="phone">
+            <div id="mobilePage" class="mobile-page"></div>
+            <div class="watermark">MOBILE PAGE SAMPLE · WATERMARK</div>
+          </div>
+        </div>
+        <div class="sales-notes">
+          <h3>크몽 상세페이지에서 보여줄 핵심 장면</h3>
+          <p>“완성형 홈페이지 제작”이 아니라, 사장님이 주신 사진·가격표·이벤트를 넣어 여러 모바일 양식을 비교해보는 편집형 상품으로 보여줍니다.</p>
+          <div class="note-list">
+            <div class="note-item"><b>1. 같은 데이터, 다른 양식</b><span>lookbook / poster / instagram / calendar 버튼으로 즉시 전환되는 장면을 캡처합니다.</span></div>
+            <div class="note-item"><b>2. 수정 가능해 보이는 화면</b><span>왼쪽 입력 패널과 오른쪽 폰 미리보기를 같이 보여주면 ‘저렴한 양식형’ 포지션이 명확해집니다.</span></div>
+            <div class="note-item"><b>3. 워터마크</b><span>판매 전 샘플/시안에는 워터마크를 표시해 복제 리스크를 줄입니다.</span></div>
+            <div class="note-item"><b>추천 시작가</b><span>크몽 기본형 19,000~29,000원 / 자체 자동판매 9,900원부터.</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const sample = {
+      shopName: '온네일 성수',
+      eyebrow: '6월 무드북 오픈',
+      mainTitle: '손끝에 남는 여름의 결',
+      description: '가격표·이달의 아트·예약 전 안내를 한 화면에 확인하세요. 인스타 프로필 링크에 걸기 좋은 모바일 안내페이지입니다.',
+      itemName: '원컬러 젤네일',
+      itemPrice: '55,000원',
+      itemDesc: '케어 포함 / 컬러 2개까지 선택 가능 / 유지력 중심 베이스 작업',
+      eventName: '첫 방문 케어 무료',
+      eventBenefit: '케어 무료 + 아트 10%',
+      imageUrl: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=80'
+    };
+    const fields = Object.keys(sample);
+    let currentTemplate = 'lookbook';
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (value) => String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const data = () => Object.fromEntries(fields.map(key => [key, $(key).value.trim() || sample[key]]));
+    const imgStyle = (url) => `background-image: linear-gradient(rgba(0,0,0,.02), rgba(0,0,0,.02)), url('${esc(url)}')`;
+
+    function renderLookbook(d) {
+      return `<div class="lookbook">
+        <section class="hero">
+          <span class="chip" style="background:#ffe4eb;color:#9b2f49">${esc(d.eyebrow)}</span>
+          <h2>${esc(d.mainTitle)}</h2>
+          <p class="sub">${esc(d.description)}</p>
+          <div class="hero-img main-img" style="${imgStyle(d.imageUrl)}"></div>
+        </section>
+        <section class="event"><small>THIS MONTH EVENT</small><h3>${esc(d.eventName)}</h3><p>${esc(d.eventBenefit)}</p></section>
+        <section class="m-section">
+          <div class="price-card"><h4>${esc(d.itemName)}</h4><p>${esc(d.itemDesc)}</p><strong>${esc(d.itemPrice)}</strong></div>
+          <a class="cta" href="#">카카오톡 예약 문의</a>
+        </section>
+        <div class="grid"><div class="thumb" style="${imgStyle(d.imageUrl)}"></div><div class="thumb" style="${imgStyle(d.imageUrl)};filter:saturate(.8) brightness(1.08)"></div></div>
+      </div>`;
+    }
+
+    function renderPoster(d) {
+      return `<div class="poster">
+        <section class="hero">
+          <div><span class="chip" style="background:#111;color:#fff">${esc(d.shopName)}</span><h2>${esc(d.mainTitle)}</h2></div>
+          <div class="hero-img main-img" style="${imgStyle(d.imageUrl)}"></div>
+          <p class="sub">${esc(d.description)}</p>
+        </section>
+        <section class="event"><small>LIMITED BENEFIT</small><h3>${esc(d.eventName)}</h3><b>${esc(d.eventBenefit)}</b></section>
+        <section class="m-section">
+          <div class="price-card"><h4>${esc(d.itemName)}</h4><p>${esc(d.itemDesc)}</p><strong>${esc(d.itemPrice)}</strong></div>
+          <a class="cta" href="#">지금 예약하고 혜택 받기</a>
+        </section>
+      </div>`;
+    }
+
+    function renderInstagram(d) {
+      return `<div class="instagram">
+        <section class="profile">
+          <div class="avatar"><div style="${imgStyle(d.imageUrl)}"></div></div>
+          <div><h2>@${esc(d.shopName).replace(/\s/g,'_')}</h2><p style="margin:5px 0 0;color:#777;font-size:12px;font-weight:800">모바일 안내페이지 · 가격표 · 예약</p></div>
+        </section>
+        <section class="bio"><b>${esc(d.mainTitle)}</b><br>${esc(d.description)}</section>
+        <section class="stories">
+          <div class="story"><div class="circle" style="${imgStyle(d.imageUrl)}"></div>price</div>
+          <div class="story"><div class="circle" style="${imgStyle(d.imageUrl)}"></div>event</div>
+          <div class="story"><div class="circle" style="${imgStyle(d.imageUrl)}"></div>booking</div>
+          <div class="story"><div class="circle" style="${imgStyle(d.imageUrl)}"></div>review</div>
+        </section>
+        <div class="feed">${Array.from({length:9}).map((_,i)=>`<div style="${imgStyle(d.imageUrl)};filter:hue-rotate(${i*8}deg) brightness(${.92+i*.018})"></div>`).join('')}</div>
+        <div class="event"><b>${esc(d.eventName)}</b><br><span>${esc(d.eventBenefit)}</span></div>
+        <div class="price-card"><h4>${esc(d.itemName)}</h4><p>${esc(d.itemDesc)}</p><strong>${esc(d.itemPrice)}</strong></div>
+        <a class="cta" href="#">DM / 카톡 예약하기</a>
+      </div>`;
+    }
+
+    function renderCalendar(d) {
+      const days = Array.from({length:28}).map((_,i)=>`<div class="day ${[2,5,9,12,16,19,23].includes(i)?'on':''}">${i+1}</div>`).join('');
+      return `<div class="calendar">
+        <section class="hero"><span class="chip" style="background:#fff;color:#365cff">${esc(d.shopName)}</span><h2>${esc(d.mainTitle)}</h2><p style="color:#60708f;line-height:1.55;font-size:13px">${esc(d.description)}</p><div class="hero-img main-img" style="${imgStyle(d.imageUrl)}"></div></section>
+        <section class="month"><b>6월 예약 가능일</b><div class="days">${days}</div></section>
+        <section class="event"><small>예약 혜택</small><h3>${esc(d.eventName)}</h3><p>${esc(d.eventBenefit)}</p></section>
+        <section class="m-section"><div class="price-card"><h4>${esc(d.itemName)}</h4><p>${esc(d.itemDesc)}</p><strong>${esc(d.itemPrice)}</strong></div><a class="cta" href="#">가능 시간 문의하기</a></section>
+      </div>`;
+    }
+
+    function render() {
+      const d = data();
+      const map = { lookbook: renderLookbook, poster: renderPoster, instagram: renderInstagram, calendar: renderCalendar };
+      $('mobilePage').innerHTML = map[currentTemplate](d);
+      $('templateLabel').textContent = currentTemplate.toUpperCase();
+    }
+
+    function activateTemplate(templateName) {
+      currentTemplate = ['lookbook', 'poster', 'instagram', 'calendar'].includes(templateName) ? templateName : 'lookbook';
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.template === currentTemplate));
+      render();
+    }
+
+    fields.forEach(key => $(key).addEventListener('input', render));
+    document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => activateTemplate(btn.dataset.template)));
+    activateTemplate(new URLSearchParams(location.search).get('template') || 'lookbook');
+    $('resetBtn').addEventListener('click', () => { fields.forEach(key => $(key).value = sample[key]); render(); });
+    $('downloadBtn').addEventListener('click', () => {
+      const css = document.querySelector('style').textContent;
+      const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(data().shopName)} 모바일 안내페이지</title><style>${css}\nbody{background:#f6f1eb}.download-wrap{max-width:430px;margin:0 auto;background:white;min-height:100vh}.download-wrap .${currentTemplate}{min-height:100vh}.download-wrap .poster .hero-img{position:absolute}</style></head><body><div class="download-wrap">${$('mobilePage').innerHTML}</div><div class="watermark">SAMPLE</div></body></html>`;
+      const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${data().shopName || 'mobile-page'}-${currentTemplate}.html`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 800);
+    });
+    render();
+  </script>
+</body>
+</html>

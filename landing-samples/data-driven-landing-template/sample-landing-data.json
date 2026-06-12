@@ -1,0 +1,38 @@
+{
+  "basic": {
+    "shop_name": "온네일 성수",
+    "category": "nail",
+    "address": "서울 성동구 성수역 4분"
+  },
+  "landing": {
+    "template_type": "lookbook",
+    "tone": "soft-premium",
+    "show_sections": [
+      "hero",
+      "events",
+      "prices",
+      "gallery",
+      "booking",
+      "notice"
+    ]
+  },
+  "hero": {
+    "eyebrow": "6월 무드북 오픈",
+    "headline": "손끝에 남는\n여름의 결",
+    "subcopy": "가격표·이달의 아트·예약 전 안내를 한 화면에 확인하세요."
+  },
+  "prices": [
+    {
+      "name": "원컬러",
+      "price": "55,000원",
+      "desc": "케어 포함 / 컬러 2개까지"
+    }
+  ],
+  "events": [
+    {
+      "name": "첫 방문 케어 무료",
+      "benefit": "케어 무료",
+      "desc": "카톡 예약 시 적용"
+    }
+  ]
+}

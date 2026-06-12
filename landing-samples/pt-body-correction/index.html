@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>핏바른 1:1 체형교정 PT | 문의 전환 샘플</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fffaf7;
+      --surface:#ffffff;
+      --ink:#222222;
+      --muted:#6a6a6a;
+      --soft:#f7f1ed;
+      --line:#eadfd8;
+      --accent:#ff385c;
+      --accent-dark:#e00b41;
+      --green:#147a57;
+      --amber:#f59e0b;
+      --shadow:rgba(0,0,0,.02) 0 0 0 1px, rgba(0,0,0,.04) 0 2px 6px, rgba(0,0,0,.10) 0 4px 8px;
+      --shadow-lg:rgba(0,0,0,.08) 0 18px 60px;
+      --radius:24px;
+      --max:1160px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans','Noto Sans KR',system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:86px}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+    .topbar{position:sticky;top:0;z-index:40;background:rgba(255,250,247,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(234,223,216,.75)}
+    .nav{height:70px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.5px}
+    .logo{width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg,#ff385c,#ff7a59);display:grid;place-items:center;color:white;box-shadow:var(--shadow)}
+    .navlinks{display:flex;gap:18px;color:#4a4a4a;font-size:14px;font-weight:700}
+    .nav-cta{background:#222;color:#fff;border-radius:999px;padding:12px 18px;font-size:14px;font-weight:800;box-shadow:var(--shadow);transition:.2s}
+    .nav-cta:hover{background:var(--accent);transform:translateY(-1px)}
+    .hero{padding:46px 0 28px}
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid #f0d6cf;background:#fff;border-radius:999px;padding:8px 12px;color:#9a3412;font-weight:800;font-size:13px;box-shadow:rgba(0,0,0,.03) 0 2px 8px}
+    .hero h1{font-size:clamp(38px,6vw,72px);line-height:.98;letter-spacing:-2.4px;margin:18px 0 18px;font-weight:900}
+    .hero h1 span{color:var(--accent)}
+    .lead{font-size:clamp(17px,2.1vw,21px);color:#4b4b4b;margin:0 0 22px;max-width:620px;letter-spacing:-.2px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 18px}
+    .btn{border:0;cursor:pointer;border-radius:16px;padding:15px 20px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:.2s;min-height:52px}
+    .btn-primary{background:var(--accent);color:#fff;box-shadow:0 14px 28px rgba(255,56,92,.22)}
+    .btn-primary:hover{background:var(--accent-dark);transform:translateY(-2px)}
+    .btn-secondary{background:#fff;color:#222;border:1px solid var(--line);box-shadow:var(--shadow)}
+    .btn-secondary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 12px;font-size:13px;color:#555;font-weight:700}
+    .visual{position:relative;min-height:570px}
+    .photo-card{position:absolute;inset:0 0 70px 44px;border-radius:34px;overflow:hidden;background:linear-gradient(145deg,#2b211f,#7c332e 48%,#ffc0a8);box-shadow:var(--shadow-lg)}
+    .photo-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 55% 18%,rgba(255,255,255,.34),transparent 24%),linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.52));}
+    .trainer{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:290px;height:370px;border-radius:150px 150px 42px 42px;background:linear-gradient(180deg,#ffe4d6,#f7a88b 46%,#111 46%,#252525);box-shadow:0 24px 50px rgba(0,0,0,.25)}
+    .trainer::before{content:"";position:absolute;left:91px;top:24px;width:108px;height:108px;border-radius:50%;background:#f3b795;box-shadow:inset 0 -12px 0 rgba(0,0,0,.06)}
+    .trainer::after{content:"";position:absolute;left:72px;top:172px;width:146px;height:16px;border-radius:999px;background:#ff385c;box-shadow:0 64px 0 #ff385c}
+    .floating{position:absolute;background:#fff;border-radius:24px;box-shadow:var(--shadow);border:1px solid rgba(234,223,216,.7)}
+    .metric{left:0;bottom:38px;width:230px;padding:18px}
+    .metric strong{display:block;font-size:29px;letter-spacing:-1px}
+    .metric p{margin:4px 0 0;color:#6a6a6a;font-size:13px;font-weight:700}
+    .booking{right:0;bottom:0;width:280px;padding:16px}
+    .booking-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .avatar-stack{display:flex}
+    .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ffe0d1,#ff385c);border:2px solid #fff;margin-left:-8px}.avatar:first-child{margin-left:0}
+    .mini-cal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slot{padding:10px 6px;text-align:center;border-radius:12px;background:#f7f1ed;font-size:12px;font-weight:800}.slot.active{background:#222;color:#fff}
+    .section{padding:52px 0}.section h2{font-size:clamp(28px,4vw,46px);letter-spacing:-1.3px;line-height:1.08;margin:0 0 12px}.section-intro{color:#666;font-size:18px;margin:0 0 26px;max-width:720px}
+    .pain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.pain{background:#fff;border-radius:22px;padding:20px;border:1px solid var(--line);box-shadow:var(--shadow)}.pain .icon{width:42px;height:42px;border-radius:14px;background:#fff0f2;display:grid;place-items:center;margin-bottom:16px}.pain strong{display:block;font-size:17px;letter-spacing:-.3px}.pain p{font-size:14px;color:#666;margin:8px 0 0}
+    .programs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.program{background:#fff;border-radius:28px;padding:24px;border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}.program.reco{border-color:#ff9aae;box-shadow:0 0 0 1px #ffccd5, var(--shadow-lg)}.badge{display:inline-block;background:#222;color:#fff;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}.program h3{font-size:24px;letter-spacing:-.7px;margin:18px 0 8px}.price{font-size:29px;font-weight:900;letter-spacing:-1px;margin:12px 0}.desc{color:#666}.list{padding:0;margin:18px 0 0;list-style:none}.list li{padding:8px 0;border-top:1px solid #f0e5de;font-size:14px;color:#494949}.list li::before{content:"✓";color:var(--green);font-weight:900;margin-right:8px}
+    .proof{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch}.review-card{background:#222;color:#fff;border-radius:32px;padding:32px;box-shadow:var(--shadow-lg)}.review-card p{font-size:24px;line-height:1.35;letter-spacing:-.6px;margin:0 0 22px}.reviewer{color:#d8d8d8;font-weight:700}.evidence{display:grid;gap:14px}.ev{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:flex-start}.ev-icon{min-width:42px;height:42px;border-radius:14px;background:#fff0f2;display:grid;place-items:center}.ev strong{display:block}.ev span{color:#666;font-size:14px}
+    .process{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.step{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow)}.num{width:34px;height:34px;border-radius:50%;background:#222;color:#fff;display:grid;place-items:center;font-weight:900;margin-bottom:12px}.step strong{display:block}.step p{font-size:13px;color:#666;margin:8px 0 0}
+    .faq-wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px}.faq-card{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:28px;overflow:hidden}.faq-item+ .faq-item{border-top:1px solid #eee0d8}.faq-q{width:100%;border:0;background:#fff;padding:20px;text-align:left;font-weight:900;display:flex;justify-content:space-between;gap:12px;cursor:pointer;color:#222}.faq-a{display:none;padding:0 20px 20px;color:#666}.faq-item.open .faq-a{display:block}.faq-item.open .plus{transform:rotate(45deg)}.plus{transition:.2s}.info-card{background:linear-gradient(145deg,#fff,#fff5f0);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:28px;padding:24px}.info-card h3{font-size:24px;margin:0 0 12px}.info-row{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid #eee0d8}.info-row b{white-space:nowrap}.info-row span{text-align:right;color:#666}
+    .edit-demo{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:32px;padding:24px;display:grid;grid-template-columns:.9fr 1.1fr;gap:22px}.fields{display:grid;gap:10px}.field{background:#f8f2ee;border-radius:16px;padding:14px}.field small{display:block;color:#8a6a5d;font-weight:900}.field b{display:block;margin-top:4px}.phone-preview{border:10px solid #222;border-radius:34px;background:#fff;overflow:hidden;max-width:330px;margin:auto;box-shadow:var(--shadow-lg)}.phone-hero{height:178px;background:linear-gradient(135deg,#2b211f,#ff9b7b);position:relative}.phone-body{padding:16px}.phone-body h4{font-size:22px;line-height:1.08;margin:0 0 8px}.phone-btn{background:#ff385c;color:#fff;border-radius:14px;padding:12px;text-align:center;font-weight:900;margin-top:12px}
+    .final{padding:64px 0}.final-card{background:#222;color:#fff;border-radius:36px;padding:36px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;box-shadow:var(--shadow-lg)}.final-card h2{font-size:clamp(30px,4vw,52px);line-height:1.05;letter-spacing:-1.5px;margin:0}.final-card p{color:#ddd;margin:14px 0 0;font-size:17px}.final-actions{display:grid;gap:10px}.btn-light{background:#fff;color:#222}.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.28)}
+    .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-top:1px solid #eadfd8;padding:12px 14px;transform:translateY(110%);opacity:0;transition:.24s}.sticky-cta.visible{transform:translateY(0);opacity:1}.sticky-inner{max-width:620px;margin:0 auto;display:flex;gap:10px}.sticky-inner .btn{flex:1;border-radius:18px;padding:14px 12px}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);opacity:0;background:#222;color:#fff;border-radius:18px;padding:14px 18px;font-weight:800;z-index:60;box-shadow:var(--shadow-lg);transition:.22s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media(max-width:900px){.navlinks{display:none}.hero-grid,.proof,.faq-wrap,.edit-demo,.final-card{grid-template-columns:1fr}.visual{min-height:520px}.photo-card{left:0}.pain-grid{grid-template-columns:repeat(2,1fr)}.programs{grid-template-columns:1fr}.process{grid-template-columns:1fr 1fr}.final-actions{grid-template-columns:1fr 1fr}.final-card{padding:28px}.hero{padding-top:28px}}
+    @media(max-width:560px){.wrap{padding:0 16px}.nav{height:62px}.brand span{display:none}.nav-cta{padding:10px 13px}.hero h1{font-size:43px;letter-spacing:-1.7px}.hero-actions{display:grid}.hero-actions .btn{width:100%}.visual{min-height:440px}.photo-card{inset:0 0 76px 0;border-radius:28px}.trainer{width:214px;height:292px}.trainer::before{left:66px;width:82px;height:82px}.trainer::after{left:52px;width:110px;top:138px}.metric{width:178px;bottom:38px}.booking{width:214px}.pain-grid,.process{grid-template-columns:1fr}.section{padding:38px 0}.review-card p{font-size:20px}.final-actions{grid-template-columns:1fr}.sticky-inner{grid-template-columns:1fr}.sticky-inner .btn-secondary{display:none}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a href="#top" class="brand"><div class="logo">핏</div><span>핏바른 체형교정</span></a>
+      <nav class="navlinks"><a href="#program">프로그램</a><a href="#proof">후기</a><a href="#faq">FAQ</a><a href="#edit">직접수정</a></nav>
+      <a class="nav-cta" href="#contact">상담 문의</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">오늘 19:00 첫 상담 1자리 가능</div>
+          <h1>통증과 자세 고민,<br><span>상담부터 운동 루틴까지</span><br>1:1로 맞춥니다.</h1>
+          <p class="lead">강남역 5분 거리의 체형교정 PT. 가격, 진행 방식, 후기, 예약 방법을 한 페이지에서 확인하고 카카오톡으로 1분 만에 문의하세요.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-toast="카카오톡 상담으로 연결됩니다">카카오톡으로 첫 상담 문의</button>
+            <button class="btn btn-secondary" data-toast="전화 문의 버튼을 눌렀습니다">전화로 바로 문의</button>
+          </div>
+          <div class="quick">
+            <span class="chip">첫 상담 30분</span><span class="chip">자세 분석 포함</span><span class="chip">여성 트레이너 가능</span><span class="chip">강남역 도보 5분</span>
+          </div>
+        </div>
+        <div class="visual" aria-label="체형교정 PT 시각 샘플">
+          <div class="photo-card"><div class="trainer"></div></div>
+          <div class="floating metric"><strong>4.9/5.0</strong><p>네이버 예약 후기 기준</p></div>
+          <div class="floating booking"><div class="booking-top"><b>이번 주 상담 가능</b><div class="avatar-stack"><i class="avatar"></i><i class="avatar"></i><i class="avatar"></i></div></div><div class="mini-cal"><span class="slot">월 19:00</span><span class="slot active">수 20:00</span><span class="slot">토 11:00</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <h2>처음 방문 전, 이런 점이 제일 궁금하셨죠?</h2>
+        <p class="section-intro">문의 전에 막히는 질문을 먼저 해결해서 상담 전환 장벽을 줄입니다.</p>
+        <div class="pain-grid">
+          <article class="pain"><div class="icon">₩</div><strong>가격이 안 보여요</strong><p>상담 전 대략적인 비용을 알아야 문의할 수 있습니다.</p></article>
+          <article class="pain"><div class="icon">✓</div><strong>나에게 맞을까요?</strong><p>통증, 자세, 체력 상태별 추천 프로그램을 안내합니다.</p></article>
+          <article class="pain"><div class="icon">후</div><strong>실제 후기가 필요해요</strong><p>전후 변화, 수업 과정, 고객 반응을 한곳에 모았습니다.</p></article>
+          <article class="pain"><div class="icon">톡</div><strong>어떻게 예약하나요?</strong><p>카카오톡으로 희망 시간과 고민만 보내면 됩니다.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="program">
+      <div class="wrap">
+        <h2>대표 프로그램</h2>
+        <p class="section-intro">처음 오신 분이 바로 비교할 수 있게 가격, 대상, 포함 사항을 카드로 정리합니다.</p>
+        <div class="programs">
+          <article class="program"><span class="badge">처음 방문</span><h3>기본 상담</h3><p class="desc">현재 자세와 통증 패턴을 확인하고 운동 방향을 잡습니다.</p><div class="price">30분 · 30,000원</div><ul class="list"><li>자세 체크</li><li>통증/생활습관 상담</li><li>맞춤 루틴 방향 안내</li></ul></article>
+          <article class="program reco"><span class="badge">가장 많이 선택</span><h3>체형교정 4회</h3><p class="desc">거북목, 라운드숄더, 골반 불균형을 집중 관리합니다.</p><div class="price">4회 · 220,000원</div><ul class="list"><li>1:1 맞춤 수업</li><li>집에서 하는 보정 루틴</li><li>수업별 피드백 기록</li></ul></article>
+          <article class="program"><span class="badge">정기 관리</span><h3>월 관리</h3><p class="desc">꾸준한 변화가 필요한 분께 월 단위로 관리합니다.</p><div class="price">상담 후 안내</div><ul class="list"><li>월 4~8회 선택</li><li>운동 강도 조절</li><li>월별 변화 리포트</li></ul></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="proof">
+      <div class="wrap proof">
+        <article class="review-card"><p>“가격이랑 진행 방식이 한눈에 보여서 상담 전에 부담이 줄었어요. 카톡으로 사진 보내고 바로 예약 잡았습니다.”</p><div class="reviewer">김OO · 직장인 · 라운드숄더 상담</div></article>
+        <div class="evidence">
+          <div class="ev"><div class="ev-icon">✓</div><div><strong>체형교정 전문 과정 수료</strong><span>자세 분석, 움직임 평가, 재활 운동 기반 수업</span></div></div>
+          <div class="ev"><div class="ev-icon">기록</div><div><strong>수업 전후 기록 제공</strong><span>변화가 보이도록 체크 포인트를 사진과 메모로 남깁니다.</span></div></div>
+          <div class="ev"><div class="ev-icon">루틴</div><div><strong>집에서 하는 루틴 안내</strong><span>수업 없는 날에도 따라 할 수 있는 간단 루틴을 제공합니다.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <h2>상담은 이렇게 진행됩니다</h2>
+        <p class="section-intro">문의 이후 흐름을 미리 보여주면 불안이 줄고 예약 전환이 쉬워집니다.</p>
+        <div class="process">
+          <div class="step"><div class="num">1</div><strong>카톡 문의</strong><p>현재 고민과 희망 시간을 보냅니다.</p></div>
+          <div class="step"><div class="num">2</div><strong>상태 확인</strong><p>통증, 운동 경험, 목표를 확인합니다.</p></div>
+          <div class="step"><div class="num">3</div><strong>프로그램 제안</strong><p>상담/체험/정기관리 중 맞는 구성을 안내합니다.</p></div>
+          <div class="step"><div class="num">4</div><strong>예약 확정</strong><p>가능 시간과 방문 안내를 전달합니다.</p></div>
+          <div class="step"><div class="num">5</div><strong>방문 수업</strong><p>자세 분석 후 1:1 수업을 시작합니다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="wrap faq-wrap">
+        <div><h2>자주 묻는 질문</h2><p class="section-intro">FAQ는 반복 문의를 줄이고, 문의 전 이탈을 막는 전환 장치입니다.</p></div>
+        <div class="faq-card">
+          <div class="faq-item open"><button class="faq-q">처음 방문해도 괜찮나요? <span class="plus">＋</span></button><div class="faq-a">네. 처음 방문자는 기본 상담에서 현재 상태를 확인한 뒤 무리 없는 루틴부터 시작합니다.</div></div>
+          <div class="faq-item"><button class="faq-q">가격은 어떻게 되나요? <span class="plus">＋</span></button><div class="faq-a">기본 상담은 30분 30,000원, 4회 프로그램은 220,000원입니다. 정기 관리는 목표와 횟수에 따라 안내드립니다.</div></div>
+          <div class="faq-item"><button class="faq-q">운동을 거의 안 해봤는데 가능한가요? <span class="plus">＋</span></button><div class="faq-a">가능합니다. 체력 수준과 통증 여부를 먼저 확인하고 강도를 조절합니다.</div></div>
+          <div class="faq-item"><button class="faq-q">예약 변경은 가능한가요? <span class="plus">＋</span></button><div class="faq-a">수업 24시간 전까지 1회 변경 가능합니다. 당일 변경은 상황에 따라 별도 안내드립니다.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="info-card"><h3>위치와 운영 정보</h3><div class="info-row"><b>주소</b><span>서울 강남구 테헤란로 00, 3층</span></div><div class="info-row"><b>운영시간</b><span>평일 10:00~22:00 · 토 10:00~15:00</span></div><div class="info-row"><b>주차</b><span>건물 뒤 유료주차 가능</span></div><div class="info-row"><b>문의</b><span>카카오톡 상담 우선 · 전화 가능</span></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="edit">
+      <div class="wrap edit-demo">
+        <div><h2>대표님은 필요한 정보만 바꾸면 됩니다</h2><p class="section-intro">레이아웃과 전환 흐름은 유지하고, 가격/공지/사진/버튼 링크만 안전하게 수정하는 구조입니다.</p><div class="fields"><div class="field"><small>공지</small><b>6월 체험 상담 3자리 남음</b></div><div class="field"><small>가격</small><b>체형교정 4회 · 220,000원</b></div><div class="field"><small>CTA 링크</small><b>카카오톡 채널 URL</b></div></div></div>
+        <div class="phone-preview"><div class="phone-hero"></div><div class="phone-body"><h4>통증과 자세 고민, 1:1로 맞춥니다.</h4><p>6월 체험 상담 3자리 남음 · 강남역 5분</p><div class="phone-btn">카카오톡 문의하기</div></div></div>
+      </div>
+    </section>
+
+    <section class="final" id="contact">
+      <div class="wrap final-card">
+        <div><h2>상담 전 궁금한 점을 카카오톡으로 보내주세요.</h2><p>현재 고민, 희망 시간, 통증 부위를 함께 보내주시면 가능한 프로그램을 먼저 안내드립니다.</p></div>
+        <div class="final-actions"><button class="btn btn-light" data-toast="카카오톡 상담으로 연결됩니다">카카오톡 문의</button><button class="btn btn-outline" data-toast="전화 문의 버튼을 눌렀습니다">전화 문의</button></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="sticky-cta"><div class="sticky-inner"><button class="btn btn-primary" data-toast="카카오톡 상담으로 연결됩니다">카카오톡으로 1분 상담</button><button class="btn btn-secondary" data-toast="이번 주 예약 가능 시간을 확인합니다">이번 주 시간 보기</button></div></div>
+  <div class="toast" id="toast">문의 버튼을 눌렀습니다</div>
+  <script>
+    const toast = document.getElementById('toast');
+    document.querySelectorAll('[data-toast]').forEach(btn=>btn.addEventListener('click',()=>{toast.textContent=btn.dataset.toast;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}));
+    document.querySelectorAll('.faq-q').forEach(q=>q.addEventListener('click',()=>q.parentElement.classList.toggle('open')));
+    const sticky=document.querySelector('.sticky-cta');
+    const updateSticky=()=>sticky.classList.toggle('visible', window.scrollY>520);
+    updateSticky(); window.addEventListener('scroll', updateSticky, {passive:true});
+  </script>
+</body>
+</html>

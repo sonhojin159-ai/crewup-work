@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>온네일 성수 | 인스타 예약 전용 모바일 안내페이지</title>
+  <meta name="description" content="성수동 네일샵 온네일 성수의 이달의 아트, 가격, 첫 방문 혜택, 예약 안내를 한 화면에 정리한 모바일 랜딩페이지 샘플" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#fff8f6;--ink:#241615;--muted:#7a6460;--soft:#f7e8e3;--soft2:#fff2ed;--line:#ead7d1;
+      --accent:#d94f7b;--accent2:#ff8fac;--deep:#4d2430;--cream:#fffaf5;--green:#4c7a5c;
+      --shadow:0 22px 70px rgba(77,36,48,.16);--radius:28px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;background:linear-gradient(180deg,#fff9f5 0%,#f8e8e4 48%,#fffaf7 100%);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}.page{max-width:430px;margin:0 auto;background:var(--cream);min-height:100vh;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 30px 90px rgba(0,0,0,.12);position:relative;overflow:hidden;padding-bottom:108px}.page:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 0%,rgba(255,143,172,.22),transparent 34%),radial-gradient(circle at 100% 14%,rgba(217,79,123,.12),transparent 26%);pointer-events:none}.inner{position:relative;z-index:1}.topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:rgba(255,250,247,.76);border-bottom:1px solid rgba(234,215,209,.8);padding:12px 18px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:-.04em}.mini{font-size:12px;color:var(--muted)}.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,255,255,.72);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800;color:var(--deep)}.hero{padding:28px 20px 18px}.eyebrow{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;color:var(--accent);font-weight:900;font-size:12px;box-shadow:0 10px 28px rgba(217,79,123,.09)}h1{font-size:38px;line-height:1.02;letter-spacing:-.08em;margin:16px 0 14px;color:#281314}.promise{font-size:17px;color:#5e4440;font-weight:700;letter-spacing:-.035em}.proof-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}.proof-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 10px;box-shadow:0 12px 28px rgba(77,36,48,.08)}.proof-card b{display:block;font-size:18px;color:var(--accent)}.proof-card span{font-size:11px;color:var(--muted);font-weight:700}.hero-photo{margin:20px 0 0;border-radius:34px;overflow:hidden;min-height:420px;background:linear-gradient(160deg,rgba(30,18,19,.1),rgba(217,79,123,.08)),url('https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=82') center/cover;position:relative;box-shadow:var(--shadow)}.hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(36,22,21,.82) 100%)}.floating-offer{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.8);border-radius:24px;padding:15px;box-shadow:0 18px 50px rgba(0,0,0,.22)}.floating-offer strong{display:block;font-size:18px;letter-spacing:-.04em}.floating-offer p{font-size:13px;color:#654b47;margin-top:4px}.cta{display:flex;align-items:center;justify-content:center;width:100%;height:54px;border-radius:18px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:900;box-shadow:0 14px 35px rgba(217,79,123,.35);cursor:pointer}.cta.secondary{background:#fff;color:var(--deep);border:1px solid var(--line);box-shadow:none}.section{padding:24px 20px}.section + .section{border-top:1px solid rgba(234,215,209,.72)}.label{font-size:12px;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}.section h2{font-size:26px;line-height:1.12;letter-spacing:-.06em;margin:7px 0 10px}.lead{color:var(--muted);font-weight:650;letter-spacing:-.025em}.bullets{display:grid;gap:10px;margin-top:14px}.bullet{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:13px;box-shadow:0 10px 26px rgba(77,36,48,.06)}.dot{width:25px;height:25px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;flex:0 0 25px}.problem{background:linear-gradient(180deg,#3a2024,#251416);color:#fff;margin:10px 20px;border-radius:32px;padding:24px 18px;box-shadow:0 24px 60px rgba(36,20,22,.28)}.problem .label{color:#ffb3c4}.problem .lead{color:#ead7d1}.problem-list{display:grid;gap:10px;margin-top:16px}.problem-list li{list-style:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:18px;padding:12px 13px;font-size:14px;color:#fff1ee}.solution-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:18px;box-shadow:var(--shadow);margin-top:16px}.solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.tile{background:var(--soft2);border:1px solid var(--line);border-radius:20px;padding:13px;min-height:98px}.tile b{display:block;font-size:15px}.tile span{display:block;margin-top:5px;font-size:12px;color:var(--muted);font-weight:650}.gallery{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.photo{height:172px;border-radius:24px;background:#eee center/cover;position:relative;overflow:hidden}.photo.wide{grid-column:1/3;height:190px}.photo:after{content:attr(data-caption);position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900;color:var(--deep)}.price-list{display:grid;gap:10px;margin-top:16px}.price{display:flex;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px}.price b{font-size:16px}.price small{display:block;color:var(--muted);font-size:12px;font-weight:650}.price strong{color:var(--accent);white-space:nowrap}.offer-box{background:linear-gradient(135deg,#fff,#ffe7ef);border:1px solid #f4c9d6;border-radius:30px;padding:20px;box-shadow:var(--shadow);margin-top:16px}.offer-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.tag{background:var(--deep);color:#fff;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:900;white-space:nowrap}.bonus{display:grid;gap:8px;margin-top:14px}.bonus div{background:rgba(255,255,255,.72);border:1px solid rgba(217,79,123,.16);border-radius:16px;padding:11px;font-weight:800;font-size:14px}.value-stack{background:#fff;border:1px solid var(--line);border-radius:24px;margin-top:14px;overflow:hidden}.stack-row{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}.stack-row:last-child{border-bottom:0;background:#fff0f5;font-weight:900;color:var(--accent)}.scarcity{display:flex;gap:10px;margin-top:14px;background:#fff8e8;border:1px solid #f2d9a7;border-radius:20px;padding:14px;color:#60451a}.guarantee{background:#edf7f0;border:1px solid #cfe8d5;border-radius:22px;padding:15px;margin-top:14px;color:#244c32}.reviews{display:grid;gap:10px;margin-top:16px}.review{background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px}.stars{color:#f2a900;letter-spacing:1px}.review p{font-size:14px;color:#5e4440;margin-top:7px}.steps{counter-reset:step;display:grid;gap:10px;margin-top:16px}.step{counter-increment:step;display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:13px}.step:before{content:counter(step);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--deep);color:#fff;font-weight:900;flex:0 0 28px}.faq{display:grid;gap:10px;margin-top:16px}.faq details{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}.faq summary{font-weight:900;cursor:pointer}.faq p{font-size:14px;color:var(--muted);margin-top:8px}.ps{background:#281314;color:#fff;border-radius:28px;padding:20px;margin-top:16px}.ps b{color:#ffc0cf}.sticky{position:fixed;left:50%;bottom:14px;transform:translateX(-50%) translateY(18px);width:min(398px,calc(100vw - 24px));z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border:1px solid rgba(234,215,209,.95);border-radius:26px;padding:10px;box-shadow:0 22px 70px rgba(77,36,48,.24);display:grid;grid-template-columns:1fr 1.25fr;gap:8px;opacity:0;pointer-events:none;transition:.25s}.sticky.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}.sticky .price-mini{padding-left:8px;display:flex;flex-direction:column;justify-content:center}.sticky .price-mini b{font-size:14px}.sticky .price-mini span{font-size:11px;color:var(--muted);font-weight:700}.step-note{display:inline-block;margin-left:6px;color:#b3958d;font-size:10px;font-weight:900}.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#281314;color:#fff;border-radius:999px;padding:12px 16px;z-index:60;font-size:13px;font-weight:900;transition:.25s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media (min-width:760px){body{padding:28px 0}.page{border-radius:36px;min-height:calc(100vh - 56px)}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="inner">
+      <nav class="topbar">
+        <div><div class="brand">ON NAIL</div><div class="mini">성수역 4분 · 1:1 예약제</div></div>
+        <a class="pill" href="#booking">예약하기</a>
+      </nav>
+
+      <header class="hero" id="top">
+        <span class="eyebrow">네일샵 가격표 찾다 지친 분께 <span class="step-note">1</span></span>
+        <h1>이번 달 아트와 가격,<br>예약 전 한 화면에서<br>끝내세요.</h1>
+        <p class="promise">온네일 성수는 손톱 상태·취향·일정을 먼저 보고, 과하지 않은 데일리 아트를 제안하는 성수동 예약제 네일샵입니다. <span class="step-note">2·3</span></p>
+        <div class="proof-row">
+          <div class="proof-card"><b>4.9</b><span>예약 후기 평점</span></div>
+          <div class="proof-card"><b>1:1</b><span>담당 시술제</span></div>
+          <div class="proof-card"><b>6월</b><span>첫방문 혜택</span></div>
+        </div>
+        <div class="hero-photo" role="img" aria-label="파스텔 네일아트 대표 사진">
+          <div class="floating-offer">
+            <strong>첫 방문 젤 제거 + 케어 무료</strong>
+            <p>카카오 예약 시 적용 · 이번 달 20명 한정</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="label">Why keep reading <span class="step-note">4</span></div>
+        <h2>예약 전 궁금한 것만 빠르게 확인하세요.</h2>
+        <div class="bullets">
+          <div class="bullet"><span class="dot">✓</span><div><b>가격 숨김 없음</b><br><span class="mini">기본 시술과 추가 옵션을 미리 확인</span></div></div>
+          <div class="bullet"><span class="dot">✓</span><div><b>이번 달 아트 먼저 보기</b><br><span class="mini">사진 보고 원하는 무드 캡처해서 예약</span></div></div>
+          <div class="bullet"><span class="dot">✓</span><div><b>내 손톱에 맞는 상담</b><br><span class="mini">짧은 손톱·손상 손톱도 가능한 디자인 제안</span></div></div>
+        </div>
+      </section>
+
+      <section class="problem">
+        <div class="label">Problem <span class="step-note">5</span></div>
+        <h2>인스타 피드만 보면 예약하기 전에 막히는 순간이 많아요.</h2>
+        <p class="lead">예쁜 사진은 많은데 가격, 제거 비용, 소요시간, 예약 방법이 흩어져 있으면 문의하기 전에 포기하게 됩니다.</p>
+        <ul class="problem-list">
+          <li>“이 디자인은 얼마지?”를 댓글과 하이라이트에서 다시 찾음</li>
+          <li>첫 방문 혜택이 있는지, 젤 제거가 포함인지 헷갈림</li>
+          <li>내 손톱 길이에 가능한 디자인인지 예약 전 알기 어려움</li>
+          <li>카톡 문의를 해도 뭘 보내야 할지 몰라 대화가 길어짐</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <div class="label">Solution <span class="step-note">6</span></div>
+        <h2>그래서 온네일은 예약 전 정보를 이 페이지 하나에 모았습니다.</h2>
+        <p class="lead">사진, 가격표, 이벤트, 예약 안내를 한 화면에서 보고 마음에 드는 디자인을 바로 캡처해 보내주세요.</p>
+        <div class="solution-card">
+          <b>추천 예약 방식</b>
+          <p class="lead">아래 아트 중 원하는 무드 1~2개를 고르고, 현재 손톱 사진을 함께 보내면 가능 디자인과 예상 시간을 안내드립니다.</p>
+          <div class="solution-grid">
+            <div class="tile"><b>무드 선택</b><span>깔끔 / 여리 / 포인트 / 글리터</span></div>
+            <div class="tile"><b>가격 확인</b><span>기본가와 추가 옵션 투명 공개</span></div>
+            <div class="tile"><b>손톱 상담</b><span>길이·손상도에 맞춘 디자인 조정</span></div>
+            <div class="tile"><b>예약 확정</b><span>카톡으로 시간과 금액 안내</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="label">Credentials & Proof <span class="step-note">7·9</span></div>
+        <h2>튀는 아트보다 오래 봐도 예쁜 손끝을 만듭니다.</h2>
+        <p class="lead">성수 직장인·프리랜서 고객이 많이 찾는 차분한 데일리 네일 중심. 과한 보정 없는 실제 시술 무드를 보여드립니다.</p>
+        <div class="gallery">
+          <div class="photo" data-caption="시럽 그라데이션" style="background-image:url('https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=700&q=82')"></div>
+          <div class="photo" data-caption="미니 포인트 아트" style="background-image:url('https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&w=700&q=82')"></div>
+          <div class="photo wide" data-caption="오피스 데일리 무드" style="background-image:url('https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=900&q=82')"></div>
+        </div>
+        <div class="reviews">
+          <div class="review"><div class="stars">★★★★★</div><p>“가격표가 정리돼 있어서 문의가 편했어요. 원하는 사진 보내니까 제 손톱 길이에 맞게 바꿔주셨어요.”</p><span class="mini">성수동 직장인 고객</span></div>
+          <div class="review"><div class="stars">★★★★★</div><p>“첫 방문인데 제거 포함 여부랑 소요시간을 미리 알려줘서 부담 없이 예약했습니다.”</p><span class="mini">재방문 예약 고객</span></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="label">Benefits <span class="step-note">8</span></div>
+        <h2>기능보다 중요한 건 예약 전 불안을 줄이는 것.</h2>
+        <div class="bullets">
+          <div class="bullet"><span class="dot">1</span><div><b>가격을 먼저 봅니다</b><br><span class="mini">방문 후 예상보다 비싸지는 걱정을 줄입니다.</span></div></div>
+          <div class="bullet"><span class="dot">2</span><div><b>내 손톱에 맞게 조정합니다</b><br><span class="mini">사진과 똑같이보다, 가능한 예쁜 결과를 우선합니다.</span></div></div>
+          <div class="bullet"><span class="dot">3</span><div><b>예약 대화가 짧아집니다</b><br><span class="mini">원하는 디자인, 날짜, 현재 손톱 사진만 보내면 됩니다.</span></div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="label">Price Guide</div>
+        <h2>대표 가격</h2>
+        <div class="price-list">
+          <div class="price"><div><b>원컬러</b><small>케어 포함 / 컬러 2개까지</small></div><strong>55,000원</strong></div>
+          <div class="price"><div><b>시럽 그라데이션</b><small>데일리 추천 / 손끝 길어보임</small></div><strong>65,000원</strong></div>
+          <div class="price"><div><b>이달의 아트</b><small>디자인별 상이 / 상담 후 확정</small></div><strong>79,000원~</strong></div>
+          <div class="price"><div><b>타샵 젤 제거</b><small>첫 방문 이벤트 적용 시 무료</small></div><strong>10,000원</strong></div>
+        </div>
+      </section>
+
+      <section class="section" id="offer">
+        <div class="label">Godfather Offer <span class="step-note">10~15</span></div>
+        <h2>첫 방문이라면 이렇게 시작하세요.</h2>
+        <div class="offer-box">
+          <div class="offer-head"><div><h3>첫 방문 데일리 아트 패키지</h3><p class="lead">젤 제거 + 기본 케어 + 이달의 아트 상담</p></div><span class="tag">20명 한정</span></div>
+          <div class="bonus">
+            <div>보너스 1 · 타샵 젤 제거 무료</div>
+            <div>보너스 2 · 손톱 상태별 디자인 조정 상담</div>
+            <div>보너스 3 · 다음 방문 케어 5,000원 쿠폰</div>
+          </div>
+          <div class="value-stack">
+            <div class="stack-row"><span>이달의 아트 시술</span><b>79,000원~</b></div>
+            <div class="stack-row"><span>타샵 젤 제거</span><b>10,000원</b></div>
+            <div class="stack-row"><span>손톱 상태 상담</span><b>무료</b></div>
+            <div class="stack-row"><span>첫 방문 적용가</span><b>79,000원부터</b></div>
+          </div>
+          <div class="scarcity"><b>!</b><span>이번 달 신규 고객 20명까지만 젤 제거 무료가 적용됩니다. 예약 확정 순서 기준입니다.</span></div>
+          <div class="guarantee"><b>예약 전 안심 안내</b><br>카톡으로 현재 손톱 사진을 보내주시면 가능 디자인, 예상 소요시간, 추가금 여부를 먼저 안내드립니다.</div>
+        </div>
+      </section>
+
+      <section class="section" id="booking">
+        <div class="label">Call To Action <span class="step-note">16</span></div>
+        <h2>예약은 이렇게 보내주세요.</h2>
+        <div class="steps">
+          <div class="step"><div><b>원하는 아트 캡처</b><br><span class="mini">이 페이지에서 마음에 드는 무드 1~2개 선택</span></div></div>
+          <div class="step"><div><b>현재 손톱 사진 전송</b><br><span class="mini">길이, 제거 필요 여부 확인용</span></div></div>
+          <div class="step"><div><b>희망 날짜 2개 보내기</b><br><span class="mini">평일 저녁 / 주말 가능 시간 함께 안내</span></div></div>
+        </div>
+        <div style="display:grid;gap:10px;margin-top:16px">
+          <button class="cta" onclick="reserve()">카카오톡으로 예약 문의하기</button>
+          <button class="cta secondary" onclick="copyGuide()">예약 문구 복사하기</button>
+        </div>
+        <div class="faq">
+          <details><summary>시술 시간은 얼마나 걸리나요?</summary><p>원컬러는 약 70분, 이달의 아트는 제거 포함 100~140분 정도로 안내드립니다.</p></details>
+          <details><summary>사진과 똑같이 가능한가요?</summary><p>손톱 길이와 상태에 따라 비율·파츠·컬러를 조정해 가장 예쁜 방향으로 제안드립니다.</p></details>
+          <details><summary>당일 예약도 가능한가요?</summary><p>취소 자리가 있으면 가능합니다. 카톡으로 희망 시간을 먼저 보내주세요.</p></details>
+        </div>
+        <div class="ps"><b>P.S.</b> 예쁜 네일 사진을 저장해두고도 가격이나 예약 방법이 헷갈려 미루셨다면, 이 페이지에서 가격·혜택·예약 방법을 확인하고 바로 문의해보세요. 이번 달 첫 방문 젤 제거 무료는 예약 확정 순서로 마감됩니다. <span class="step-note">17</span></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="sticky">
+    <div class="price-mini"><b>첫 방문 혜택</b><span>젤 제거 + 상담 무료</span></div>
+    <button class="cta" onclick="reserve()">예약 문의</button>
+  </div>
+  <div class="toast" id="toast">예약 문구를 복사했어요</div>
+
+  <script>
+    const guide = `안녕하세요 온네일 성수 예약 문의드립니다.\n1) 원하는 아트: 이달의 아트 / 원컬러 / 시럽 그라데이션\n2) 현재 손톱 사진 첨부 예정\n3) 희망 날짜: 1순위 ___ / 2순위 ___\n4) 젤 제거 필요 여부: 있음/없음`;
+    function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+    function copyGuide(){navigator.clipboard?.writeText(guide).then(()=>showToast('예약 문구를 복사했어요')).catch(()=>showToast('문구: 원하는 아트/손톱사진/희망날짜를 보내주세요'))}
+    function reserve(){showToast('카카오톡 예약 링크 연결 영역입니다')}
+    const sticky = document.querySelector('.sticky');
+    function toggleSticky(){ sticky.classList.toggle('show', window.scrollY > 520); }
+    window.addEventListener('scroll', toggleSticky, {passive:true});
+    toggleSticky();
+  </script>
+</body>
+</html>
